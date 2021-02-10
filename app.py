@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request, render_template
-import pickle
+import pickle5 as pickle
 import json
 from lib import CarrierCharge, Customer
 from datetime import date, datetime

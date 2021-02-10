@@ -1,7 +1,7 @@
 import os
 import csv
 import mysql.connector
-import pickle
+import pickle5 as pickle
 import json
 import pandas as pd
 import math
