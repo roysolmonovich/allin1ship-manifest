@@ -1,7 +1,7 @@
 from flask import Flask, jsonify, request, render_template
 import pickle5 as pickle
 import json
-from lib import CarrierCharge, Customer
+from lib import CarrierCharge
 from datetime import date, datetime
 app = Flask(__name__)
 
