@@ -5,7 +5,7 @@ from lib import CarrierCharge, Customer
 from datetime import date, datetime
 app = Flask(__name__)
 
-with open(r'hashes\charges by zone\carrier_charges111.pkl', 'rb') as f:
+with open(r'hashes/charges by zone/carrier_charges111.pkl', 'rb') as f:
     map = pickle.load(f)
 
 
@@ -66,7 +66,7 @@ def create_carrier_or_tier():
         ch = request_data['charge']
         map[c][l][d][sv][z][w] = ch
     print(request_data)
-    with open(r'..\hashes\charges by zone\carrier_charges.pkl', 'wb') as f:
+    with open(r'hashes/charges by zone/carrier_charges.pkl', 'wb') as f:
         pickle.dump(map, f, pickle.HIGHEST_PROTOCOL)
     return jsonify(request_data)
 
