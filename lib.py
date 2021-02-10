@@ -1,7 +1,7 @@
 import os
 import csv
 import mysql.connector
-import pickle5 as pickle
+import pickle
 import json
 import pandas as pd
 import math
@@ -16,46 +16,46 @@ import re
 #     json.dump(overlabeled, f, indent=4)
 # with open(r'hashes\sheets\customers.pkl', 'rb') as f:
 #     customers = pickle.load(f)
-# with open(r'hashes/overlabeled/overlabeled.json', 'r') as f:
-#     overlabeled = json.load(f)
-# with open(r'hashes/Shipping Variance/amp.pkl', 'rb') as f:
-#     amp = pickle.load(f)
-# with open(r'hashes/services/dhl_service_hash.json', 'r') as f:
-#     service = json.load(f)
-# with open(r'hashes/services/ai1s service names.json', 'r') as f:
-#     service_names = json.load(f)
-# with open(r'hashes/zones/USPS 2019 zip to zone.pkl', 'rb') as f:
-#     usps_zip_zone_2019 = pickle.load(f)
-# with open(r'hashes/zones/USPS 2020 zip to zone.pkl', 'rb') as f:
-#     usps_zip_zone_2020 = pickle.load(f)
-# with open(r'hashes/zones/DHL 2019 zip to zone.pkl', 'rb') as f:
-#     dhl_zip_zone_2019 = pickle.load(f)
-# with open(r'hashes/zones/DHL 2020 zip to zone.pkl', 'rb') as f:
-#     dhl_zip_zone_2020 = pickle.load(f)
-# with open(r'hashes/zones/country to code.json', 'r') as f:
-#     country_to_code = json.load(f)
-# with open(r'hashes/zones/CA zip to zone.json', 'r') as f:
-#     ca_zip_zone = json.load(f)
-# with open(r'hashes/zones/intl zone names.pkl', 'rb') as f:
-#     intl_names = pickle.load(f)
-# with open(r'flag_map.pkl', 'rb') as f:
-#     flag_map = pickle.load(f)
-# with open(r'customer names.pkl', 'rb') as f:
-#     cust_names = pickle.load(f)
-# with open(r'hashes/Marked Up Items/del_to_dim.json', 'r') as f:
-#     del_to_dim = json.load(f)
-# with open(r'invoices/invoices.json', 'rb') as f:
-#     invoices = json.load(f)
-# with open(r'hashes/sheets/tracking to account.pkl', 'rb') as f:
-#     tr_to_acc = pickle.load(f)
-# mydb = mysql.connector.connect(
-#     host="162.241.219.134",
-#     user="allinoy4_user0",
-#     password="+3mp0r@ry",
-#     database="allinoy4_allin1ship"
-# )
-# print(mydb)
-# mycursor = mydb.cursor()
+with open(r'hashes\overlabeled\overlabeled.json', 'r') as f:
+    overlabeled = json.load(f)
+with open(r'hashes\Shipping Variance\amp.pkl', 'rb') as f:
+    amp = pickle.load(f)
+with open(r'hashes\services\dhl_service_hash.json', 'r') as f:
+    service = json.load(f)
+with open(r'hashes\services\ai1s service names.json', 'r') as f:
+    service_names = json.load(f)
+with open(r'hashes\zones\USPS 2019 zip to zone.pkl', 'rb') as f:
+    usps_zip_zone_2019 = pickle.load(f)
+with open(r'hashes\zones\USPS 2020 zip to zone.pkl', 'rb') as f:
+    usps_zip_zone_2020 = pickle.load(f)
+with open(r'hashes\zones\DHL 2019 zip to zone.pkl', 'rb') as f:
+    dhl_zip_zone_2019 = pickle.load(f)
+with open(r'hashes\zones\DHL 2020 zip to zone.pkl', 'rb') as f:
+    dhl_zip_zone_2020 = pickle.load(f)
+with open(r'hashes\zones\country to code.json', 'r') as f:
+    country_to_code = json.load(f)
+with open(r'hashes\zones\CA zip to zone.json', 'r') as f:
+    ca_zip_zone = json.load(f)
+with open(r'hashes\zones\intl zone names.pkl', 'rb') as f:
+    intl_names = pickle.load(f)
+with open(r'flag_map.pkl', 'rb') as f:
+    flag_map = pickle.load(f)
+with open(r'customer names.pkl', 'rb') as f:
+    cust_names = pickle.load(f)
+with open(r'hashes\Marked Up Items\del_to_dim.json', 'r') as f:
+    del_to_dim = json.load(f)
+with open(r'invoices\invoices.json', 'rb') as f:
+    invoices = json.load(f)
+with open(r'hashes\sheets\tracking to account.pkl', 'rb') as f:
+    tr_to_acc = pickle.load(f)
+mydb = mysql.connector.connect(
+    host="162.241.219.134",
+    user="allinoy4_user0",
+    password="+3mp0r@ry",
+    database="allinoy4_allin1ship"
+)
+print(mydb)
+mycursor = mydb.cursor()
 
 
 def acc_to_name(file):
@@ -84,13 +84,13 @@ def del_con_to_dims(file):
     # dims = {rows[0][1:]: (float(rows[2]), float(rows[3]), float(rows[4])) for rows in reader
     #         if rows[2] != ''}
     # del_to_dim.update(dims)
-    with open(r'hashes/Marked Up Items/del_to_dim.json', 'w') as fw:
+    with open(r'hashes\Marked Up Items\del_to_dim.json', 'w') as fw:
         json.dump(del_to_dim, fw, indent=4)
 
 
 # print(len(del_to_dim))
 # print(del_to_dim.get('9305589936900295057325'))
-# del_con_to_dims(r'C:/Users/Roy Solmonovich/Desktop/20201228_Marked_Up_Items_40340_4440843.csv')
+# del_con_to_dims(r'C:\Users\Roy Solmonovich\Desktop\20201228_Marked_Up_Items_40340_4440843.csv')
 
 def tracking_to_acc(file):
     with open(file, 'r') as f:
@@ -108,6 +108,18 @@ def tracking_to_acc(file):
             pickle.dump(tr_to_acc, fw, pickle.HIGHEST_PROTOCOL)
 
 
+# for x in list(tr_to_acc.items()):
+#     if len(x[0][0]) == 22 and x[0][0].isnumeric() and x[0][0][0] == '9':
+#         # tr_to_acc[(x[0][0], int(x[0][1][:5]))] = tr_to_acc.pop(x[0])
+#         if x[0][0].isnumeric():
+#             tr_to_acc[(int(x[0][0]), x[0][1])] = tr_to_acc.pop(x[0])
+#             # print((int(x[0][0]), x[0][1]), tr_to_acc[(int(x[0][0]), x[0][1])])
+
+# print(len(tr_to_acc))
+# tracking_to_acc(r'hashes\Customer Tracking\Cust Track (3).csv')
+# print(len(tr_to_acc))
+# print(tr_to_acc.get(('20201214025141972DTLKJWV', '71660070')))
+
 
 def overlabeled_report_update(file):
     cols = ['Delivery Confirmation Number', 'Data Capture Method']
@@ -117,11 +129,44 @@ def overlabeled_report_update(file):
     overlabeled.update(over_l)
     with open(r'hashes/overlabeled/overlabeled.json', 'w') as fw:
         json.dump(overlabeled, fw, indent=4)
+    # df.where(filter, inplace=True)
+    # for row in df.itertuples():
+    #     #     # print(row['Delivery Confirmation Number'], row['Data Capture Method'])
+    #     print(row[1][1:], row[2])
+    # with open(file, 'r', encoding='utf-8') as f:
+    #     reader = csv.reader(f)
+    #     next(reader)
+    # over_l = {rows[4][1:]: rows[-1] for rows in reader
+    #           if rows[-1] == 'ENCODE'}
+    #     overlabeled.update(over_l)
+    #     with open(r'hashes/overlabeled/overlabeled.pkl', 'wb') as fw:
+    #         pickle.dump(overlabeled, fw, pickle.HIGHEST_PROTOCOL)
 
+
+# overlabeled_report_update(r'hashes\overlabeled\20201228_Over_Label_Items_40340_4440844.csv')
+# print(overlabeled)
+#
+# for dc in ('9361289936900293593967',
+#            '9361289936900293593851',
+#            '9361289936900293593929',
+#            '9361289936900293593899',
+#            '9361289936900293593820',
+#            '9361289936900293593837',
+#            '9361289936900293593783'):
+#     print(overlabeled.get(dc), overlabeled.get("\'"+dc))
+# overlabeled_report_update(r'C:\Users\Roy Solmonovich\Desktop\20201213_Over_Label_Items_40340_4409366.csv')
+
+# del_con_to_dims('20201129_Marked_Up_Items_40340_4375552.csv')
+
+# print(cust_names[5355340])
+# acc_to_name('Tiers FINAL.csv')
+# with open(r'customer names.pkl', 'rb') as f:
+#     cust_names = pickle.load(f)
+# print(cust_names)
 
 class CarrierCharge:
-    if os.path.exists(r'hashes/charges by zone/carrier_charges111.pkl'):
-        with open(r'hashes/charges by zone/carrier_charges111.pkl', 'rb') as f:
+    if os.path.exists(r'hashes\charges by zone\carrier_charges111.pkl'):
+        with open(r'hashes\charges by zone\carrier_charges111.pkl', 'rb') as f:
             map = pickle.load(f)
     else:
         map = {}
@@ -219,7 +264,7 @@ class CarrierCharge:
                 #             CarrierCharge(carrier, "domestic" if row[3][:4] == "USPS" else "international",
                 #                           datetime.strptime(row[0], '%m/%d/%Y').date(), 631, row[3], float(row[1]),
                 #                           float(row[4]) if row[4].replace('.', '', 1).isdigit() else -2)
-        with open(r'hashes/charges by zone/carrier_charges111.pkl', 'wb') as f:
+        with open(r'hashes\charges by zone\carrier_charges111.pkl', 'wb') as f:
             pickle.dump(CarrierCharge.map, f, pickle.HIGHEST_PROTOCOL)
 
     def last_active_date(carrier, location, date):
@@ -669,8 +714,8 @@ def surcharge(service_code, domestic, ship_date, weight, lg=0, wd=0, ht=0):
 
 
 def update_amp(file, amp_update0={}, amp_update1={}):
-    if os.path.exists(r'hashes/Shipping Variance/amp.pkl'):
-        with open(r'hashes/Shipping Variance/amp.pkl', 'rb') as f:
+    if os.path.exists(r'hashes\Shipping Variance\amp.pkl'):
+        with open(r'hashes\Shipping Variance\amp.pkl', 'rb') as f:
             amp_curr = pickle.load(f)
     else:
         amp_curr = [{}, {}]
@@ -685,7 +730,7 @@ def update_amp(file, amp_update0={}, amp_update1={}):
                     amp_update1[(int(row[1][1:]), int(row[8][1:6]))] = int(row[-3])
         amp_curr[0].update(amp_update0)
         amp_curr[1].update(amp_update1)
-        with open(r'hashes/Shipping Variance/amp.pkl', 'wb') as f:
+        with open(r'hashes\Shipping Variance\amp.pkl', 'wb') as f:
             pickle.dump(amp_curr, f, pickle.HIGHEST_PROTOCOL)
 
 
@@ -693,9 +738,9 @@ def update_service(file):
     with open(file, 'r') as f:
         reader = csv.reader(f)
         dhl_to_ai1s = {int(rows[0]): (int(rows[1]), int(rows[2]), int(rows[3]), rows[4]) for rows in reader}
-        # with open(r'hashes/services/dhl_service_hash.pkl', 'wb') as fw:
+        # with open(r'hashes\services\dhl_service_hash.pkl', 'wb') as fw:
         #     pickle.dump(dhl_to_ai1s, fw, pickle.HIGHEST_PROTOCOL)
-        with open(r'hashes/services/dhl_service_hash.json', 'w') as fw:
+        with open(r'hashes\services\dhl_service_hash.json', 'w') as fw:
             pickle.dump(dhl_to_ai1s, fw, indent=4)
 
 
@@ -703,7 +748,7 @@ def intl_zone_to_name(file):
     with open(file, 'r') as f:
         reader = csv.reader(f)
         intl_names = {rows[0]: rows[1] for rows in reader}
-        with open(r'C:/Users/Roy Solmonovich/Desktop/Allin1Ship/Development/hashes/zones/intl zone names.pkl', 'wb') as fw:
+        with open(r'C:\Users\Roy Solmonovich\Desktop\Allin1Ship\Development\hashes\zones\intl zone names.pkl', 'wb') as fw:
             pickle.dump(intl_names, fw, pickle.HIGHEST_PROTOCOL)
 
 
@@ -721,7 +766,7 @@ def create_profit_report():
     cols = sorted(df.columns.tolist(), reverse=True)
     df = df[cols]
     print(df.head(10))
-    file = r'Customer Profit by Week/Customer Profit by Week.xlsx'
+    file = r'Customer Profit by Week\Customer Profit by Week.xlsx'
     writer = pd.ExcelWriter(file, engine='openpyxl')
     df.to_excel(writer, sheet_name='Sheet1', freeze_panes=(1, 0))
     writer.save()
@@ -824,3 +869,215 @@ def history_duplicates():
         if del_conf in ol_to_shipment:
             if len(ol_to_shipment[del_conf]) - (shipment in ol_to_shipment[del_conf]) > 0:
                 print(f'shipment {shipment} delivery confirm - {del_conf} matches the overlabeled of the following shipments: {ol_to_shipment[del_conf]}')
+# history_duplicates()
+
+# print(CarrierCharge.map.keys())
+# CarrierCharge.update(5361043, r'C:\Users\Roy Solmonovich\Downloads\5361043 Domestic.csv')
+# create_profit_report()
+# print(Customer.crm['5361043']['tiers']['domestic'])
+# rate_update(account_no, location, rate_date, tier
+# Customer.rate_update('5361043', 'domestic', date(2021, 1, 10), 5361043)
+# print(Customer.crm[5346314]['tiers']['domestic'][date(2020, 1, 26)])
+# for cust in list(Customer.crm):
+#     Customer.crm[int(cust)] = Customer.crm.pop(cust)
+# print(cust_names)
+# for c in cust_names.items():
+#     if isinstance(c[0], int):
+#         if c[0] in Customer.crm:
+#             if 'name' not in Customer.crm[c[0]]:
+#                 Customer.crm[c[0]]['name'] = c[1]
+# with open(r'customers.pkl', 'wb') as f:
+#     pickle.dump(Customer.crm, f, pickle.HIGHEST_PROTOCOL)
+#
+# x = Customer('1234567', mailer_id=None, location='domestic', date=date(
+#     2021, 1, 12), tier=7, payment_method='CC', fee=0.015, name='TestName')
+
+
+#
+# myfile = open("items2.xml", "w")
+# myfile.write(mydata)
+# c=1
+# eq_c=0
+# neq_c=0
+# for loc in CarrierCharge.map[c]:
+#     if date(2021, 1, 24) in CarrierCharge.map[c][loc]:
+#         for sv in CarrierCharge.map[c][loc][date(2021, 1, 24)]:
+#             for z in CarrierCharge.map[c][loc][date(2021, 1, 24)][sv]:
+#                 for w in CarrierCharge.map[c][loc][date(2021, 1, 24)][sv][z]:
+#                     if CarrierCharge.map[c][loc][date(2021, 1, 24)][sv][z][w] != CarrierCharge.map[5][loc][date(2021, 1, 24)][sv][z][w]:
+#                         neq_c+=1
+#                     else:
+#                         eq_c+=1
+# print(eq_c, neq_c)
+# for c in Customer.crm:
+#     print(Customer.recent_tier(c, 'domestic'))
+# print(Customer.outdated_recent_tier(date(2019, 1, 28)))
+# x = list(range(20), 3)
+# print(x)
+# print(Customer.crm)
+# Customer.update_bulk(r'C:\Users\Roy Solmonovich\Downloads\Customers Update Template.csv')
+# print(Customer.crm['5367056'])
+# print(Customer.crm['5367056']['name'])
+# for c in Customer.crm:
+#     if 'domestic' in Customer.crm[c]['tiers']:
+#         dic = Customer.crm[c]['tiers']['domestic']
+#         if dic:
+#             lst = sorted(list(dic.items()), key=lambda x: x[0])
+#         else:
+#             lst = []
+#         for i, v in enumerate(lst):
+#             lst[i] = (str(v[0]), v[1])
+#         Customer.crm[c]['tiers']['domestic'] = lst
+#     if 'international' in Customer.crm[c]['tiers']:
+#         dic = Customer.crm[c]['tiers']['international']
+#         if dic:
+#             lst = sorted(list(dic.items()), key=lambda x: x[0])
+#         else:
+#             lst=[]
+#         for i, v in enumerate(lst):
+#             lst[i] = (str(v[0]), v[1])
+#         Customer.crm[c]['tiers']['international'] = lst
+# print(Customer.crm)
+# with open(r'customers.json', 'w') as f:
+#     json.dump(Customer.crm, f, indent=4)
+# for c in Customer.crm:
+#     # print(c, Customer.recent_tier(c, 'domestic', '2021-01-23'), Customer.crm[c]['tiers']['domestic'], Customer.crm[c])
+#     print(c, Customer.recent_tier(c, 'domestic', '2020-01-26'), Customer.crm[c]['tiers']['domestic'])
+
+# Customer.crm['5367056']['fee'] = .035
+# Customer.crm['5367056']['payment method'] = 'Credit Card'
+# print(Customer.crm['5367056'])
+# with open(r'customers.json', 'w') as f:
+#     json.dump(Customer.crm, f, indent=4)
+
+# new_map = CarrierCharge.map
+# new_map = CarrierCharge.map
+# for c in CarrierCharge.map:
+#     if c not in new_map:
+#         new_map[c] = {}
+#     for loc in CarrierCharge.map[c]:
+#         if loc not in new_map[c]:
+#             new_map[c][loc] = {}
+#         for d in CarrierCharge.map[c][loc]:
+#             if d not in new_map[c][loc]:
+#                 new_map[c][loc][d] = {}
+#             for sc in CarrierCharge.map[c][loc][d]:
+#                 if sc not in new_map[c][loc][d]:
+#                     new_map[c][loc][d][sc] = {}
+#                 for zone in CarrierCharge.map[c][loc][d][sc]:
+#                     if zone not in new_map[c][loc][d][sc]:
+#                         new_map[c][loc][d][sc][zone] = {}
+#                     weight_list = []
+#                     for w in CarrierCharge.map[c][loc][d][sc][zone]:
+#                         # print(c, loc, d, sc, zone, w)
+#                         if not CarrierCharge.map[c][loc][d][sc][zone][w] or isinstance(CarrierCharge.map[c][loc][d][sc][zone][w], str):
+#                             continue
+#                         bisect.insort(weight_list, [w, CarrierCharge.map[c][loc][d][sc][zone][w]])
+#                     # print(weight_list)
+#                     # if not CarrierCharge.map[c][loc][d][sc][zone][w] or isinstance(CarrierCharge.map[c][loc][d][sc][zone][w], str):
+#                         # print(c, loc, d, sc, zone, w, CarrierCharge.map[c][loc][d][sc][zone][w])
+#                     new_map[c][loc][d][sc][zone] = weight_list
+
+# for c in list(new_map):
+#     for loc in list(new_map[c]):
+#         for d in list(new_map[c][loc].keys()):
+#             # print(c, loc, d, type(d), str(d))
+#             new_map[c][loc][str(d)] = new_map[c][loc].pop(d)
+# # #
+#
+# print(CarrierCharge.map[1]['domestic'].keys())
+# with open(r'hashes\charges by zone\carrier_charges111.pkl', 'wb') as f:
+#     pickle.dump(new_map, f, pickle.HIGHEST_PROTOCOL)
+# with open(r'hashes\charges by zone\carrier_charges111.json', 'w') as f:
+#     json.dump(new_map, f, indent=4)
+# x = []
+# bisect.insort(x, [1, 'x'])
+# print(Customer.crm)
+# print(acc_num('000535555780501201228', '9361269903506075012561', 'USPS11', '', '#14259', '4233012033263784', '00802-1373'))
+# for c in list(CarrierCharge.map):
+#     for loc in list(CarrierCharge.map[c]):
+#         for d in list(CarrierCharge.map[c][loc]):
+#             if not isinstance(d, str):
+#                 print(c, loc, d)
+# Customer.delete('1')
+
+# print(CarrierCharge.charge_rate(1, 'domestic', '2022-02-25', 81, 'USPS03', .9))
+# for i in CarrierCharge.map.keys():
+#     if isinstance(i, int) and i > 5:
+#         print (i, CarrierCharge.map[i]['domestic'].keys())
+# for c in list(CarrierCharge.map):
+#     for loc in list(CarrierCharge.map[c]):
+#         for d in list(CarrierCharge.map[c][loc]):
+#             for sv in list(CarrierCharge.map[c][loc][d]):
+#                 for z in list(CarrierCharge.map[c][loc][d][sv]):
+#                     zlist = list(CarrierCharge.map[c][loc][d][sv][z].items())
+#                     for i, w in enumerate(zlist):
+#                         # if i > 0 and w[1] and zlist[i-1][1] and w[1] < zlist[i-1][1]:
+#                         #     print(f'{c} {loc} {d} {sv} {z} weight {w[0]}: charge {w[1]} is less than weight {zlist[i-1][0]}: charge {zlist[i-1][1]}')
+#                         if i > 0 and w[1] and zlist[i-1][1] and w[1] == zlist[i-1][1]:
+#                             print(f'{c} {loc} {d} {sv} {z} weight {w[0]}: charge {w[1]} is same as {zlist[i-1][0]}: charge {zlist[i-1][1]}')
+
+# pritn(c, loc, d, sv, z, w, wc)
+# for c in CarrierCharge.map:
+#     for loc in CarrierCharge.map[c]:
+#         for d in CarrierCharge.map[c][loc]:
+#             print(c, loc, d)
+# print(Customer.crm)
+# print(service)
+# print(Customer.crm[str(int(row['Account #']))].get('fee'))
+# for c in Customer.crm:
+#     if Customer.crm[c]['fee'] != 0:
+#         print(c, Customer.crm[c])
+
+# with open(r'C:\Users\Roy Solmonovich\Downloads\customers update template (3).csv', 'r') as f:
+#     reader = csv.reader(f)
+#     next(reader)
+#     for row in reader:
+#         # print(row[3], row[4])
+#         if Customer.crm[row[3]]['fee'] == 0:
+#             Customer.crm[row[3]]['fee'] = float(row[4])
+
+# with open(r'customers.json', 'w') as f:
+#     json.dump(Customer.crm, f, indent=4)
+# print(CarrierCharge.map[1]['domestic']['2021-01-24'][81]['USPS06'])
+# print(CarrierCharge.map[2]['domestic']['2021-01-24'][81]['USPS06'])
+# print(CarrierCharge.map[3]['domestic']['2021-01-24'][81]['USPS06'])
+# print(CarrierCharge.map[4]['domestic']['2021-01-24'][81]['USPS06'])
+# print(CarrierCharge.map[5]['domestic']['2021-01-24'][81]['USPS06'])
+# print(CarrierCharge.map['USPS']['domestic']['2021-01-24'][81]['USPS06'])
+# CarrierCharge.map['USPS']['domestic'].pop(date(2021, 1, 24))
+# CarrierCharge.update('USPS', r'C:\Users\Roy Solmonovich\Downloads\Create RF2 Dom USPS 2021 631 Update.csv')
+# print(CarrierCharge.map['DHL']['domestic']['2021-01-24'][81]['USPS06'])
+# for acc in cust_names:
+#     if isinstance(acc, str) and acc not in Customer.crm:
+#         if 'account names' not in Customer.crm:
+#             Customer.crm['account names'] = {}
+#         Customer.crm['account names'][acc] = cust_names[acc]
+# print(Customer.crm['account names'])
+# with open(r'customers.json', 'w') as f:
+#     json.dump(Customer.crm, f, indent=4)
+
+
+# Customer.crm['5367056']['qb client'] = 'Boruch Gancz'
+# print(Customer.crm['10'])
+
+# sql = 'INSERT INTO customer (acc, mailer_id, payment_method, fee, name, qb_client) VALUES (%s, %s, %s, %s, %s, %s)'
+# sql_alt = 'INSERT INTO customer (acc, mailer_id, payment_method, fee, name) VALUES (%s, %s, %s, %s, %s)'
+# vals_bulk = []
+# vals_bulk_alt = []
+# for c in Customer.crm:
+#     if 'qb client' in Customer.crm[c]:
+#         vals_bulk.append((c, Customer.crm[c]['mailer id'], Customer.crm[c]['payment method'], Customer.crm[c]['fee'], Customer.crm[c]['name'], Customer.crm[c]['qb client']))
+#     else:
+#         vals_bulk_alt.append((c, Customer.crm[c]['mailer id'], Customer.crm[c]['payment method'], Customer.crm[c]['fee'], Customer.crm[c]['name']))
+# mycursor.executemany(sql, vals_bulk)
+# mycursor.executemany(sql_alt, vals_bulk_alt)
+# mydb.commit()
+# for c in comp_name:
+#     if c not in existing:
+#         print(c, comp_name[c])
+# with open(r'customers.json', 'w') as f:
+#     json.dump(Customer.crm, f, indent=4)
+# for c in Customer.crm:
+#     if Customer.crm[c].get('qb client'):
+#         print(Customer.crm[c])
