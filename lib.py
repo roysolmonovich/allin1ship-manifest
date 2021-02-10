@@ -16,7 +16,7 @@ import re
 #     json.dump(overlabeled, f, indent=4)
 # with open(r'hashes\sheets\customers.pkl', 'rb') as f:
 #     customers = pickle.load(f)
-with open(r'hashes\overlabeled\overlabeled.json', 'r') as f:
+with open(r'hashes/overlabeled/overlabeled.json', 'r') as f:
     overlabeled = json.load(f)
 with open(r'hashes\Shipping Variance\amp.pkl', 'rb') as f:
     amp = pickle.load(f)
