@@ -9,9 +9,13 @@ with open(r'hashes\charges by zone\carrier_charges111.pkl', 'rb') as f:
     map = pickle.load(f)
 
 
+# @app.route('/')
+# def home():
+#     return render_template('index.html')
+
 @app.route('/')
-def home():
-    return render_template('index.html')
+def index():
+    return "<h1>Welcome to our server !!</h1>"
 
 # @app.route('/store', methods=['POST'])
 # def create_store():
@@ -123,5 +127,5 @@ def get_charge(carrier, location, date, service, zone, weight):
 #                         charge = map[c][loc][d][sv][z][w]
 #                         if charge and not isinstance(charge, float):
 #                             print(c,loc,d,sv,z,w,charge)
-
-app.run(port=5000, debug=1)
+if __name__ == '__main__':
+	app.run(threaded=True, port=5000)
