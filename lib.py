@@ -18,35 +18,35 @@ import re
 #     customers = pickle.load(f)
 with open(r'hashes/overlabeled/overlabeled.json', 'r') as f:
     overlabeled = json.load(f)
-with open(r'hashes\Shipping Variance\amp.pkl', 'rb') as f:
+with open(r'hashes/Shipping Variance/amp.pkl', 'rb') as f:
     amp = pickle.load(f)
-with open(r'hashes\services\dhl_service_hash.json', 'r') as f:
+with open(r'hashes/services/dhl_service_hash.json', 'r') as f:
     service = json.load(f)
-with open(r'hashes\services\ai1s service names.json', 'r') as f:
+with open(r'hashes/services/ai1s service names.json', 'r') as f:
     service_names = json.load(f)
-with open(r'hashes\zones\USPS 2019 zip to zone.pkl', 'rb') as f:
+with open(r'hashes/zones/USPS 2019 zip to zone.pkl', 'rb') as f:
     usps_zip_zone_2019 = pickle.load(f)
-with open(r'hashes\zones\USPS 2020 zip to zone.pkl', 'rb') as f:
+with open(r'hashes/zones/USPS 2020 zip to zone.pkl', 'rb') as f:
     usps_zip_zone_2020 = pickle.load(f)
-with open(r'hashes\zones\DHL 2019 zip to zone.pkl', 'rb') as f:
+with open(r'hashes/zones/DHL 2019 zip to zone.pkl', 'rb') as f:
     dhl_zip_zone_2019 = pickle.load(f)
-with open(r'hashes\zones\DHL 2020 zip to zone.pkl', 'rb') as f:
+with open(r'hashes/zones/DHL 2020 zip to zone.pkl', 'rb') as f:
     dhl_zip_zone_2020 = pickle.load(f)
-with open(r'hashes\zones\country to code.json', 'r') as f:
+with open(r'hashes/zones/country to code.json', 'r') as f:
     country_to_code = json.load(f)
-with open(r'hashes\zones\CA zip to zone.json', 'r') as f:
+with open(r'hashes/zones/CA zip to zone.json', 'r') as f:
     ca_zip_zone = json.load(f)
-with open(r'hashes\zones\intl zone names.pkl', 'rb') as f:
+with open(r'hashes/zones/intl zone names.pkl', 'rb') as f:
     intl_names = pickle.load(f)
 with open(r'flag_map.pkl', 'rb') as f:
     flag_map = pickle.load(f)
 with open(r'customer names.pkl', 'rb') as f:
     cust_names = pickle.load(f)
-with open(r'hashes\Marked Up Items\del_to_dim.json', 'r') as f:
+with open(r'hashes/Marked Up Items/del_to_dim.json', 'r') as f:
     del_to_dim = json.load(f)
-with open(r'invoices\invoices.json', 'rb') as f:
+with open(r'invoices/invoices.json', 'rb') as f:
     invoices = json.load(f)
-with open(r'hashes\sheets\tracking to account.pkl', 'rb') as f:
+with open(r'hashes/sheets/tracking to account.pkl', 'rb') as f:
     tr_to_acc = pickle.load(f)
 mydb = mysql.connector.connect(
     host="162.241.219.134",
@@ -84,13 +84,13 @@ def del_con_to_dims(file):
     # dims = {rows[0][1:]: (float(rows[2]), float(rows[3]), float(rows[4])) for rows in reader
     #         if rows[2] != ''}
     # del_to_dim.update(dims)
-    with open(r'hashes\Marked Up Items\del_to_dim.json', 'w') as fw:
+    with open(r'hashes/Marked Up Items/del_to_dim.json', 'w') as fw:
         json.dump(del_to_dim, fw, indent=4)
 
 
 # print(len(del_to_dim))
 # print(del_to_dim.get('9305589936900295057325'))
-# del_con_to_dims(r'C:\Users\Roy Solmonovich\Desktop\20201228_Marked_Up_Items_40340_4440843.csv')
+# del_con_to_dims(r'C:/Users/Roy Solmonovich/Desktop/20201228_Marked_Up_Items_40340_4440843.csv')
 
 def tracking_to_acc(file):
     with open(file, 'r') as f:
@@ -116,7 +116,7 @@ def tracking_to_acc(file):
 #             # print((int(x[0][0]), x[0][1]), tr_to_acc[(int(x[0][0]), x[0][1])])
 
 # print(len(tr_to_acc))
-# tracking_to_acc(r'hashes\Customer Tracking\Cust Track (3).csv')
+# tracking_to_acc(r'hashes/Customer Tracking/Cust Track (3).csv')
 # print(len(tr_to_acc))
 # print(tr_to_acc.get(('20201214025141972DTLKJWV', '71660070')))
 
@@ -143,7 +143,7 @@ def overlabeled_report_update(file):
     #         pickle.dump(overlabeled, fw, pickle.HIGHEST_PROTOCOL)
 
 
-# overlabeled_report_update(r'hashes\overlabeled\20201228_Over_Label_Items_40340_4440844.csv')
+# overlabeled_report_update(r'hashes/overlabeled/20201228_Over_Label_Items_40340_4440844.csv')
 # print(overlabeled)
 #
 # for dc in ('9361289936900293593967',
@@ -153,8 +153,8 @@ def overlabeled_report_update(file):
 #            '9361289936900293593820',
 #            '9361289936900293593837',
 #            '9361289936900293593783'):
-#     print(overlabeled.get(dc), overlabeled.get("\'"+dc))
-# overlabeled_report_update(r'C:\Users\Roy Solmonovich\Desktop\20201213_Over_Label_Items_40340_4409366.csv')
+#     print(overlabeled.get(dc), overlabeled.get("/'"+dc))
+# overlabeled_report_update(r'C:/Users/Roy Solmonovich/Desktop/20201213_Over_Label_Items_40340_4409366.csv')
 
 # del_con_to_dims('20201129_Marked_Up_Items_40340_4375552.csv')
 
@@ -165,8 +165,8 @@ def overlabeled_report_update(file):
 # print(cust_names)
 
 class CarrierCharge:
-    if os.path.exists(r'hashes\charges by zone\carrier_charges111.pkl'):
-        with open(r'hashes\charges by zone\carrier_charges111.pkl', 'rb') as f:
+    if os.path.exists(r'hashes/charges by zone/carrier_charges111.pkl'):
+        with open(r'hashes/charges by zone/carrier_charges111.pkl', 'rb') as f:
             map = pickle.load(f)
     else:
         map = {}
@@ -264,7 +264,7 @@ class CarrierCharge:
                 #             CarrierCharge(carrier, "domestic" if row[3][:4] == "USPS" else "international",
                 #                           datetime.strptime(row[0], '%m/%d/%Y').date(), 631, row[3], float(row[1]),
                 #                           float(row[4]) if row[4].replace('.', '', 1).isdigit() else -2)
-        with open(r'hashes\charges by zone\carrier_charges111.pkl', 'wb') as f:
+        with open(r'hashes/charges by zone/carrier_charges111.pkl', 'wb') as f:
             pickle.dump(CarrierCharge.map, f, pickle.HIGHEST_PROTOCOL)
 
     def last_active_date(carrier, location, date):
@@ -714,8 +714,8 @@ def surcharge(service_code, domestic, ship_date, weight, lg=0, wd=0, ht=0):
 
 
 def update_amp(file, amp_update0={}, amp_update1={}):
-    if os.path.exists(r'hashes\Shipping Variance\amp.pkl'):
-        with open(r'hashes\Shipping Variance\amp.pkl', 'rb') as f:
+    if os.path.exists(r'hashes/Shipping Variance/amp.pkl'):
+        with open(r'hashes/Shipping Variance/amp.pkl', 'rb') as f:
             amp_curr = pickle.load(f)
     else:
         amp_curr = [{}, {}]
@@ -730,7 +730,7 @@ def update_amp(file, amp_update0={}, amp_update1={}):
                     amp_update1[(int(row[1][1:]), int(row[8][1:6]))] = int(row[-3])
         amp_curr[0].update(amp_update0)
         amp_curr[1].update(amp_update1)
-        with open(r'hashes\Shipping Variance\amp.pkl', 'wb') as f:
+        with open(r'hashes/Shipping Variance/amp.pkl', 'wb') as f:
             pickle.dump(amp_curr, f, pickle.HIGHEST_PROTOCOL)
 
 
@@ -738,9 +738,9 @@ def update_service(file):
     with open(file, 'r') as f:
         reader = csv.reader(f)
         dhl_to_ai1s = {int(rows[0]): (int(rows[1]), int(rows[2]), int(rows[3]), rows[4]) for rows in reader}
-        # with open(r'hashes\services\dhl_service_hash.pkl', 'wb') as fw:
+        # with open(r'hashes/services/dhl_service_hash.pkl', 'wb') as fw:
         #     pickle.dump(dhl_to_ai1s, fw, pickle.HIGHEST_PROTOCOL)
-        with open(r'hashes\services\dhl_service_hash.json', 'w') as fw:
+        with open(r'hashes/services/dhl_service_hash.json', 'w') as fw:
             pickle.dump(dhl_to_ai1s, fw, indent=4)
 
 
@@ -748,7 +748,7 @@ def intl_zone_to_name(file):
     with open(file, 'r') as f:
         reader = csv.reader(f)
         intl_names = {rows[0]: rows[1] for rows in reader}
-        with open(r'C:\Users\Roy Solmonovich\Desktop\Allin1Ship\Development\hashes\zones\intl zone names.pkl', 'wb') as fw:
+        with open(r'C:/Users/Roy Solmonovich/Desktop/Allin1Ship/Development/hashes/zones/intl zone names.pkl', 'wb') as fw:
             pickle.dump(intl_names, fw, pickle.HIGHEST_PROTOCOL)
 
 
@@ -766,7 +766,7 @@ def create_profit_report():
     cols = sorted(df.columns.tolist(), reverse=True)
     df = df[cols]
     print(df.head(10))
-    file = r'Customer Profit by Week\Customer Profit by Week.xlsx'
+    file = r'Customer Profit by Week/Customer Profit by Week.xlsx'
     writer = pd.ExcelWriter(file, engine='openpyxl')
     df.to_excel(writer, sheet_name='Sheet1', freeze_panes=(1, 0))
     writer.save()
