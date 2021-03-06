@@ -14,7 +14,7 @@ manifest_update_schema = ManifestUpdateSchema()
 # from flask_jwt import jwt_required
 dom_service_names = []
 intl_service_names = []
-for v in ManifestModel.service.values():
+for v in ManifestModel.lib_service.values():
     if v[-1] == 'domestic':
         dom_service_names.append(v[3])
     elif v[-1] == 'international':
