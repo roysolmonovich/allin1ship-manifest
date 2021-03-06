@@ -97,11 +97,11 @@ try:
         tr_to_acc = pickle.load(f)
 except FileNotFoundError:
     print('file not found')
-try:
-    with open(r'dependencies\services\sv_to_code.json', 'r') as f:
-        sv_to_code = json.load(f)
-except FileNotFoundError:
-    print('file not found')
+# try:
+with open(r'dependencies\services\sv_to_code.json', 'r') as f:
+    sv_to_code = json.load(f)
+# except FileNotFoundError:
+#     print('file not found')
 
 def acc_to_name(file):
     with open(file, 'r') as f:
