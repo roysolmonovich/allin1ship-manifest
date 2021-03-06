@@ -1,1 +1,1 @@
-web uwsgi app:apptst
+web uwsgi app:app
