@@ -17,38 +17,84 @@ import string
 #     json.dump(overlabeled, f, indent=4)
 # with open(r'dependencies\sheets\customers.pkl', 'rb') as f:
 #     customers = pickle.load(f)
-with open(r'dependencies/overlabeled/overlabeled.json', 'r') as f:
-    overlabeled = json.load(f)
-with open(r'dependencies/Shipping Variance/amp.pkl', 'rb') as f:
-    amp = pickle.load(f)
-with open(r'dependencies/services/dhl_service_hash.json', 'r') as f:
-    service = json.load(f)
-with open(r'dependencies/services/ai1s_service_names.json', 'r') as f:
-    service_names = json.load(f)
-with open(r'dependencies/zones/USPS 2019 zip to zone.pkl', 'rb') as f:
-    usps_zip_zone_2019 = pickle.load(f)
-with open(r'dependencies/zones/USPS 2020 zip to zone.pkl', 'rb') as f:
-    usps_zip_zone_2020 = pickle.load(f)
-with open(r'dependencies/zones/DHL 2019 zip to zone.pkl', 'rb') as f:
-    dhl_zip_zone_2019 = pickle.load(f)
-with open(r'dependencies/zones/DHL 2020 zip to zone.pkl', 'rb') as f:
-    dhl_zip_zone_2020 = pickle.load(f)
-with open(r'dependencies/zones/country_to_code.json', 'r') as f:
-    country_to_code = json.load(f)
-with open(r'dependencies/zones/CA_zip_to_zone.json', 'r') as f:
-    ca_zip_zone = json.load(f)
-with open(r'dependencies/zones/intl_zone_names.pkl', 'rb') as f:
-    intl_names = pickle.load(f)
-with open(r'flag_map.pkl', 'rb') as f:
-    flag_map = pickle.load(f)
-with open(r'customer names.pkl', 'rb') as f:
-    cust_names = pickle.load(f)
-with open(r'dependencies/Marked Up Items/del_to_dim.json', 'r') as f:
-    del_to_dim = json.load(f)
-with open(r'invoices/invoices.json', 'rb') as f:
-    invoices = json.load(f)
-with open(r'dependencies/sheets/tracking to account.pkl', 'rb') as f:
-    tr_to_acc = pickle.load(f)
+try:
+    with open(r'dependencies/overlabeled/overlabeled.json', 'r') as f:
+        overlabeled = json.load(f)
+except FileNotFoundError:
+    print('file not found')
+try:
+    with open(r'dependencies/Shipping Variance/amp.pkl', 'rb') as f:
+        amp = pickle.load(f)
+except FileNotFoundError:
+    print('file not found')
+try:
+    with open(r'dependencies/services/dhl_service_hash.json', 'r') as f:
+        service = json.load(f)
+except FileNotFoundError:
+    print('file not found')
+try:
+    with open(r'dependencies/services/ai1s_service_names.json', 'r') as f:
+        service_names = json.load(f)
+except FileNotFoundError:
+    print('file not found')
+try:
+    with open(r'dependencies/zones/USPS 2019 zip to zone.pkl', 'rb') as f:
+        usps_zip_zone_2019 = pickle.load(f)
+except FileNotFoundError:
+    print('file not found')
+try:
+    with open(r'dependencies/zones/USPS 2020 zip to zone.pkl', 'rb') as f:
+        usps_zip_zone_2020 = pickle.load(f)
+except FileNotFoundError:
+    print('file not found')
+try:
+    with open(r'dependencies/zones/DHL 2019 zip to zone.pkl', 'rb') as f:
+        dhl_zip_zone_2019 = pickle.load(f)
+except FileNotFoundError:
+    print('file not found')
+try:
+    with open(r'dependencies/zones/DHL 2020 zip to zone.pkl', 'rb') as f:
+        dhl_zip_zone_2020 = pickle.load(f)
+except FileNotFoundError:
+    print('file not found')
+try:
+    with open(r'dependencies/zones/country_to_code.json', 'r') as f:
+        country_to_code = json.load(f)
+except FileNotFoundError:
+    print('file not found')
+try:
+    with open(r'dependencies/zones/CA_zip_to_zone.json', 'r') as f:
+        ca_zip_zone = json.load(f)
+except FileNotFoundError:
+    print('file not found')
+try:
+    with open(r'dependencies/zones/intl_zone_names.pkl', 'rb') as f:
+        intl_names = pickle.load(f)
+except FileNotFoundError:
+    print('file not found')
+try:
+    with open(r'flag_map.pkl', 'rb') as f:
+        flag_map = pickle.load(f)
+except FileNotFoundError:
+    print('file not found')
+try:
+    with open(r'customer names.pkl', 'rb') as f:
+        cust_names = pickle.load(f)
+except FileNotFoundError:
+    print('file not found')
+try:
+    with open(r'dependencies/Marked Up Items/del_to_dim.json', 'r') as f:
+        del_to_dim = json.load(f)
+except FileNotFoundError:
+    print('file not found')
+try:
+    with open(r'invoices/invoices.json', 'rb') as f:
+        invoices = json.load(f)
+except FileNotFoundError:
+    print('file not found')
+try:
+    with open(r'dependencies/sheets/tracking to account.pkl', 'rb') as f:
+        tr_to_acc = pickle.load(f)
 
 
 def acc_to_name(file):
