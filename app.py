@@ -1,4 +1,3 @@
-from db import db
 from flask_cors import CORS, cross_origin
 from datetime import datetime
 import numpy as np
@@ -1243,6 +1242,7 @@ api.add_resource(ManifestColumns, '/column-headers')
 # manifest-manual-submit
 
 if __name__ == '__main__':
+    from db import db
     # app.run(host='192.168.50.101', threaded=True, port=5000, debug=True, ssl_context=('cert.pem', 'key.pem'))
     # app.run(host='192.168.1.24', threaded=True, port=5000, debug=True, ssl_context=('cert.pem', 'key.pem'))
     db.init_app(app)
