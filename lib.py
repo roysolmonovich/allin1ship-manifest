@@ -9,53 +9,46 @@ from datetime import datetime, date
 from math import ceil
 import bisect
 import re
+import string
 
-# with open(r'hashes\overlabeled\overlabeled.pkl', 'rb') as f:
+# with open(r'dependencies\overlabeled\overlabeled.pkl', 'rb') as f:
 #     overlabeled = pickle.load(f)
-# with open(r'hashes\overlabeled\overlabeled.json', 'w') as f:
+# with open(r'dependencies\overlabeled\overlabeled.json', 'w') as f:
 #     json.dump(overlabeled, f, indent=4)
-# with open(r'hashes\sheets\customers.pkl', 'rb') as f:
+# with open(r'dependencies\sheets\customers.pkl', 'rb') as f:
 #     customers = pickle.load(f)
-with open(r'hashes\overlabeled\overlabeled.json', 'r') as f:
+with open(r'dependencies/overlabeled/overlabeled.json', 'r') as f:
     overlabeled = json.load(f)
-with open(r'hashes\Shipping Variance\amp.pkl', 'rb') as f:
+with open(r'dependencies/Shipping Variance/amp.pkl', 'rb') as f:
     amp = pickle.load(f)
-with open(r'hashes\services\dhl_service_hash.json', 'r') as f:
+with open(r'dependencies/services/dhl_service_hash.json', 'r') as f:
     service = json.load(f)
-with open(r'hashes\services\ai1s service names.json', 'r') as f:
+with open(r'dependencies/services/ai1s_service_names.json', 'r') as f:
     service_names = json.load(f)
-with open(r'hashes\zones\USPS 2019 zip to zone.pkl', 'rb') as f:
+with open(r'dependencies/zones/USPS 2019 zip to zone.pkl', 'rb') as f:
     usps_zip_zone_2019 = pickle.load(f)
-with open(r'hashes\zones\USPS 2020 zip to zone.pkl', 'rb') as f:
+with open(r'dependencies/zones/USPS 2020 zip to zone.pkl', 'rb') as f:
     usps_zip_zone_2020 = pickle.load(f)
-with open(r'hashes\zones\DHL 2019 zip to zone.pkl', 'rb') as f:
+with open(r'dependencies/zones/DHL 2019 zip to zone.pkl', 'rb') as f:
     dhl_zip_zone_2019 = pickle.load(f)
-with open(r'hashes\zones\DHL 2020 zip to zone.pkl', 'rb') as f:
+with open(r'dependencies/zones/DHL 2020 zip to zone.pkl', 'rb') as f:
     dhl_zip_zone_2020 = pickle.load(f)
-with open(r'hashes\zones\country to code.json', 'r') as f:
+with open(r'dependencies/zones/country_to_code.json', 'r') as f:
     country_to_code = json.load(f)
-with open(r'hashes\zones\CA zip to zone.json', 'r') as f:
+with open(r'dependencies/zones/CA_zip_to_zone.json', 'r') as f:
     ca_zip_zone = json.load(f)
-with open(r'hashes\zones\intl zone names.pkl', 'rb') as f:
+with open(r'dependencies/zones/intl_zone_names.pkl', 'rb') as f:
     intl_names = pickle.load(f)
 with open(r'flag_map.pkl', 'rb') as f:
     flag_map = pickle.load(f)
 with open(r'customer names.pkl', 'rb') as f:
     cust_names = pickle.load(f)
-with open(r'hashes\Marked Up Items\del_to_dim.json', 'r') as f:
+with open(r'dependencies/Marked Up Items/del_to_dim.json', 'r') as f:
     del_to_dim = json.load(f)
-with open(r'invoices\invoices.json', 'rb') as f:
+with open(r'invoices/invoices.json', 'rb') as f:
     invoices = json.load(f)
-with open(r'hashes\sheets\tracking to account.pkl', 'rb') as f:
+with open(r'dependencies/sheets/tracking to account.pkl', 'rb') as f:
     tr_to_acc = pickle.load(f)
-mydb = mysql.connector.connect(
-    host="162.241.219.134",
-    user="allinoy4_user0",
-    password="+3mp0r@ry",
-    database="allinoy4_allin1ship"
-)
-print(mydb)
-mycursor = mydb.cursor()
 
 
 def acc_to_name(file):
@@ -84,13 +77,13 @@ def del_con_to_dims(file):
     # dims = {rows[0][1:]: (float(rows[2]), float(rows[3]), float(rows[4])) for rows in reader
     #         if rows[2] != ''}
     # del_to_dim.update(dims)
-    with open(r'hashes\Marked Up Items\del_to_dim.json', 'w') as fw:
+    with open(r'dependencies/Marked Up Items/del_to_dim.json', 'w') as fw:
         json.dump(del_to_dim, fw, indent=4)
 
 
 # print(len(del_to_dim))
 # print(del_to_dim.get('9305589936900295057325'))
-# del_con_to_dims(r'C:\Users\Roy Solmonovich\Desktop\20201228_Marked_Up_Items_40340_4440843.csv')
+# del_con_to_dims(r'C:/Users/Roy Solmonovich/Desktop/20201228_Marked_Up_Items_40340_4440843.csv')
 
 def tracking_to_acc(file):
     with open(file, 'r') as f:
@@ -98,13 +91,14 @@ def tracking_to_acc(file):
         next(reader)
         tr_to_acc_new = {}
         for rows in reader:
+            print(rows)
             if rows[2]:
                 if rows[0].isnumeric() and len(rows[0]) == 22 and rows[0][0] == '9':
                     tr_to_acc_new[(int(rows[0]), int(rows[1].replace('-', '')[:5]))] = int(rows[2])
                 else:
-                    tr_to_acc_new[(rows[0], rows[1].replace(' ', '').replace('-', ''))] = int(rows[2])
+                    tr_to_acc_new[(rows[0], rows[1].replace(' ', '').replace('-', '').lstrip('0'))] = int(rows[2])
         tr_to_acc.update(tr_to_acc_new)
-        with open(r'hashes/sheets/tracking to account.pkl', 'wb') as fw:
+        with open(r'dependencies/sheets/tracking to account.pkl', 'wb') as fw:
             pickle.dump(tr_to_acc, fw, pickle.HIGHEST_PROTOCOL)
 
 
@@ -116,7 +110,7 @@ def tracking_to_acc(file):
 #             # print((int(x[0][0]), x[0][1]), tr_to_acc[(int(x[0][0]), x[0][1])])
 
 # print(len(tr_to_acc))
-# tracking_to_acc(r'hashes\Customer Tracking\Cust Track (3).csv')
+# tracking_to_acc(r'dependencies/Customer Tracking/Cust Track (3).csv')
 # print(len(tr_to_acc))
 # print(tr_to_acc.get(('20201214025141972DTLKJWV', '71660070')))
 
@@ -127,7 +121,7 @@ def overlabeled_report_update(file):
     df = df.loc[df['Data Capture Method'] == 'ENCODE']
     over_l = {row[1][1:]: row[2] for row in df.itertuples()}
     overlabeled.update(over_l)
-    with open(r'hashes/overlabeled/overlabeled.json', 'w') as fw:
+    with open(r'dependencies/overlabeled/overlabeled.json', 'w') as fw:
         json.dump(overlabeled, fw, indent=4)
     # df.where(filter, inplace=True)
     # for row in df.itertuples():
@@ -139,11 +133,11 @@ def overlabeled_report_update(file):
     # over_l = {rows[4][1:]: rows[-1] for rows in reader
     #           if rows[-1] == 'ENCODE'}
     #     overlabeled.update(over_l)
-    #     with open(r'hashes/overlabeled/overlabeled.pkl', 'wb') as fw:
+    #     with open(r'dependencies/overlabeled/overlabeled.pkl', 'wb') as fw:
     #         pickle.dump(overlabeled, fw, pickle.HIGHEST_PROTOCOL)
 
 
-# overlabeled_report_update(r'hashes\overlabeled\20201228_Over_Label_Items_40340_4440844.csv')
+# overlabeled_report_update(r'dependencies/overlabeled/20201228_Over_Label_Items_40340_4440844.csv')
 # print(overlabeled)
 #
 # for dc in ('9361289936900293593967',
@@ -153,8 +147,8 @@ def overlabeled_report_update(file):
 #            '9361289936900293593820',
 #            '9361289936900293593837',
 #            '9361289936900293593783'):
-#     print(overlabeled.get(dc), overlabeled.get("\'"+dc))
-# overlabeled_report_update(r'C:\Users\Roy Solmonovich\Desktop\20201213_Over_Label_Items_40340_4409366.csv')
+#     print(overlabeled.get(dc), overlabeled.get("/'"+dc))
+# overlabeled_report_update(r'C:/Users/Roy Solmonovich/Desktop/20201213_Over_Label_Items_40340_4409366.csv')
 
 # del_con_to_dims('20201129_Marked_Up_Items_40340_4375552.csv')
 
@@ -165,8 +159,8 @@ def overlabeled_report_update(file):
 # print(cust_names)
 
 class CarrierCharge:
-    if os.path.exists(r'hashes\charges by zone\carrier_charges111.pkl'):
-        with open(r'hashes\charges by zone\carrier_charges111.pkl', 'rb') as f:
+    if os.path.exists(r'dependencies/charges by zone/carrier_charges111.pkl'):
+        with open(r'dependencies/charges by zone/carrier_charges111.pkl', 'rb') as f:
             map = pickle.load(f)
     else:
         map = {}
@@ -221,8 +215,6 @@ class CarrierCharge:
             reader = csv.reader(f)
             next(reader)
             for row in reader:
-                if row[2] == '81' and row[3] == 'USPS06':
-                    print(row)
                 if row[2] == '83':
                     row[2] = 82
                 elif row[2] == '36':
@@ -264,7 +256,7 @@ class CarrierCharge:
                 #             CarrierCharge(carrier, "domestic" if row[3][:4] == "USPS" else "international",
                 #                           datetime.strptime(row[0], '%m/%d/%Y').date(), 631, row[3], float(row[1]),
                 #                           float(row[4]) if row[4].replace('.', '', 1).isdigit() else -2)
-        with open(r'hashes\charges by zone\carrier_charges111.pkl', 'wb') as f:
+        with open(r'dependencies/charges by zone/carrier_charges111.pkl', 'wb') as f:
             pickle.dump(CarrierCharge.map, f, pickle.HIGHEST_PROTOCOL)
 
     def last_active_date(carrier, location, date):
@@ -312,7 +304,7 @@ class CarrierCharge:
         last_active_date = CarrierCharge.charge_validate(carrier, location, date, service_code, ship_zone, weight)
         if last_active_date is None:
             print(f"Active date prior to {date} could not be found for - {carrier} - {location}")
-            return -1
+            return
         weight_charge = CarrierCharge.map[carrier][location][last_active_date][service_code][ship_zone]
         weights = sorted(list(weight_charge.keys()))
         i_l = 0
@@ -320,10 +312,10 @@ class CarrierCharge:
         if weights == []:
             print(
                 f"Charge not found based on given information: {carrier, location, date, service_code, ship_zone, weight}.")
-            return -2
+            return
         if weight > weights[-1]:
             print(f"Weight larger than max weight bracket: {weights[-1]}.")
-            return -3
+            return
         while i_l <= i_r:
             m = (i_r+i_l)//2
             if weight > weights[m]:
@@ -373,6 +365,14 @@ class Customer:
             crm = json.load(f)
     else:
         crm = {}
+    mydb = mysql.connector.connect(
+        host="162.241.219.134",
+        user="allinoy4_user0",
+        password="+3mp0r@ry",
+        database="allinoy4_allin1ship"
+    )
+    print(mydb)
+    mycursor = mydb.cursor()
 
     def __init__(self, account_no, mailer_id=None, location=None, date=None, tier=None, payment_method=None, fee=None, name=None, qb_client=None):
         account_no = str(account_no)
@@ -411,8 +411,8 @@ class Customer:
             json.dump(Customer.crm, f, indent=4)
         sql_insert = 'INSERT INTO customer (acc, mailer_id, payment_method, fee, name, qb_client) \
             VALUES (%s, %s, %s, %s, %s, %s)'
-        mycursor.execute(sql_insert, (account_no, mailer_id, payment_method, fee, name, qb_client))
-        mydb.commit()
+        Customer.mycursor.execute(sql_insert, (account_no, mailer_id, payment_method, fee, name, qb_client))
+        Customer.mydb.commit()
 
     def __str__(self):
         return f"Account #: {self.account_no}:\n{Customer.crm[self.account_no]}"
@@ -455,14 +455,14 @@ class Customer:
             sql_params[qb_client] = 'qb_client = %s'
         with open(r'customers.json', 'w') as f:
             json.dump(Customer.crm, f, indent=4)
-        sql = 'UPDATE customer SET '
-        sql += ', '.join(list(sql_params.values())) + ' WHERE acc = %s'
-        sql_vals = list(sql_params.keys())+[account_no]
-        print(sql)
-        print(sql_vals)
-        mycursor.execute(sql, sql_vals)
-        mydb.commit()
-
+        if sql_params:
+            sql = 'UPDATE customer SET '
+            sql += ', '.join(list(sql_params.values())) + ' WHERE acc = %s'
+            sql_vals = list(sql_params.keys())+[int(account_no)]
+            print(sql)
+            print(sql_vals)
+            Customer.mycursor.execute(sql, sql_vals)
+            Customer.mydb.commit()
 
     def update_bulk(file):
         with open(file, 'r', encoding='unicode_escape') as f:
@@ -523,8 +523,8 @@ class Customer:
         else:
             with open(r'customers.json', 'w') as f:
                 json.dump(Customer.crm, f, indent=4)
-            mycursor.execute('DELETE FROM customer WHERE acc = %s', (account_no, ))
-            mydb.commit()
+            Customer.mycursor.execute('DELETE FROM customer WHERE acc = %s', (account_no, ))
+            Customer.mydb.commit()
             print(f'Customer # {account_no} successfully deleted.')
 
     def recent_tier(account_no, location, ship_date=str(date.today())):
@@ -597,7 +597,6 @@ def weight(actual_weight, zone, lg=0, wd=0, ht=0):
     return (round(weight, 3), True if weight == actual_weight else False)
 
 
-
 def acc_num(bol, deliv_confirm, zone, ol, cust_conf, int_tr_no, zip):
     account_no = None
     flag = 0
@@ -612,7 +611,6 @@ def acc_num(bol, deliv_confirm, zone, ol, cust_conf, int_tr_no, zip):
         else:
             bol = bol.lstrip('0')[: 7]
             mailer_id = Customer.crm[bol]['mailer id'] if bol in Customer.crm else None
-            # print("bol is", bol, "; mailer id is", mailer_id)
             if mailer_id is None:
                 # print("Flag - No account #", bol, "found")
                 flag = -2
@@ -656,12 +654,10 @@ def acc_num(bol, deliv_confirm, zone, ol, cust_conf, int_tr_no, zip):
             account_no = tr_to_acc.get((cust_conf, zip.replace(' ', '').replace('-', '')))
             if account_no:
                 return (account_no, 0)
+            print('finding account', cust_conf, zip, account_no, tr_to_acc.get((cust_conf, zip)))
             return (None, -8)
         return (account_no, 0)
         # domestic - delivery, intl. - customer
-
-
-# bol, deliv_confirm, zone, ol, cust_conf, int_tr_no, zip
 
 
 def route_acc(acc, ship_date):
@@ -675,7 +671,7 @@ def route_acc(acc, ship_date):
         if ship_date >= date(2021, 1, 22) and ship_date <= date(2021, 1, 27):
             return (5367056, acc[1])
         elif ship_date > date(2021, 1, 27):
-            return (10, acc[1])
+            return (5367469, acc[1])
     # elif acc[0] ==  and ship_date >= date(2021, 1, 28):
     #     return (, acc[1])
     return acc
@@ -714,8 +710,8 @@ def surcharge(service_code, domestic, ship_date, weight, lg=0, wd=0, ht=0):
 
 
 def update_amp(file, amp_update0={}, amp_update1={}):
-    if os.path.exists(r'hashes\Shipping Variance\amp.pkl'):
-        with open(r'hashes\Shipping Variance\amp.pkl', 'rb') as f:
+    if os.path.exists(r'dependencies/Shipping Variance/amp.pkl'):
+        with open(r'dependencies/Shipping Variance/amp.pkl', 'rb') as f:
             amp_curr = pickle.load(f)
     else:
         amp_curr = [{}, {}]
@@ -730,7 +726,7 @@ def update_amp(file, amp_update0={}, amp_update1={}):
                     amp_update1[(int(row[1][1:]), int(row[8][1:6]))] = int(row[-3])
         amp_curr[0].update(amp_update0)
         amp_curr[1].update(amp_update1)
-        with open(r'hashes\Shipping Variance\amp.pkl', 'wb') as f:
+        with open(r'dependencies/Shipping Variance/amp.pkl', 'wb') as f:
             pickle.dump(amp_curr, f, pickle.HIGHEST_PROTOCOL)
 
 
@@ -738,9 +734,9 @@ def update_service(file):
     with open(file, 'r') as f:
         reader = csv.reader(f)
         dhl_to_ai1s = {int(rows[0]): (int(rows[1]), int(rows[2]), int(rows[3]), rows[4]) for rows in reader}
-        # with open(r'hashes\services\dhl_service_hash.pkl', 'wb') as fw:
+        # with open(r'dependencies/services/dhl_service_hash.pkl', 'wb') as fw:
         #     pickle.dump(dhl_to_ai1s, fw, pickle.HIGHEST_PROTOCOL)
-        with open(r'hashes\services\dhl_service_hash.json', 'w') as fw:
+        with open(r'dependencies/services/dhl_service_hash.json', 'w') as fw:
             pickle.dump(dhl_to_ai1s, fw, indent=4)
 
 
@@ -748,16 +744,16 @@ def intl_zone_to_name(file):
     with open(file, 'r') as f:
         reader = csv.reader(f)
         intl_names = {rows[0]: rows[1] for rows in reader}
-        with open(r'C:\Users\Roy Solmonovich\Desktop\Allin1Ship\Development\hashes\zones\intl zone names.pkl', 'wb') as fw:
+        with open(r'C:/Users/Roy Solmonovich/Desktop/Allin1Ship/Development/dependencies/zones/intl zone names.pkl', 'wb') as fw:
             pickle.dump(intl_names, fw, pickle.HIGHEST_PROTOCOL)
 
 
 def create_profit_report():
     sql = "SELECT account, bill_date, SUM(IFNULL(charge+surcharges, 0)-IFNULL(total_charges_dhl, 0)) profit FROM dhl_master_invoice \
     WHERE account > 0 AND bill_date IS NOT NULL GROUP BY account, bill_date ORDER BY bill_date DESC, account;"
-    mycursor.execute(sql)
-    res = mycursor.fetchall()
-    columns = [desc[0] for desc in mycursor.description]
+    Customer.mycursor.execute(sql)
+    res = Customer.mycursor.fetchall()
+    columns = [desc[0] for desc in Customer.mycursor.description]
     df = pd.DataFrame([tuple(t) for t in res], columns=columns)
     df['account'] = df.apply(lambda row: Customer.crm[str(row['account'])].get('name')
                              if str(row['account']) in Customer.crm else None, axis=1)
@@ -766,7 +762,7 @@ def create_profit_report():
     cols = sorted(df.columns.tolist(), reverse=True)
     df = df[cols]
     print(df.head(10))
-    file = r'Customer Profit by Week\Customer Profit by Week.xlsx'
+    file = r'Customer Profit by Week/Customer Profit by Week.xlsx'
     writer = pd.ExcelWriter(file, engine='openpyxl')
     df.to_excel(writer, sheet_name='Sheet1', freeze_panes=(1, 0))
     writer.save()
@@ -787,64 +783,105 @@ def duplicate_check(potential_dupl, del_confirm_to_shipment=(),
     sql_update_invoice_duplicate = 'UPDATE dhl_master_invoice SET account = -account WHERE account > 0 AND (delivery_confirm, ship_date, material_or_vas_num) IN '
     for rec in potential_dupl:
         if rec[-1][1] == -9:  # account was flagged and then found in amp or customer tracking - checking for duplicates against history
-            mycursor.execute(sql_dupl_deliv, [rec[0]]+rec[:3])
-            duplicate = mycursor.fetchall()
+            Customer.mycursor.execute(sql_dupl_deliv, [rec[0]]+rec[:3])
+            duplicate = Customer.mycursor.fetchall()
             if duplicate:
                 for d in duplicate:
                     print(d)
                     log[(
                         rec[-2], 'flagged duplicate found (delivery_confirm)')] = f'Shipment {tuple(rec[:3])} delivery_confirm - {rec[0]} - found in shipment {tuple(d[:3])} delivery_confirm - {d[0]}'
-                mycursor.execute(sql_update_history_duplicate, rec[:3])
-            mycursor.execute(sql_dupl_ol, [rec[0]]+rec[:3])
-            duplicate = mycursor.fetchall()
+                Customer.mycursor.execute(sql_update_history_duplicate, rec[:3])
+            Customer.mycursor.execute(sql_dupl_ol, [rec[0]]+rec[:3])
+            duplicate = Customer.mycursor.fetchall()
             if duplicate:
                 for d in duplicate:
                     print(d)
                     log[(
                         rec[-2], 'flagged duplicate found (overlabeled)')] = f'Shipment {tuple(rec[:3])} delivery_confirm - {rec[0]} - found in shipment {tuple(d[1:4])} overlabeled - {d[0]}'
-                mycursor.execute(sql_update_history_duplicate, rec[:3])
-            mycursor.execute(sql_dupl_cust, [rec[0]]+rec[:3])
-            duplicate = mycursor.fetchall()
+                Customer.mycursor.execute(sql_update_history_duplicate, rec[:3])
+            Customer.mycursor.execute(sql_dupl_cust, [rec[0]]+rec[:3])
+            duplicate = Customer.mycursor.fetchall()
             if duplicate:
                 for d in duplicate:
                     print(d)
                     log[(
                         rec[-2], 'flagged duplicate found (cust_confirm)')] = f'Shipment {tuple(rec[:3])} delivery_confirm - {rec[0]} - found in shipment {tuple(d[1:4])} cust_confirm - {d[0]}'
-                mycursor.execute(sql_update_history_duplicate, rec[:3])
+                Customer.mycursor.execute(sql_update_history_duplicate, rec[:3])
         else:  # account passed all the flags - checking for duplicates against invoice
             if rec[0] in del_confirm_to_shipment:
                 if len(del_confirm_to_shipment[rec[0]]) - (tuple(rec[:3]) in del_confirm_to_shipment[rec[0]]) > 0:
                     log[(
                         rec[-2], 'unflagged duplicate found (delivery_confirm)')] = f'Shipment {tuple(rec[:3])} delivery_confirm - {rec[0]} - found in shipment(s) {del_confirm_to_shipment[rec[0]]} delivery_confirm'
-                    mycursor.execute(sql_update_invoice_duplicate +
-                                     str(tuple(del_confirm_to_shipment[rec[0]]+[tuple(rec[:3])])))
+                    Customer.mycursor.execute(sql_update_invoice_duplicate +
+                                              str(tuple(del_confirm_to_shipment[rec[0]]+[tuple(rec[:3])])))
             if rec[0] in cust_confirm_to_shipment:
                 if len(cust_confirm_to_shipment[rec[0]]) - (tuple(rec[:3]) in cust_confirm_to_shipment[rec[0]]) > 0:
                     log[(
                         rec[-2], 'unflagged duplicate found (overlabeled)')] = f'Shipment {tuple(rec[:3])} delivery_confirm - {rec[0]} - found in shipment(s) {del_confirm_to_shipment[rec[0]]} overlabeled'
-                    mycursor.execute(sql_update_invoice_duplicate +
-                                     str(tuple(cust_confirm_to_shipment[rec[0]]+[tuple(rec[:3])])))
+                    Customer.mycursor.execute(sql_update_invoice_duplicate +
+                                              str(tuple(cust_confirm_to_shipment[rec[0]]+[tuple(rec[:3])])))
             if rec[0] in ol_to_shipment:
                 if len(ol_to_shipment[rec[0]]) - (tuple(rec[:3]) in ol_to_shipment[rec[0]]) > 0:
                     log[(
                         rec[-2], 'unflagged duplicate found (cust_confirm)')] = f'Shipment {tuple(rec[:3])} delivery_confirm - {rec[0]} - found in shipment(s) {del_confirm_to_shipment[rec[0]]} cust_confirm'
-                    mycursor.execute(sql_update_invoice_duplicate +
-                                     str(tuple(ol_to_shipment[rec[0]]+[tuple(rec[:3])])))
+                    Customer.mycursor.execute(sql_update_invoice_duplicate +
+                                              str(tuple(ol_to_shipment[rec[0]]+[tuple(rec[:3])])))
     return log
 
-def history_duplicates():
-    mycursor.execute('SELECT ship_date, material_or_vas_num, delivery_confirm, RIGHT(customer_confirm, 22), overlabeled_value \
+#bol_number, pricing_zone, internal_tracking, recipient_zip
+
+
+def history_duplicates(records=None):
+    print('Selecting all potential duplicates...')
+    if records:
+        sql_select_existing_duplicates = 'SELECT ship_date, service, delivery_confirm FROM duplicates'
+        Customer.mycursor.execute(sql_select_existing_duplicates)
+        existing_duplicates = set()
+        while True:
+            existing_duplicate = Customer.mycursor.fetchone()
+            if not existing_duplicate:
+                break
+            existing_duplicates.add(existing_duplicate)
+        shipments_to_check = []
+        for rec in records:
+            if rec[:3] not in existing_duplicates:
+                shipments_to_check.append(rec)
+        print(shipments_to_check)
+        # dhl_master_invoice.ship_date, material_or_vas_num, dhl_master_invoice.delivery_confirm, RIGHT(customer_confirm, 22), \
+        #     account, bol_number, pricing_zone, internal_tracking, recipient_zip
+    else:
+        sql_select = 'SELECT dhl_master_invoice.ship_date, material_or_vas_num, dhl_master_invoice.delivery_confirm, RIGHT(customer_confirm, 22), \
+            account FROM dhl_master_invoice LEFT JOIN duplicates ON dhl_master_invoice.delivery_confirm = duplicates.delivery_confirm \
+            AND dhl_master_invoice.ship_date = duplicates.ship_date AND material_or_vas_num = service \
+            WHERE account < 0 AND account >= -9 AND LEFT(pricing_zone, 4) = "USPS" AND material_or_vas_num NOT IN (154, 192) \
+            AND duplicates.delivery_confirm IS NULL'
+        Customer.mycursor.execute(sql_select)
+        shipments_to_check = []
+        while True:
+            current_shipment = Customer.mycursor.fetchone()
+            if current_shipment:
+                shipments_to_check.append(current_shipment)
+            else:
+                break
+    print('Done...')
+    if not shipments_to_check:
+        print('No potential duplicates to check...')
+        return
+    print('Starting history duplicates check...')
+    print('Selecting all domestic shipments...')
+    Customer.mycursor.execute('SELECT ship_date, material_or_vas_num, delivery_confirm, RIGHT(customer_confirm, 22), overlabeled_value, account \
         FROM dhl_master_invoice \
         WHERE LEFT(pricing_zone, 4) = "USPS" AND material_or_vas_num NOT IN (154, 192)')
-    dom_shipments = mycursor.fetchall()
-    # mycursor.execute('SELECT ship_date, material_or_vas_num, delivery_confirm, RIGHT(customer_confirm, 22), overlabeled_value \
-    #     FROM dhl_master_invoice \
-    #     WHERE LEFT(pricing_zone, 4) = "USPS" AND material_or_vas_num NOT IN (154, 192)')
+    dom_shipments = Customer.mycursor.fetchall()
+    print('Done...')
     d_to_shipment = {}
     c_to_shipment = {}
     ol_to_shipment = {}
+    duplicates = {}
+    log = {}
     for row in dom_shipments:
-        ship_date, service, del_conf, cust_conf, ol = str(row[0]), row[1], row[2], row[3], str(row[4]) if row[4] else row[4]
+        ship_date, service, del_conf, cust_conf, ol, account = row[0], row[1], row[2], row[3], str(
+            row[4]) if row[4] else row[4], row[5]
         if del_conf not in d_to_shipment:
             d_to_shipment[del_conf] = []
         d_to_shipment[del_conf].append((ship_date, service, del_conf))
@@ -856,19 +893,113 @@ def history_duplicates():
             if ol not in ol_to_shipment:
                 ol_to_shipment[ol] = []
             ol_to_shipment[ol].append((ship_date, service, del_conf))
-    count = 0
-    for row in dom_shipments:
-        ship_date, service, del_conf, cust_conf, ol = str(row[0]), row[1], row[2], row[3], str(row[4]) if row[4] else row[4]
+    for row in shipments_to_check:
+        ship_date, service, del_conf, cust_conf, account = row[0], row[1], row[2], row[3], row[4]
         shipment = (ship_date, service, del_conf)
-        if del_conf in d_to_shipment:
+        if cust_conf in d_to_shipment.keys():
+            if len(d_to_shipment[cust_conf]) - (shipment in d_to_shipment[cust_conf]) > 0:
+                log[shipment] = f'account: {account}, shipment {shipment} customer confirm - {cust_conf} matches the delivery confirm of the following shipments: {d_to_shipment[cust_conf]}'
+                duplicates[shipment] = account
+        if cust_conf in c_to_shipment.keys():
+            if len(c_to_shipment[cust_conf]) - (shipment in c_to_shipment[cust_conf]) > 0:
+                log[shipment] = f'account: {account}, shipment {shipment} customer confirm - {cust_conf} matches the customer confirm right 22 of the following shipments: {c_to_shipment[cust_conf]}'
+                duplicates[shipment] = account
+        if cust_conf in ol_to_shipment.keys():
+            if len(ol_to_shipment[cust_conf]) - (shipment in ol_to_shipment[cust_conf]) > 0:
+                log[shipment] = f'account: {account}, shipment {shipment} customer confirm - {cust_conf} matches the overlabeled of the following shipments: {ol_to_shipment[cust_conf]}'
+                duplicates[shipment] = account
+    if duplicates:
+        print(log)
+        sql_duplicates = list(duplicates.keys())
+        print(f'{len(duplicates)} duplicates found - updating dB...')
+        sql_add_duplicates = 'INSERT INTO duplicates (ship_date, service, delivery_confirm) VALUES (%s, %s, %s)'
+        Customer.mycursor.executemany(sql_add_duplicates, sql_duplicates)
+        sql_negate_duplicates = 'UPDATE dhl_master_invoice SET account = - account WHERE (ship_date, material_or_vas_num, delivery_confirm) IN ((%s, %s, %s)) AND account > 0'
+        Customer.mycursor.executemany(sql_negate_duplicates, sql_duplicates)
+        Customer.mydb.commit()
+        print(f'{len(duplicates)} new customer confirm duplicates added to dB.')
+        return log
+    else:
+        print('No new customer confirm duplicates found.')
+    # if uniques_account_found:
+
+
+# continue invoice duplicates and history duplicates v2 tomorrow
+# del_confirm, ship_date, inv_sc
+def invoice_duplicates(invoice, records):
+    print('Starting invoice duplicates check...')
+    sql_select_existing_duplicates = 'SELECT ship_date, service, delivery_confirm FROM duplicates'
+    Customer.mycursor.execute(sql_select_existing_duplicates)
+    existing_duplicates = set()
+    while True:
+        existing_duplicate = Customer.mycursor.fetchone()
+        if not existing_duplicate:
+            break
+        existing_duplicates.add(existing_duplicate)
+    print('Selecting all potential duplicates...')
+    shipments_to_check = []
+    for current_shipment in records:
+        if current_shipment[:3] not in existing_duplicates:
+            shipments_to_check.append(current_shipment)
+    print('Done...')
+    if not shipments_to_check:
+        print('No potential duplicates to check...')
+        return
+    print(f'Selecting all domestic shipments within invoice {invoice}...')
+    Customer.mycursor.execute(f'SELECT ship_date, material_or_vas_num, delivery_confirm, RIGHT(customer_confirm, 22), overlabeled_value, account \
+        FROM dhl_master_invoice \
+        WHERE LEFT(pricing_zone, 4) = "USPS" AND material_or_vas_num NOT IN (154, 192) AND invoice = {invoice}')
+    dom_shipments = Customer.mycursor.fetchall()
+    print('Done...')
+    d_to_shipment = {}
+    c_to_shipment = {}
+    ol_to_shipment = {}
+    duplicates = {}
+    log = {}
+    for row in dom_shipments:
+        ship_date, service, del_conf, cust_conf, ol, account = row[0], row[1], row[2], row[3], str(
+            row[4]) if row[4] else row[4], row[5]
+        if del_conf not in d_to_shipment:
+            d_to_shipment[del_conf] = []
+        d_to_shipment[del_conf].append((ship_date, service, del_conf))
+        if cust_conf:
+            if cust_conf not in c_to_shipment:
+                c_to_shipment[cust_conf] = []
+            c_to_shipment[cust_conf].append((ship_date, service, del_conf))
+        if ol:
+            if ol not in ol_to_shipment:
+                ol_to_shipment[ol] = []
+            ol_to_shipment[ol].append((ship_date, service, del_conf))
+    for row in shipments_to_check:
+        ship_date, service, del_conf, account = row[0], row[1], row[2], row[3]
+        shipment = (ship_date, service, del_conf)
+        if del_conf in d_to_shipment.keys():
             if len(d_to_shipment[del_conf]) - (shipment in d_to_shipment[del_conf]) > 0:
-                print(f'shipment {shipment} delivery confirm - {del_conf} matches the delivery confirm of the following shipments: {d_to_shipment[del_conf]}')
-        if del_conf in c_to_shipment:
+                log[shipment] = f'account: {account}, shipment {shipment} delivery confirm - {del_conf} matches the delivery confirm of the following shipments: {d_to_shipment[del_conf]}'
+                duplicates[shipment] = account
+        if del_conf in c_to_shipment.keys():
             if len(c_to_shipment[del_conf]) - (shipment in c_to_shipment[del_conf]) > 0:
-                print(f'shipment {shipment} delivery confirm - {del_conf} matches the customer confirm right 22 of the following shipments: {c_to_shipment[del_conf]}')
-        if del_conf in ol_to_shipment:
+                log[shipment] = f'account: {account}, shipment {shipment} delivery confirm - {del_conf} matches the customer confirm right 22 of the following shipments: {c_to_shipment[del_conf]}'
+                duplicates[shipment] = account
+        if del_conf in ol_to_shipment.keys():
             if len(ol_to_shipment[del_conf]) - (shipment in ol_to_shipment[del_conf]) > 0:
-                print(f'shipment {shipment} delivery confirm - {del_conf} matches the overlabeled of the following shipments: {ol_to_shipment[del_conf]}')
+                log[shipment] = f'account: {account}, shipment {shipment} delivery confirm - {del_conf} matches the overlabeled of the following shipments: {ol_to_shipment[del_conf]}'
+                duplicates[shipment] = account
+    if duplicates:
+        print(log)
+        sql_duplicates = list(duplicates.keys())
+        print(f'{len(duplicates)} duplicates found - updating dB...')
+        sql_add_duplicates = 'INSERT INTO duplicates (ship_date, service, delivery_confirm) VALUES (%s, %s, %s)'
+        Customer.mycursor.executemany(sql_add_duplicates, sql_duplicates)
+        sql_negate_duplicates = 'UPDATE dhl_master_invoice SET account = - account WHERE (ship_date, material_or_vas_num, delivery_confirm) IN ((%s, %s, %s)) AND account > 0'
+        Customer.mycursor.executemany(sql_negate_duplicates, sql_duplicates)
+        Customer.mydb.commit()
+        print(f'{len(duplicates)} new delivery confirm duplicates added to dB.')
+        return log
+    else:
+        print('No new delivery confirm duplicates found.')
+
+
 # history_duplicates()
 
 # print(CarrierCharge.map.keys())
@@ -986,9 +1117,9 @@ def history_duplicates():
 # # #
 #
 # print(CarrierCharge.map[1]['domestic'].keys())
-# with open(r'hashes\charges by zone\carrier_charges111.pkl', 'wb') as f:
+# with open(r'dependencies\charges by zone\carrier_charges111.pkl', 'wb') as f:
 #     pickle.dump(new_map, f, pickle.HIGHEST_PROTOCOL)
-# with open(r'hashes\charges by zone\carrier_charges111.json', 'w') as f:
+# with open(r'dependencies\charges by zone\carrier_charges111.json', 'w') as f:
 #     json.dump(new_map, f, indent=4)
 # x = []
 # bisect.insort(x, [1, 'x'])
@@ -1081,3 +1212,33 @@ def history_duplicates():
 # for c in Customer.crm:
 #     if Customer.crm[c].get('qb client'):
 #         print(Customer.crm[c])
+# update('10', location=None, rate_date=None, tier=None, mailer_id=None, fee=None, payment_method=None, name=None, qb_client=None)
+# {'mailer id': None, 'tiers': {'domestic': [['2021-01-28', 2]], 'international': [['2021-01-28', 2]]}, 'payment method': 'Credit Card', 'fee': 0.02, 'name': 'Smart Shoppers BH LLC'}
+# print(cust_names)
+# Customer.update('5367469', mailer_id = 699035)
+# print(Customer.crm.get('5367469'))
+# print(CarrierCharge.map[2]['international']['2020-01-26'][54].keys())
+# print(CarrierCharge.charge_rate(2, 'international', '2020-01-27', service_code, ship_zone, weight))
+# print(acc_num(bol, deliv_confirm, zone, ol, cust_conf, int_tr_no, zip))
+# print(intl_names)
+# for name in intl_names.values():
+#     name = name.split(' ')
+#     if len(name) > 1:
+#         print(name)
+# st = "THIS IS A SENTENCE . THEY'RE DON'T"
+# print(string.capwords(st))
+# Customer.update('5345286', location='domestic', rate_date='2021-02-14', tier=5345286)
+# CarrierCharge.update(5345286, r'C:\Users\Roy Solmonovich\Downloads\Create RF2 Dom Tier 5345286 Shazar Solutions.csv')
+# print(history_duplicates())
+# for x in amp[0]:
+#     if x[0] == '20210215145641076AOTXGHA':
+#         print(x)
+# print(amp[0][('20210215145641076AOTXGHA', '2906')])
+# print(CarrierCharge.charge_rate(5348587, 'domestic', '2021-02-23', 81, 'USPS08', 2.21))
+# print(CarrierCharge.map[5348587]['domestic'].keys())
+# print(CarrierCharge.map[5352947]['domestic'].keys())
+# print(CarrierCharge.map.keys())
+# tracking_to_acc(r'C:\Users\Roy Solmonovich\Downloads\DHL history accounts not found (non duplicates).csv')
+# print(tr_to_acc.get(('20210222033734458JTN35GJ', '5705190')))
+# 20210222033734458JTN35GJ 5705190
+print(service_names)

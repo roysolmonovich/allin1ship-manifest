@@ -1,0 +1,359 @@
+{
+    "upssurepost1orgreater": {
+        "domestic": {
+            "<": 82,
+            ">=": 82
+        }
+    },
+    "domesticpsfirstclass": {
+        "domestic": {
+            "<": 81,
+            ">=": 81
+        }
+    },
+    "domesticpspriority": {
+        "domestic": {
+            "<": 631,
+            ">=": 81
+        }
+    },
+    "upsworldwideexpedited": {
+        "international": {
+            "<": 60,
+            ">=": 60
+        }
+    },
+    "domesticpsfirstclassmailinternational": {
+        "international": {
+            "<": 54,
+            ">=": 54
+        }
+    },
+    "fedexinternationaleconomy": {
+        "international": {
+            "<": 54,
+            ">=": 54
+        }
+    },
+    "fedexhomedelivery": {
+        "domestic": {
+            "<": 82,
+            ">=": 82
+        }
+    },
+    "upsexpeditedtocanada": {
+        "international": {
+            "<": 60,
+            ">=": 60
+        }
+    },
+    "domesticpsinternationalpriority": {
+        "international": {
+            "<": 54,
+            ">=": 54
+        }
+    },
+    "upssurepostlessthan1": {
+        "domestic": {
+            "<": 82,
+            ">=": 82
+        }
+    },
+    "domesticpsinternationalfirstclass": {
+        "international": {
+            "<": 54,
+            ">=": 54
+        }
+    },
+    "upsstandardtocanada": {
+        "international": {
+            "<": 54,
+            ">=": 54
+        }
+    },
+    "fedexinternationalgroundtocanada": {
+        "international": {
+            "<": 54,
+            ">=": 54
+        }
+    },
+    "domesticpsparcelselect": {
+        "domestic": {
+            "<": 82,
+            ">=": 82
+        }
+    },
+    "fedexinternationalpriority": {
+        "international": {
+            "<": 60,
+            ">=": 60
+        }
+    },
+    "fedexsmartpoststandardmail": {
+        "domestic": {
+            "<": 82,
+            ">=": 82
+        }
+    },
+    "ups3dayselect": {
+        "domestic": {
+            "<": 631,
+            ">=": 631
+        }
+    },
+    "domesticpspriorityflatrateenvelope": {
+        "domestic": {
+            ">=": 81,
+            "<": 631
+        }
+    },
+    "dhlexpressworldwide": {
+        "international": {
+            "<": 60,
+            ">=": 60
+        }
+    },
+    "domesticpsprioritymail": {
+        "domestic": {
+            "<": 631,
+            ">=": 81
+        }
+    },
+    "domesticpsprioritymaillargeflatratebox": {
+        "domestic": {
+            "<": 631,
+            ">=": 81
+        }
+    },
+    "upsground": {
+        "domestic": {
+            ">=": 81,
+            "<": 0
+        }
+    },
+    "fedexground": {
+        "domestic": {
+            ">=": 81,
+            "<": 0
+        }
+    },
+    "other": {
+        "domestic": {
+            "<": 0,
+            ">=": 0
+        }
+    },
+    "fedex2day": {
+        "domestic": {
+            "<": 0,
+            ">=": 0
+        }
+    },
+    "domesticpsapofpo": {
+        "domestic": {
+            "<": 0,
+            ">=": 0
+        }
+    },
+    "fedexpriorityovernight": {
+        "domestic": {
+            "<": 0,
+            ">=": 0
+        }
+    },
+    "itschecked": {
+        "domestic": {
+            "<": 0,
+            ">=": 0
+        }
+    },
+    "upsnextdayair": {
+        "domestic": {
+            "<": 0,
+            ">=": 0
+        }
+    },
+    "wardtrucking": {
+        "domestic": {
+            "<": 0,
+            ">=": 0
+        }
+    },
+    "domesticpsfirstclassmail": {
+        "domestic": {
+            "<": 81,
+            ">=": 0
+        }
+    },
+    "fedexexpresssaver": {
+        "domestic": {
+            "<": 0,
+            ">=": 0
+        }
+    },
+    "ediexpress": {
+        "domestic": {
+            "<": 0,
+            ">=": 0
+        }
+    },
+    "ups2nddayair": {
+        "domestic": {
+            "<": 0,
+            ">=": 0
+        }
+    },
+    "fedexstandardovernight": {
+        "domestic": {
+            "<": 0,
+            ">=": 0
+        }
+    },
+    "ground": {
+        "domestic": {
+            "<": 0,
+            ">=": 81
+        }
+    },
+    "mm": {
+        "domestic": {
+            "<": 77,
+            ">=": 77
+        }
+    },
+    "upssplg": {
+        "domestic": {
+            "<": 82,
+            ">=": 82
+        }
+    },
+    "upsspsm": {
+        "domestic": {
+            "<": 82
+        }
+    },
+    "nextdaysaver": {
+        "domestic": {
+            ">=": 0
+        }
+    },
+    "upsgnd": {
+        "domestic": {
+            ">=": 81,
+            "<": 0
+        }
+    },
+    "fedex2dayorpak": {
+        "domestic": {
+            ">=": 0,
+            "<": 0
+        }
+    },
+    "domesticpsfirstrectparcel": {
+        "domestic": {
+            "<": 81
+        }
+    },
+    "domesticpspriorityflatratelargebox": {
+        "domestic": {
+            ">=": 81
+        }
+    },
+    "domesticpspriorityflatratepaddedenvelope": {
+        "domestic": {
+            ">=": 81
+        }
+    },
+    "ups2da": {
+        "domestic": {
+            ">=": 0
+        }
+    },
+    "domesticpspriorityrectparcel": {
+        "domestic": {
+            ">=": 81
+        }
+    },
+    "domesticpsinternationalexpressrectparcel": {
+        "international": {
+            ">=": 54
+        }
+    },
+    "domesticpspriorityflatratebox": {
+        "domestic": {
+            ">=": 81
+        }
+    },
+    "domesticpspriorityflatratesmallbox": {
+        "domestic": {
+            ">=": 81
+        }
+    },
+    "nanpriorityflatratepaddedenvelope": {
+        "domestic": {
+            ">=": 81
+        }
+    },
+    "ups1da": {
+        "domestic": {
+            ">=": 0
+        }
+    },
+    "uspsfirstrectparcel": {
+        "domestic": {
+            "<": 81
+        }
+    },
+    "uspspriorityflatrateenvelope": {
+        "domestic": {
+            ">=": 81,
+            "<": 631
+        }
+    },
+    "uspspriorityflatratelargebox": {
+        "domestic": {
+            ">=": 81
+        }
+    },
+    "uspspriorityflatratepaddedenvelope": {
+        "domestic": {
+            ">=": 81
+        }
+    },
+    "uspspriorityrectparcel": {
+        "domestic": {
+            ">=": 81
+        }
+    },
+    "uspsintlexpressrectparcel": {
+        "international": {
+            ">=": 54
+        }
+    },
+    "uspspriorityflatratebox": {
+        "domestic": {
+            ">=": 81
+        }
+    },
+    "uspspriorityflatratesmallbox": {
+        "domestic": {
+            ">=": 81
+        }
+    },
+    "uspsfirstclassmail": {
+        "domestic": {
+            "<": 81
+        }
+    },
+    "uspsprioritymail": {
+        "domestic": {
+            ">=": 81,
+            "<": 631
+        }
+    },
+    "uspsprioritymailexpress": {
+        "domestic": {
+            ">=": 0
+        }
+    }
+}
