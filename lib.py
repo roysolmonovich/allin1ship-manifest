@@ -95,6 +95,8 @@ except FileNotFoundError:
 try:
     with open(r'dependencies/sheets/tracking to account.pkl', 'rb') as f:
         tr_to_acc = pickle.load(f)
+except FileNotFoundError:
+    print('file not found')       
 
 
 def acc_to_name(file):
