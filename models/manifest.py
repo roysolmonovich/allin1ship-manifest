@@ -427,8 +427,8 @@ class ManifestModel(db.Model):
                     'insured', 'dim1', 'dim2', 'dim3'}
     upload_directory = 'api_uploads'
     type_conv = {'str': str, 'float': float, 'int': pd.Int64Dtype(), 'bool': bool}
-    with open(r'dependencies\services\dhl_service_hash.json', 'r') as f:
-        service = json.load(f)
+    # with open(r'dependencies\services\dhl_service_hash.json', 'r') as f:
+        # service = json.load(f)
     with open(r'dependencies\services\sv_to_code.json', 'r') as f:
         sv_to_code = json.load(f)
 
