@@ -1,1 +1,1 @@
-web uwsgi app:app
+web: uwsgi app:app
