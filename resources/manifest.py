@@ -8,6 +8,7 @@ import os
 import pandas as pd
 from datetime import datetime
 from math import ceil
+from lib import service as lib_service
 import numpy as np
 manifest_schema = ManifestSchema()
 manifest_update_schema = ManifestUpdateSchema()
