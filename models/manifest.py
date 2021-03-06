@@ -5,7 +5,7 @@ from datetime import datetime, date
 import pandas as pd
 from numpy import random, int64
 # from flask-sqlalchemy import
-from lib import CarrierCharge, country_to_code, service as lib_service, dhl_zip_zone_2020, ca_zip_zone, service_names
+from lib import CarrierCharge, country_to_code, service as lib_service, dhl_zip_zone_2020, ca_zip_zone, service_names, sv_to_code
 import re
 import os
 import json
@@ -429,8 +429,7 @@ class ManifestModel(db.Model):
     type_conv = {'str': str, 'float': float, 'int': pd.Int64Dtype(), 'bool': bool}
     # with open(r'dependencies\services\dhl_service_hash.json', 'r') as f:
         # service = json.load(f)
-    with open(r'dependencies\services\sv_to_code.json', 'r') as f:
-        sv_to_code = json.load(f)
+
 
     def __init__(self, name):
         self.name = name
