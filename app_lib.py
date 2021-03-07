@@ -10,7 +10,6 @@ from math import ceil
 import bisect
 import re
 import string
-from c import db_cred
 # with open(r'dependencies\overlabeled\overlabeled.pkl', 'rb') as f:
 #     overlabeled = pickle.load(f)
 # with open(r'dependencies\overlabeled\overlabeled.json', 'w') as f:
@@ -112,48 +111,6 @@ def acc_to_name(file):
             pickle.dump(acc_names, fw, pickle.HIGHEST_PROTOCOL)
 
 
-def del_con_to_dims(file):
-    df = pd.read_csv(file)
-    df = df[['Delivery Confirmation Number', 'DIM Height', 'DIM Length', 'DIM Width']]
-    df.dropna(subset=['DIM Height'], inplace=True)
-    # print(df.columns)
-    # for row in df.itertuples():
-    #     print(row)
-    dims = {rows[1][1:]: (float(rows[2]), float(rows[3]), float(rows[4])) for rows in df.itertuples()
-            if rows[2] != ''}
-    del_to_dim.update(dims)
-
-    # with open(file, 'r') as f:
-    #     reader = csv.reader(f)
-    #     next(reader)
-    # dims = {rows[0][1:]: (float(rows[2]), float(rows[3]), float(rows[4])) for rows in reader
-    #         if rows[2] != ''}
-    # del_to_dim.update(dims)
-    with open(r'dependencies/Marked Up Items/del_to_dim.json', 'w') as fw:
-        json.dump(del_to_dim, fw, indent=4)
-
-
-# print(len(del_to_dim))
-# print(del_to_dim.get('9305589936900295057325'))
-# del_con_to_dims(r'C:/Users/Roy Solmonovich/Desktop/20201228_Marked_Up_Items_40340_4440843.csv')
-
-def tracking_to_acc(file):
-    with open(file, 'r') as f:
-        reader = csv.reader(f)
-        next(reader)
-        tr_to_acc_new = {}
-        for rows in reader:
-            print(rows)
-            if rows[2]:
-                if rows[0].isnumeric() and len(rows[0]) == 22 and rows[0][0] == '9':
-                    tr_to_acc_new[(int(rows[0]), int(rows[1].replace('-', '')[:5]))] = int(rows[2])
-                else:
-                    tr_to_acc_new[(rows[0], rows[1].replace(' ', '').replace('-', '').lstrip('0'))] = int(rows[2])
-        tr_to_acc.update(tr_to_acc_new)
-        with open(r'dependencies/sheets/tracking to account.pkl', 'wb') as fw:
-            pickle.dump(tr_to_acc, fw, pickle.HIGHEST_PROTOCOL)
-
-
 # for x in list(tr_to_acc.items()):
 #     if len(x[0][0]) == 22 and x[0][0].isnumeric() and x[0][0][0] == '9':
 #         # tr_to_acc[(x[0][0], int(x[0][1][:5]))] = tr_to_acc.pop(x[0])
@@ -161,32 +118,6 @@ def tracking_to_acc(file):
 #             tr_to_acc[(int(x[0][0]), x[0][1])] = tr_to_acc.pop(x[0])
 #             # print((int(x[0][0]), x[0][1]), tr_to_acc[(int(x[0][0]), x[0][1])])
 
-# print(len(tr_to_acc))
-# tracking_to_acc(r'dependencies/Customer Tracking/Cust Track (3).csv')
-# print(len(tr_to_acc))
-# print(tr_to_acc.get(('20201214025141972DTLKJWV', '71660070')))
-
-
-def overlabeled_report_update(file):
-    cols = ['Delivery Confirmation Number', 'Data Capture Method']
-    df = pd.read_csv(file, usecols=cols)
-    df = df.loc[df['Data Capture Method'] == 'ENCODE']
-    over_l = {row[1][1:]: row[2] for row in df.itertuples()}
-    overlabeled.update(over_l)
-    with open(r'dependencies/overlabeled/overlabeled.json', 'w') as fw:
-        json.dump(overlabeled, fw, indent=4)
-    # df.where(filter, inplace=True)
-    # for row in df.itertuples():
-    #     #     # print(row['Delivery Confirmation Number'], row['Data Capture Method'])
-    #     print(row[1][1:], row[2])
-    # with open(file, 'r', encoding='utf-8') as f:
-    #     reader = csv.reader(f)
-    #     next(reader)
-    # over_l = {rows[4][1:]: rows[-1] for rows in reader
-    #           if rows[-1] == 'ENCODE'}
-    #     overlabeled.update(over_l)
-    #     with open(r'dependencies/overlabeled/overlabeled.pkl', 'wb') as fw:
-    #         pickle.dump(overlabeled, fw, pickle.HIGHEST_PROTOCOL)
 
 
 # overlabeled_report_update(r'dependencies/overlabeled/20201228_Over_Label_Items_40340_4440844.csv')
