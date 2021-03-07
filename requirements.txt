@@ -24,16 +24,8 @@ Flask==1.1.2
 Flask-Cors==3.0.10
 Flask-JWT==0.3.2
 Flask-RESTful==0.3.8
-Flask-SQLAlchemy==2.4.4
 Flask-WTF==0.14.3
 future==0.18.2
-google-api-core==1.24.0
-google-api-python-client==1.12.8
-google-auth==1.24.0
-google-auth-httplib2==0.0.4
-google-auth-oauthlib==0.4.2
-google-cloud==0.34.0
-googleapis-common-protos==1.52.0
 gspread==3.6.0
 httplib2==0.18.1
 idna==2.10

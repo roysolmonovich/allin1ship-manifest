@@ -1,18 +1,15 @@
 from flask_cors import CORS, cross_origin
-from datetime import datetime
-import numpy as np
 import pandas as pd
 from lib import CarrierCharge, service
 # uncomment sqlalchemy
 # from sqlalchemy import create_engine, select, insert, MetaData, Table, and_
 # import mysql.connector
-import pickle
+# import pickle
 from resources.carrieritem import CarrierItem
 from resources.user import User
 from resources.manifest import Manifest, ManifestFilter, ManifestNames, ManifestColumns
 # from models.manifest import ManifestModel
 from security import identity, authenticate
-import tracemalloc
 from flask import Flask, jsonify, request  # , flash, redirect
 from flask_restful import Api
 from flask_jwt import JWT, jwt_required
@@ -20,7 +17,6 @@ import os
 # from werkzeug.utils import secure_filename
 # from flask_wtf import FlaskForm
 # import mysql.connector
-tracemalloc.start()
 service_options = [v[3] for v in service.values()]
 ai1s_headers = {'orderno', 'shipdate', 'weight', 'service', 'zip', 'country', 'price',
                 'insured', 'dim1', 'dim2', 'dim3'}
@@ -64,15 +60,15 @@ def vali_date(date_text):
 # conn = engine.connect()
 
 
-with open(r'dependencies/charges_by_zone/carrier_charges111.pkl', 'rb') as f:
-    map = pickle.load(f)
+# with open(r'dependencies/charges_by_zone/carrier_charges111.pkl', 'rb') as f:
+#     map = pickle.load(f)
 # format_hash = mflib.ManifestFormat.format_hash
 type_conv = {'str': str, 'float': float, 'int': pd.Int64Dtype(), 'bool': bool}
 
 # mycursor = mydb.cursor()
 app = Flask(__name__)
 # app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://allinoy4_user0:+3mp0r@ry@162.241.219.134:3306/allinoy4_allin1ship'
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', 'mysql+mysqlconnector://allinoy4_user0:+3mp0r@ry@162.241.219.134:3306/allinoy4_allin1ship')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_size': 100, 'pool_recycle': 280}
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAX_CONTENT_LENGTH'] = 20 * 1024 * 1024
@@ -104,100 +100,100 @@ def index():
 #         return {'location': list(CarrierCharge.map[carrier].keys())}
 
 
-@app.route('/mapadd/', methods=['POST'])
-def create_carrier_or_tier():
-    request_data = request.get_json()
-    if 'carrier' in request_data:
-        c = request_data['carrier']
-        map[c] = {}
-    if 'location' in request_data:
-        loc = request_data['location']
-        map[c][loc] = {}
-    if 'date' in request_data:
-        # d = datetime.strptime(request_data['date'], '%Y-%m-%d').date()
-        d = request_data['date']
-        map[c][loc][d] = {}
-    if 'service' in request_data:
-        sv = request_data['service']
-        map[c][loc][d][sv] = {}
-    if 'zone' in request_data:
-        z = request_data['zone']
-        map[c][loc][d][sv][z] = {}
-    if 'weight' in request_data:
-        w = request_data['weight']
-        map[c][loc][d][sv][z][w] = None
-    if 'charge' in request_data:
-        ch = request_data['charge']
-        map[c][loc][d][sv][z][w] = ch
-    print(request_data)
-    with open(r'dependencies/charges_by_zone/carrier_charges.pkl', 'wb') as f:
-        pickle.dump(map, f, pickle.HIGHEST_PROTOCOL)
-    return jsonify(request_data)
+# @app.route('/mapadd/', methods=['POST'])
+# def create_carrier_or_tier():
+#     request_data = request.get_json()
+#     if 'carrier' in request_data:
+#         c = request_data['carrier']
+#         map[c] = {}
+#     if 'location' in request_data:
+#         loc = request_data['location']
+#         map[c][loc] = {}
+#     if 'date' in request_data:
+#         # d = datetime.strptime(request_data['date'], '%Y-%m-%d').date()
+#         d = request_data['date']
+#         map[c][loc][d] = {}
+#     if 'service' in request_data:
+#         sv = request_data['service']
+#         map[c][loc][d][sv] = {}
+#     if 'zone' in request_data:
+#         z = request_data['zone']
+#         map[c][loc][d][sv][z] = {}
+#     if 'weight' in request_data:
+#         w = request_data['weight']
+#         map[c][loc][d][sv][z][w] = None
+#     if 'charge' in request_data:
+#         ch = request_data['charge']
+#         map[c][loc][d][sv][z][w] = ch
+#     print(request_data)
+#     with open(r'dependencies/charges_by_zone/carrier_charges.pkl', 'wb') as f:
+#         pickle.dump(map, f, pickle.HIGHEST_PROTOCOL)
+#     return jsonify(request_data)
 
 
-@app.route('/map/')
-@jwt_required()
-def get_carriers():
-    return jsonify({'carriers': list(map.keys())})
-
-
-@app.route('/map/<string:carrier>/')
-def get_locations(carrier):
-    if carrier.isnumeric():
-        carrier = int(carrier)
-    return jsonify({'locations': map[carrier]})
-
-
-@app.route('/map/<string:carrier>/<string:location>/')
-def get_dates(carrier, location):
-    if carrier.isnumeric():
-        carrier = int(carrier)
-    return jsonify({'dates': list(map[carrier][location].keys())})
-
-
-@app.route('/map/<string:carrier>/<string:location>/<string:date>/')
-def get_serivces(carrier, location, date):
-    request_data = request.get_json()
-    print(request_data)
-    date = datetime.strptime(date, '%Y-%m-%d').date()
-    if carrier.isnumeric():
-        carrier = int(carrier)
-    return jsonify({'services': list(map[carrier][location][date].keys())})
-
-
-@app.route('/map/<string:carrier>/<string:location>/<string:date>/<int:service>/')
-def get_zones(carrier, location, date, service):
-    date = datetime.strptime(date, '%Y-%m-%d').date()
-    if carrier.isnumeric():
-        carrier = int(carrier)
-    return jsonify({'zones': list(map[carrier][location][date][service].keys())})
-
-
-@app.route('/map/<string:carrier>/<string:location>/<string:date>/<int:service>/<string:zone>/')
-def get_weights(carrier, location, date, service, zone):
-    date = datetime.strptime(date, '%Y-%m-%d').date()
-    if carrier.isnumeric():
-        carrier = int(carrier)
-    return jsonify({'weights': list(map[carrier][location][date][service][zone].keys())})
-
-
-@app.route('/map/<string:carrier>/<string:location>/<string:date>/<int:service>/<string:zone>/<float:weight>/')
-def get_charge(carrier, location, date, service, zone, weight):
-    # return jsonify({'stores': stores})
-    weight = float(weight)
-    date = datetime.strptime(date, '%Y-%m-%d').date()
-    if carrier.isnumeric():
-        carrier = int(carrier)
-    return jsonify({'charge': CarrierCharge.charge_rate(carrier, location, date, service, zone, weight)})
-    # return jsonify({'charge': map[carrier][location][date][service][zone][weight]})
-
-
-@app.route('/manifest_filters/', methods=['GET'])
-@cross_origin()
-def manifest_filters():
-    request_data = request.get_json()
-    print(request_data)
-    return jsonify(request_data)
+# @app.route('/map/')
+# @jwt_required()
+# def get_carriers():
+#     return jsonify({'carriers': list(map.keys())})
+#
+#
+# @app.route('/map/<string:carrier>/')
+# def get_locations(carrier):
+#     if carrier.isnumeric():
+#         carrier = int(carrier)
+#     return jsonify({'locations': map[carrier]})
+#
+#
+# @app.route('/map/<string:carrier>/<string:location>/')
+# def get_dates(carrier, location):
+#     if carrier.isnumeric():
+#         carrier = int(carrier)
+#     return jsonify({'dates': list(map[carrier][location].keys())})
+#
+#
+# @app.route('/map/<string:carrier>/<string:location>/<string:date>/')
+# def get_serivces(carrier, location, date):
+#     request_data = request.get_json()
+#     print(request_data)
+#     date = datetime.strptime(date, '%Y-%m-%d').date()
+#     if carrier.isnumeric():
+#         carrier = int(carrier)
+#     return jsonify({'services': list(map[carrier][location][date].keys())})
+#
+#
+# @app.route('/map/<string:carrier>/<string:location>/<string:date>/<int:service>/')
+# def get_zones(carrier, location, date, service):
+#     date = datetime.strptime(date, '%Y-%m-%d').date()
+#     if carrier.isnumeric():
+#         carrier = int(carrier)
+#     return jsonify({'zones': list(map[carrier][location][date][service].keys())})
+#
+#
+# @app.route('/map/<string:carrier>/<string:location>/<string:date>/<int:service>/<string:zone>/')
+# def get_weights(carrier, location, date, service, zone):
+#     date = datetime.strptime(date, '%Y-%m-%d').date()
+#     if carrier.isnumeric():
+#         carrier = int(carrier)
+#     return jsonify({'weights': list(map[carrier][location][date][service][zone].keys())})
+#
+#
+# @app.route('/map/<string:carrier>/<string:location>/<string:date>/<int:service>/<string:zone>/<float:weight>/')
+# def get_charge(carrier, location, date, service, zone, weight):
+#     # return jsonify({'stores': stores})
+#     weight = float(weight)
+#     date = datetime.strptime(date, '%Y-%m-%d').date()
+#     if carrier.isnumeric():
+#         carrier = int(carrier)
+#     return jsonify({'charge': CarrierCharge.charge_rate(carrier, location, date, service, zone, weight)})
+#     # return jsonify({'charge': map[carrier][location][date][service][zone][weight]})
+#
+#
+# @app.route('/manifest_filters/', methods=['GET'])
+# @cross_origin()
+# def manifest_filters():
+#     request_data = request.get_json()
+#     print(request_data)
+#     return jsonify(request_data)
 
 
 # @app.route('/manifest_test/', methods=['POST'])
