@@ -10,7 +10,8 @@ from math import ceil
 import bisect
 import re
 import string
-from c import db_cred
+if __name__ in ('main_invoice.py', '__main__'):
+    from c import db_cred
 # with open(r'dependencies\overlabeled\overlabeled.pkl', 'rb') as f:
 #     overlabeled = pickle.load(f)
 # with open(r'dependencies\overlabeled\overlabeled.json', 'w') as f:
