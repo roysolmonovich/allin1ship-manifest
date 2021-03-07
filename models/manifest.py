@@ -256,6 +256,7 @@ class ManifestDataModel(db.Model):
 
     def correct_service_rates(self, service_override):
         service = int(service_names[service_override])
+        self.service = service
         self.tier_1_2021 = CarrierCharge.charge_rate(1, 'domestic' if self.country == 'US' else 'international', str(date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
         self.tier_2_2021 = CarrierCharge.charge_rate(2, 'domestic' if self.country == 'US' else 'international', str(date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
         self.tier_3_2021 = CarrierCharge.charge_rate(3, 'domestic' if self.country == 'US' else 'international', str(date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
