@@ -17,7 +17,7 @@ import os
 # from werkzeug.utils import secure_filename
 # from flask_wtf import FlaskForm
 # import mysql.connector
-service_options = [v[3] for v in service.values()]
+# service_options = [v[3] for v in service.values()]
 ai1s_headers = {'orderno', 'shipdate', 'weight', 'service', 'zip', 'country', 'price',
                 'insured', 'dim1', 'dim2', 'dim3'}
 
