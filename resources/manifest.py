@@ -933,7 +933,7 @@ class ManifestFilter(Resource):
             for missing_column in missing_columns:
                 shipment[missing_column+' (gen.)'] = shipment.pop(missing_column)
             shipments.append(shipment)
-        return {'filtered shipments': shipments}
+        return {'filtered shipments': shipments, 'filters': filters}
         # shipments = ManifestModel.manifest_shipments(_id=id, filter=None)
         # print(id)
         # print(shipments)
