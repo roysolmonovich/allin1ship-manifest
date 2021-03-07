@@ -7,7 +7,7 @@ import pandas as pd
 # import pickle
 from resources.carrieritem import CarrierItem
 from resources.user import User
-from resources.manifest import Manifest, ManifestFilter, ManifestNames, ManifestColumns
+from resources.manifest import Manifest, ManifestFilter, ManifestNames, ManifestColumns, ManifestAuthTest
 # from models.manifest import ManifestModel
 from security import identity, authenticate
 from flask import Flask, jsonify, request  # , flash, redirect
@@ -131,10 +131,10 @@ def index():
 #     return jsonify(request_data)
 
 
-@app.route('/map/')
-@jwt_required()
-def get_carriers():
-    return jsonify({'carriers': list(map.keys())})
+# @app.route('/map/')
+# @jwt_required()
+# def get_carriers():
+#     return jsonify({'carriers': list(map.keys())})
 #
 #
 # @app.route('/map/<string:carrier>/')
@@ -1236,6 +1236,7 @@ api.add_resource(Manifest, '/manifest')
 api.add_resource(ManifestFilter, '/manifest-filter')
 api.add_resource(ManifestNames, '/previous-manifests')
 api.add_resource(ManifestColumns, '/column-headers')
+api.add_resource(ManifestAuthTest, '/manifest-auth-test')
 # manifest-manual
 # manifest-manual-submit
 

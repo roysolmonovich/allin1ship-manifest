@@ -10,6 +10,7 @@ from datetime import datetime
 from math import ceil
 from app_lib import service as lib_service
 from numpy import nan
+from flask_jwt import JWT, jwt_required
 manifest_schema = ManifestSchema()
 manifest_update_schema = ManifestUpdateSchema()
 # from flask_jwt import jwt_required
@@ -963,3 +964,8 @@ class ManifestFilter(Resource):
 #     },
 #     "services":
 #         [service_params]
+
+class ManifestAuthTest(Resource):
+    @ jwt_required()
+    def get(self):
+        return 'ok'
