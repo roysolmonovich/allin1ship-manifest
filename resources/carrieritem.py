@@ -1,5 +1,5 @@
 from flask import request
-from lib import CarrierCharge
+from app_lib import CarrierCharge
 from flask_restful import Resource
 
 
