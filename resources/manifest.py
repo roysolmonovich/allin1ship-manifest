@@ -8,8 +8,8 @@ import os
 import pandas as pd
 from datetime import datetime
 from math import ceil
-from lib import service as lib_service
-import numpy as np
+from app_lib import service as lib_service
+from numpy import nan
 manifest_schema = ManifestSchema()
 manifest_update_schema = ManifestUpdateSchema()
 # from flask_jwt import jwt_required
@@ -102,7 +102,7 @@ class ManifestManual(Resource):
             df = pd.read_excel(api_file_path, nrows=10, dtype=str)
         elif f_ext == 'csv':
             df = pd.read_csv(api_file_path, nrows=10, dtype=str)
-        df = df.replace({np.nan: None})
+        df = df.replace({nan: None})
         response = {'shipments': df.to_dict(orient='list'), 'file name': filename}
         response.update(data.to_dict())
         return response
@@ -816,7 +816,7 @@ class Manifest(Resource):
         # engine.execute(manifest_id_insert, (name, date.today()))
         subset = ['service', 'weight_threshold', 'country']
         df.loc[df['zone'].str.len() != 7, 'country'] = 'Intl'
-        df = df.replace({np.nan: None})
+        df = df.replace({nan: None})
         df_unique_services = df[['service', 'weight_threshold', 'country',
                                  'sugg_service']].drop_duplicates(subset=subset, inplace=False)
         df_unique_services['weight_threshold'] = df.apply(

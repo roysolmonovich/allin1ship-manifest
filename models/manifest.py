@@ -5,7 +5,7 @@ from datetime import datetime, date
 import pandas as pd
 from numpy import random, int64
 # from flask-sqlalchemy import
-from lib import CarrierCharge, country_to_code, service as lib_service, dhl_zip_zone_2020, ca_zip_zone, service_names, sv_to_code
+from app_lib import CarrierCharge, country_to_code, service as lib_service, dhl_zip_zone_2020, ca_zip_zone, service_names, sv_to_code
 import re
 import os
 import json
@@ -255,12 +255,6 @@ class ManifestDataModel(db.Model):
         return output
 
     def correct_service_rates(self, service_override):
-        print('here')
-        # for tier in range(1, 6):
-        #     charge = CarrierCharge.charge_rate(
-        #         tier, 'domestic' if domestic else 'international', str(date(2021, 2, 1)), sc[0], zone, row['weight'])
-        #     charge = None if charge < 0 else charge
-        #     output.append(charge)
         service = service_names[service_override]
         print(service, self.zone)
         self.tier_1_2021 = CarrierCharge.charge_rate(1, 'domestic' if self.country == 'US' else 'international', str(date(2021, 2, 1)), service, self.zone.replace('Zone', 'USPS'), self.weight)
