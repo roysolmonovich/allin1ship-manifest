@@ -10,7 +10,7 @@ from math import ceil
 import bisect
 import re
 import string
-
+from c import db_cred
 # with open(r'dependencies\overlabeled\overlabeled.pkl', 'rb') as f:
 #     overlabeled = pickle.load(f)
 # with open(r'dependencies\overlabeled\overlabeled.json', 'w') as f:
@@ -211,8 +211,8 @@ def overlabeled_report_update(file):
 # print(cust_names)
 
 class CarrierCharge:
-    if os.path.exists(r'dependencies/charges by zone/carrier_charges111.pkl'):
-        with open(r'dependencies/charges by zone/carrier_charges111.pkl', 'rb') as f:
+    if os.path.exists(r'dependencies/charges_by_zone/carrier_charges111.pkl'):
+        with open(r'dependencies/charges_by_zone/carrier_charges111.pkl', 'rb') as f:
             map = pickle.load(f)
     else:
         map = {}
@@ -417,12 +417,7 @@ class Customer:
             crm = json.load(f)
     else:
         crm = {}
-    mydb = mysql.connector.connect(
-        host="162.241.219.134",
-        user="allinoy4_user0",
-        password="+3mp0r@ry",
-        database="allinoy4_allin1ship"
-    )
+    mydb = mysql.connector.connect(**db_cred)
     print(mydb)
     mycursor = mydb.cursor()
 
@@ -1293,4 +1288,4 @@ def invoice_duplicates(invoice, records):
 # tracking_to_acc(r'C:\Users\Roy Solmonovich\Downloads\DHL history accounts not found (non duplicates).csv')
 # print(tr_to_acc.get(('20210222033734458JTN35GJ', '5705190')))
 # 20210222033734458JTN35GJ 5705190
-print(service_names)
+# print(CarrierCharge.map['DHL']['domestic']['2020-01-26'][81].keys())
