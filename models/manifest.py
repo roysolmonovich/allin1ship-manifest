@@ -257,15 +257,15 @@ class ManifestDataModel(db.Model):
     def correct_service_rates(self, service_override):
         service = service_names[service_override]
         print(service, self.zone)
-        self.tier_1_2021 = CarrierCharge.charge_rate(1, 'domestic' if self.country == 'US' else 'international', str(date(2021, 2, 1)), service, self.zone.replace('Zone', 'USPS'), self.weight)
-        self.tier_2_2021 = CarrierCharge.charge_rate(2, 'domestic' if self.country == 'US' else 'international', str(date(2021, 2, 1)), service, self.zone.replace('Zone', 'USPS'), self.weight)
-        self.tier_3_2021 = CarrierCharge.charge_rate(3, 'domestic' if self.country == 'US' else 'international', str(date(2021, 2, 1)), service, self.zone.replace('Zone', 'USPS'), self.weight)
-        self.tier_4_2021 = CarrierCharge.charge_rate(4, 'domestic' if self.country == 'US' else 'international', str(date(2021, 2, 1)), service, self.zone.replace('Zone', 'USPS'), self.weight)
-        self.tier_5_2021 = CarrierCharge.charge_rate(5, 'domestic' if self.country == 'US' else 'international', str(date(2021, 2, 1)), service, self.zone.replace('Zone', 'USPS'), self.weight)
-        self.dhl_2021 = CarrierCharge.charge_rate('DHL', 'domestic' if self.country == 'US' else 'international', str(date(2021, 2, 1)), service, self.zone.replace('Zone', 'USPS'), self.weight)
-        self.usps_2021 = CarrierCharge.charge_rate('USPS', 'domestic' if self.country == 'US' else 'international', str(date(2021, 2, 1)), service, self.zone.replace('Zone', 'USPS'), self.weight)
-        self.dhl_shipdate = CarrierCharge.charge_rate('DHL', 'domestic' if self.country == 'US' else 'international', str(self.shipdate), service, self.zone.replace('Zone', 'USPS'), self.weight)
-        self.usps_shipdate = CarrierCharge.charge_rate('USPS', 'domestic' if self.country == 'US' else 'international', str(self.shipdate), service, self.zone.replace('Zone', 'USPS'), self.weight)
+        self.tier_1_2021 = CarrierCharge.charge_rate(1, 'domestic' if self.country == 'US' else 'international', str(date(2021, 2, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
+        self.tier_2_2021 = CarrierCharge.charge_rate(2, 'domestic' if self.country == 'US' else 'international', str(date(2021, 2, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
+        self.tier_3_2021 = CarrierCharge.charge_rate(3, 'domestic' if self.country == 'US' else 'international', str(date(2021, 2, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
+        self.tier_4_2021 = CarrierCharge.charge_rate(4, 'domestic' if self.country == 'US' else 'international', str(date(2021, 2, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
+        self.tier_5_2021 = CarrierCharge.charge_rate(5, 'domestic' if self.country == 'US' else 'international', str(date(2021, 2, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
+        self.dhl_2021 = CarrierCharge.charge_rate('DHL', 'domestic' if self.country == 'US' else 'international', str(date(2021, 2, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
+        self.usps_2021 = CarrierCharge.charge_rate('USPS', 'domestic' if self.country == 'US' else 'international', str(date(2021, 2, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
+        self.dhl_shipdate = CarrierCharge.charge_rate('DHL', 'domestic' if self.country == 'US' else 'international', str(self.shipdate), service, self.zone.replace('Zone ', 'USPS'), self.weight)
+        self.usps_shipdate = CarrierCharge.charge_rate('USPS', 'domestic' if self.country == 'US' else 'international', str(self.shipdate), service, self.zone.replace('Zone ', 'USPS'), self.weight)
         return self
 
     def weight_threshold_display(row):
