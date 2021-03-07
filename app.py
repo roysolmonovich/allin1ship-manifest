@@ -131,10 +131,10 @@ def index():
 #     return jsonify(request_data)
 
 
-# @app.route('/map/')
-# @jwt_required()
-# def get_carriers():
-#     return jsonify({'carriers': list(map.keys())})
+@app.route('/map/')
+@jwt_required()
+def get_carriers():
+    return jsonify({'carriers': list(map.keys())})
 #
 #
 # @app.route('/map/<string:carrier>/')
