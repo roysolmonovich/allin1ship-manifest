@@ -1,5 +1,4 @@
-from sqlalchemy import create_engine, select, MetaData, Table
-from passlib.hash import pbkdf2_sha256
+from passlib.hash import argon2
 from db import db
 
 # engine = create_engine('mysql+mysqlconnector://allinoy4_user0:+3mp0r@ry@162.241.219.134:3306/allinoy4_allin1ship', pool_pre_ping=True)
@@ -11,6 +10,7 @@ from db import db
 #     autoload_with=engine
 # )
 # conn = engine.connect()
+
 
 class UserModel(db.Model):
     __tablename__ = 'users'
@@ -26,9 +26,10 @@ class UserModel(db.Model):
     #     autoload_with=engine
     # )
     # conn = engine.connect()
+
     def __init__(self, username, password):
         self.username = username
-        self.hashed_pw = pbkdf2_sha256.hash(password)
+        self.hashed_pw = argon2.hash(password)
 
     @classmethod
     def find_by_username(cls, username):
