@@ -10,9 +10,9 @@ from resources.user import User
 from resources.manifest import Manifest, ManifestFilter, ManifestNames, ManifestColumns, ManifestAuthTest
 # from models.manifest import ManifestModel
 from security import identity, authenticate
-from flask import Flask, jsonify, request  # , flash, redirect
+from flask import Flask, jsonify
 from flask_restful import Api
-from flask_jwt import JWT, jwt_required
+from flask_jwt import JWT
 import os
 # from werkzeug.utils import secure_filename
 # from flask_wtf import FlaskForm
@@ -39,27 +39,6 @@ def allowed_file(filename):
     return True
 
 
-def vali_date(date_text):
-    try:
-        datetime.strptime(date_text, '%Y-%m-%d')
-        return str(datetime.strptime(date_text, '%Y-%m-%d').date())
-    except ValueError:
-        return
-# mydb = mysql.connector.connect(
-#     host="162.241.219.134",
-#     user="allinoy4_user0",
-#     password="+3mp0r@ry",
-#     database="allinoy4_allin1ship"
-# )
-# mycursor = mydb.cursor()
-
-#uncomment: engine
-# engine = create_engine(
-#     'mysql+mysqlconnector://allinoy4_user0:+3mp0r@ry@162.241.219.134:3306/allinoy4_allin1ship', pool_pre_ping=True)
-# metadata = MetaData(bind=None)
-# conn = engine.connect()
-
-
 # with open(r'dependencies/charges_by_zone/carrier_charges111.pkl', 'rb') as f:
 #     map = pickle.load(f)
 # format_hash = mflib.ManifestFormat.format_hash
@@ -67,9 +46,8 @@ type_conv = {'str': str, 'float': float, 'int': pd.Int64Dtype(), 'bool': bool}
 
 # mycursor = mydb.cursor()
 app = Flask(__name__)
-# app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+mysqlconnector://allinoy4_user0:+3mp0r@ry@162.241.219.134:3306/allinoy4_allin1ship'
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
-app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_size': 100, 'pool_recycle': 280}
+app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_size': 100, 'pool_recycle': 280, 'pool_pre_ping': True}
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAX_CONTENT_LENGTH'] = 20 * 1024 * 1024
 # app.config['UPLOAD_FOLDER'] = Manifest.upload_directory
@@ -1246,5 +1224,5 @@ if __name__ == '__main__':
     # app.run(host='192.168.1.24', threaded=True, port=5000, debug=True, ssl_context=('cert.pem', 'key.pem'))
     db.init_app(app)
     app.run(threaded=True)
-    # app.run(host='192.168.50.101', threaded=True, port=5000, debug=True)
+    app.run(host='192.168.50.101', threaded=True, port=5000, debug=True)
     # app.run(host='192.168.1.24', threaded=True, port=5000, debug=True)

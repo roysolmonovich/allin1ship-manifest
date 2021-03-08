@@ -400,7 +400,7 @@ class Manifest(Resource):
                 df[['zip', 'country']] = df.apply(lambda row: ManifestModel.add_to_zip_ctry(
                     row.address), axis=1, result_type='expand')
             empty_cols = ManifestModel.ai1s_headers.difference(
-                set(df.columns)).difference({'shipdate', 'zip', 'country', 'service provider and name', 'service provider', 'service name', 'address'})
+                set(df.columns)).difference({'shipdate', 'zip', 'country', 'service provider and name', 'service provider', 'service name', 'address', 'dim1', 'dim2', 'dim3'})
             for col in empty_cols:
                 df[col] = None
             return df, empty_cols
@@ -449,7 +449,7 @@ class Manifest(Resource):
             # df['insured'] = (df['insured'] > 0)
             # print(df.head())
             empty_cols = ManifestModel.ai1s_headers.difference(
-                set(df.columns)).difference({'shipdate', 'zip', 'country', 'service provider and name', 'service provider', 'service name', 'address'})
+                set(df.columns)).difference({'shipdate', 'zip', 'country', 'service provider and name', 'service provider', 'service name', 'address', 'dim1', 'dim2', 'dim3'})
             for col in empty_cols:
                 df[col] = None
             return df, empty_cols
@@ -535,7 +535,7 @@ class Manifest(Resource):
                 del df['service_provider']
                 del df['service_code']
             empty_cols = ManifestModel.ai1s_headers.difference(
-                set(df.columns)).difference({'shipdate', 'zip', 'country', 'service provider and name', 'service provider', 'service name', 'address'})
+                set(df.columns)).difference({'shipdate', 'zip', 'country', 'service provider and name', 'service provider', 'service name', 'address', 'dim1', 'dim2', 'dim3'})
             for col in empty_cols:
                 df[col] = None
             return df, empty_cols
@@ -626,7 +626,7 @@ class Manifest(Resource):
             #     del df['service_provider']
             #     del df['service_code']
             empty_cols = ManifestModel.ai1s_headers.difference(
-                set(df.columns)).difference({'shipdate', 'zip', 'country', 'service provider and name', 'service provider', 'service name', 'address'})
+                set(df.columns)).difference({'shipdate', 'zip', 'country', 'service provider and name', 'service provider', 'service name', 'address', 'dim1', 'dim2', 'dim3'})
             for col in empty_cols:
                 df[col] = None
             return df, empty_cols
@@ -740,7 +740,7 @@ class Manifest(Resource):
             # df['insured'] = (df['insured'] > 0)
             # print(df.head())
             empty_cols = ManifestModel.ai1s_headers.difference(
-                set(df.columns)).difference({'shipdate', 'zip', 'country', 'service provider and name', 'service provider', 'service name', 'address'})
+                set(df.columns)).difference({'shipdate', 'zip', 'country', 'service provider and name', 'service provider', 'service name', 'address', 'dim1', 'dim2', 'dim3'})
             for col in empty_cols:
                 df[col] = None
             return df, empty_cols

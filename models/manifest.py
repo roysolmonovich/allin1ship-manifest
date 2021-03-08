@@ -426,7 +426,7 @@ class ManifestModel(db.Model):
     manifest_missing = db.relationship('ManifestMissingModel', cascade='all,delete', lazy='dynamic')
     format = ManifestFormat.format
     ai1s_headers = {'orderno', 'shipdate', 'weight', 'service provider and name', 'service provider', 'service name', 'zip', 'country', 'price',
-                    'insured', 'dim1', 'dim2', 'dim3'}
+                    'insured', 'dim1', 'dim2', 'dim3', 'address'}
     upload_directory = 'api_uploads'
     type_conv = {'str': str, 'float': float, 'int': pd.Int64Dtype(), 'bool': bool}
     # with open(r'dependencies\services\dhl_service_hash.json', 'r') as f:
