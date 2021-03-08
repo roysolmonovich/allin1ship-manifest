@@ -102,6 +102,7 @@ try:
 except FileNotFoundError:
     print('file not found')
 
+
 def acc_to_name(file):
     with open(file, 'r') as f:
         reader = csv.reader(f)
@@ -117,7 +118,6 @@ def acc_to_name(file):
 #         if x[0][0].isnumeric():
 #             tr_to_acc[(int(x[0][0]), x[0][1])] = tr_to_acc.pop(x[0])
 #             # print((int(x[0][0]), x[0][1]), tr_to_acc[(int(x[0][0]), x[0][1])])
-
 
 
 # overlabeled_report_update(r'dependencies/overlabeled/20201228_Over_Label_Items_40340_4440844.csv')
@@ -265,20 +265,15 @@ class CarrierCharge:
 
     def charge_validate(carrier, location, date, service_code, ship_zone, weight):
         if CarrierCharge.map.get(carrier) is None:
-            # print(f"Carrier '{carrier}' not found in record.")
             return None
         if CarrierCharge.map[carrier].get(location) is None:
-            print(f"Location '{location}' not found in record.")
             return None
         last_active_date = CarrierCharge.last_active_date(carrier, location, date)
         if last_active_date is None:
-            print(f"Date '{date}' is earlier than our earliest active date.")
             return None
         if CarrierCharge.map[carrier][location][last_active_date].get(service_code) is None:
-            print(f"Service code '{service_code}' not found.", carrier, location, date, service_code, ship_zone, weight)
             return None
         if CarrierCharge.map[carrier][location][last_active_date][service_code].get(ship_zone) is None:
-            print(f"Ship zone '{ship_zone}' not found.")
             return None
         return last_active_date
 
