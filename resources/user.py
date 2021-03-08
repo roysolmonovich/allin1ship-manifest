@@ -1,5 +1,5 @@
 # from sqlalchemy import create_engine, select, MetaData, Table
-from passlib.hash import pbkdf2_sha256
+from argon2 import PasswordHasher, exceptions
 from flask_restful import Resource, reqparse
 from models.user import UserModel
 from flask_jwt import jwt_required
@@ -19,6 +19,7 @@ class User(Resource):
         required=True,
         help="This field cannot be blank."
     )
+    ph = PasswordHasher()
 
     def post(self):
         data = User.parser.parse_args()
@@ -38,7 +39,9 @@ class User(Resource):
         existing = UserModel.find_by_username(username=data['username'])
         if not existing:
             return {'message': f'Username {data["username"]} not found.'}, 400
-        elif not pbkdf2_sha256.verify(data['password'], existing.hashed_pw):
+        try:
+            User.ph.verify(existing.hashed_pw, data['password'])
+        except exceptions.VerifyMismatchError:
             return {'message': 'Wrong password entered.'}, 400
         existing.delete_from_db()
         return{'message': f'User {data["username"]} deleted successfully.'}, 200

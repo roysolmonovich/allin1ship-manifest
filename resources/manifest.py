@@ -922,12 +922,14 @@ class ManifestFilter(Resource):
         service_replacements = {}
         for service_override in filters['services']:
             if service_override['service'] is not None:
-                service_replacements[(service_override['service name'], service_override['location'], service_override['weight threshold'])] = service_override['service']
+                service_replacements[(service_override['service name'], service_override['location'],
+                                      service_override['weight threshold'])] = service_override['service']
         shipments = []
         for shipment_item in ManifestDataModel.find_filtered_shipments(id, filters):
             # '_sa_instance_state'
             if (shipment_item.service, shipment_item.country, shipment_item.weight_threshold) in service_replacements:
-                shipment_item = shipment_item.correct_service_rates(service_replacements[(shipment_item.service, shipment_item.country, shipment_item.weight_threshold)])
+                shipment_item = shipment_item.correct_service_rates(service_replacements[(
+                    shipment_item.service, shipment_item.country, shipment_item.weight_threshold)])
             shipment = shipment_item.__dict__
             del shipment['_sa_instance_state']
             shipment['shipdate'] = str(shipment['shipdate'])

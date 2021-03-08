@@ -1,16 +1,20 @@
 from models.user import UserModel
-from passlib.hash import argon2
+from argon2 import PasswordHasher, exceptions
+ph = PasswordHasher()
 
 
 def authenticate(username, password):
+    print('here')
     user = UserModel.find_by_username(username)
     if not user:
         print(f'User {username} not found.')
         return
-    if not argon2.verify(password, user.hashed_pw):
+    try:
+        ph.verify(user.hashed_pw, password)
+        return user
+    except exceptions.VerifyMismatchError:
         print('Wrong password entered.')
         return
-    return user
 
 
 def identity(payload):

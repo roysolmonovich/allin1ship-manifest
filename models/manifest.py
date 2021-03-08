@@ -65,7 +65,7 @@ class ManifestDataModel(db.Model):
     manifest = db.relationship('ManifestModel')
     zone_areas = {
         'Non-contiguous US': [f'Zone {i}' for i in range(11, 14)], 'Contiguous US': [f'Zone {i:02}' for i in range(1, 9)]}
-        # "{:02d}".format(1)
+    # "{:02d}".format(1)
 
     def __init__(self, id, orderno, shipdate, weight, service, zip, country, insured, dim1, dim2, dim3, price, zone, weight_threshold, sugg_service, tier_1_2021, tier_2_2021, tier_3_2021, tier_4_2021, tier_5_2021, dhl_2021, usps_2021, shipdate_dhl, shipdate_usps):
         self.id = id
@@ -162,7 +162,6 @@ class ManifestDataModel(db.Model):
                 weight_zone_query.append('('+(' & ').join(weight_zone_sub)+')')
             query.append((' | ').join(weight_zone_query))
 
-
         # print(user_input)
         # for item in eval(user_input):
         #     print(item)
@@ -239,7 +238,7 @@ class ManifestDataModel(db.Model):
         for tier in range(1, 6):
             charge = CarrierCharge.charge_rate(
                 tier, 'domestic' if domestic else 'international', str(date(2021, 2, 1)), sc[0], zone, row['weight'])
-            charge = None if charge < 0 else charge
+            charge = None if charge and charge < 0 else charge
             output.append(charge)
         dhl_c_2021 = CarrierCharge.charge_rate("DHL", "domestic" if domestic else "international",
                                                str(date(2021, 2, 1)), sc[0], zone, row['weight'])
@@ -257,15 +256,24 @@ class ManifestDataModel(db.Model):
     def correct_service_rates(self, service_override):
         service = int(service_names[service_override])
         self.sugg_service = service_override
-        self.tier_1_2021 = CarrierCharge.charge_rate(1, 'domestic' if self.country == 'US' else 'international', str(date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
-        self.tier_2_2021 = CarrierCharge.charge_rate(2, 'domestic' if self.country == 'US' else 'international', str(date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
-        self.tier_3_2021 = CarrierCharge.charge_rate(3, 'domestic' if self.country == 'US' else 'international', str(date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
-        self.tier_4_2021 = CarrierCharge.charge_rate(4, 'domestic' if self.country == 'US' else 'international', str(date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
-        self.tier_5_2021 = CarrierCharge.charge_rate(5, 'domestic' if self.country == 'US' else 'international', str(date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
-        self.dhl_2021 = CarrierCharge.charge_rate('DHL', 'domestic' if self.country == 'US' else 'international', str(date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
-        self.usps_2021 = CarrierCharge.charge_rate('USPS', 'domestic' if self.country == 'US' else 'international', str(date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
-        self.dhl_shipdate = CarrierCharge.charge_rate('DHL', 'domestic' if self.country == 'US' else 'international', str(self.shipdate), service, self.zone.replace('Zone ', 'USPS'), self.weight)
-        self.usps_shipdate = CarrierCharge.charge_rate('USPS', 'domestic' if self.country == 'US' else 'international', str(self.shipdate), service, self.zone.replace('Zone ', 'USPS'), self.weight)
+        self.tier_1_2021 = CarrierCharge.charge_rate(1, 'domestic' if self.country == 'US' else 'international', str(
+            date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
+        self.tier_2_2021 = CarrierCharge.charge_rate(2, 'domestic' if self.country == 'US' else 'international', str(
+            date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
+        self.tier_3_2021 = CarrierCharge.charge_rate(3, 'domestic' if self.country == 'US' else 'international', str(
+            date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
+        self.tier_4_2021 = CarrierCharge.charge_rate(4, 'domestic' if self.country == 'US' else 'international', str(
+            date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
+        self.tier_5_2021 = CarrierCharge.charge_rate(5, 'domestic' if self.country == 'US' else 'international', str(
+            date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
+        self.dhl_2021 = CarrierCharge.charge_rate('DHL', 'domestic' if self.country == 'US' else 'international', str(
+            date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
+        self.usps_2021 = CarrierCharge.charge_rate('USPS', 'domestic' if self.country == 'US' else 'international', str(
+            date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
+        self.dhl_shipdate = CarrierCharge.charge_rate('DHL', 'domestic' if self.country == 'US' else 'international', str(
+            self.shipdate), service, self.zone.replace('Zone ', 'USPS'), self.weight)
+        self.usps_shipdate = CarrierCharge.charge_rate('USPS', 'domestic' if self.country == 'US' else 'international', str(
+            self.shipdate), service, self.zone.replace('Zone ', 'USPS'), self.weight)
         return self
 
     def weight_threshold_display(row):
@@ -422,8 +430,7 @@ class ManifestModel(db.Model):
     upload_directory = 'api_uploads'
     type_conv = {'str': str, 'float': float, 'int': pd.Int64Dtype(), 'bool': bool}
     # with open(r'dependencies\services\dhl_service_hash.json', 'r') as f:
-        # service = json.load(f)
-
+    # service = json.load(f)
 
     def __init__(self, name):
         self.name = name
@@ -563,10 +570,10 @@ class ManifestModel(db.Model):
             weight_thres = '<' if weight < 16 else '>='
         else:
             weight_thres = '<' if weight < 70.4 else '>='
-        if sv_name in ManifestModel.sv_to_code:
-            if dom_intl in ManifestModel.sv_to_code[sv_name]:
-                if weight_thres in ManifestModel.sv_to_code[sv_name][dom_intl]:
-                    return [ManifestModel.sv_to_code[sv_name][dom_intl][weight_thres], lib_service[str(ManifestModel.sv_to_code[sv_name][dom_intl][weight_thres])][3], weight_thres]
+        if sv_name in sv_to_code:
+            if dom_intl in sv_to_code[sv_name]:
+                if weight_thres in sv_to_code[sv_name][dom_intl]:
+                    return [sv_to_code[sv_name][dom_intl][weight_thres], lib_service[str(sv_to_code[sv_name][dom_intl][weight_thres])][3], weight_thres]
                 else:
                     print(f'Weight threshold not found for service name: {sv_name}.')
             else:

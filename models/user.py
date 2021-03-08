@@ -1,4 +1,4 @@
-from passlib.hash import argon2
+from argon2 import PasswordHasher
 from db import db
 
 # engine = create_engine('mysql+mysqlconnector://allinoy4_user0:+3mp0r@ry@162.241.219.134:3306/allinoy4_allin1ship', pool_pre_ping=True)
@@ -17,6 +17,7 @@ class UserModel(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(45))
     hashed_pw = db.Column(db.String(87))
+    ph = PasswordHasher()
     # engine = create_engine('mysql+mysqlconnector://allinoy4_user0:+3mp0r@ry@162.241.219.134:3306/allinoy4_allin1ship')
     # metadata = MetaData(bind=None)
     # table = Table(
@@ -29,7 +30,7 @@ class UserModel(db.Model):
 
     def __init__(self, username, password):
         self.username = username
-        self.hashed_pw = argon2.hash(password)
+        self.hashed_pw = UserModel.ph.hash(password)
 
     @classmethod
     def find_by_username(cls, username):
