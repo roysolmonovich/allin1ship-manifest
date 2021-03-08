@@ -1,0 +1,253 @@
+{
+    "order_no": {
+        "sellercloud_shipbridge": {
+            "header": [
+                "Order #",
+                "TrackingNumber"
+            ],
+            "format": "str"
+        },
+        "shipstation": {
+            "header": [
+                "OrderNumber",
+                "Shipment #",
+                "Order #",
+                "Tracking #"
+            ],
+            "format": "str"
+        },
+        "shopify": {
+            "header": [
+                "Shipment ID",
+                "Order ID",
+                "Carrier Transaction"
+            ],
+            "format": "str"
+        },
+        "teapplix": {
+            "header": [
+                "txn_id",
+                "tracking"
+            ],
+            "format": "str"
+        }
+    },
+    "date": {
+        "sellercloud_shipbridge": {
+            "header": ["ShipDate"],
+            "format": "str",
+            "parse": "%m/%d/%Y"
+        },
+        "shipstation": {
+            "header": [
+                "ShipDate",
+                "Ship Date"
+            ],
+            "format": "str"
+        },
+        "shopify": {
+            "header": [
+                "Ship Date",
+                "Order Date"
+            ],
+            "format": "str"
+        },
+        "teapplix": {
+            "header": ["ship_date"],
+            "format": "str",
+            "parse": "%m/%d/%Y"
+        }
+    },
+    "weight": {
+        "sellercloud_shipbridge": {
+            "header": ["PackageWeight"],
+            "format": "str",
+            "parse": "w_lbs_or_w_oz"
+        },
+        "shipstation": {
+            "header": [
+                "WeightOz",
+                "Weight"
+            ],
+            "format": "float",
+            "parse": "None",
+            "parse1": "w_lbs_or_w_oz"
+        },
+        "shopify": {
+            "header": [
+                "Weight Oz"
+            ],
+            "format": "float"
+        },
+        "teapplix": {
+            "header": ["weight"],
+            "format": "float"
+        }
+    },
+    "service": {
+        "sellercloud_shipbridge": {
+            "header": ["ShippingMethod"],
+            "format": "str"
+        },
+        "shipstation": {
+            "header": [
+                "Service"
+            ],
+            "header_alt": [
+                [
+                    "Carrier",
+                    "ProviderName"
+                ],
+                [
+                    "ServiceCode",
+                    "ShippingServiceCode"
+                ]
+            ],
+            "format": "str"
+        },
+        "shopify": {
+            "header": [
+                "Shipping Service"
+            ],
+            "format": "str"
+        },
+        "teapplix": {
+            "header": [],
+            "header_alt": [
+                [
+                    "carrier"
+                ],
+                [
+                    "method"
+                ]
+            ],
+            "format": "str"
+        }
+    },
+    "current_price": {
+        "sellercloud_shipbridge": {
+            "header": ["ShippingCost"],
+            "format": "float"
+        },
+        "shipstation": {
+            "header": [
+                "CarrierFee",
+                "Carrier Fee"
+            ],
+            "format": "float"
+        },
+        "shopify": {
+            "header": [
+                "Carrier Fee"
+            ],
+            "format": "float"
+        },
+        "teapplix": {
+            "header": ["fee"],
+            "format": "float"
+        }
+    },
+    "insured_parcel": {
+        "shipstation": {
+            "header": [
+                "InsuranceFee",
+                "Insurance Fee"
+            ],
+            "format": "float"
+        },
+        "teapplix": {
+            "header": [
+                "insurance",
+                "insurance_value",
+                "insurance_fee"
+            ],
+            "format": "float"
+        }
+    },
+    "address": {
+        "sellercloud_shipbridge": {
+            "header": ["Address"],
+            "format": "str",
+            "z_parse": [
+                "split",
+                ", ",
+                1
+            ],
+            "c_parse": [
+                "split",
+                ", ",
+                2
+            ],
+            "c_abbv": false
+        },
+        "shipstation": {
+            "header": [
+                "PostalCode",
+                "Postal Code"
+            ],
+            "format": "str"
+        },
+        "shopify": {
+            "header": [
+                "Ship Postal Code"
+            ],
+            "format": "str"
+        },
+        "teapplix": {
+            "header": [
+                "address_zip"
+            ],
+            "format": "str"
+        }
+    },
+    "address1": {
+        "shipstation": {
+            "header": [
+                "CountryCode",
+                "Country"
+            ],
+            "format": "str",
+            "ctry_type": "code"
+        },
+        "shopify": {
+            "header": [
+                "Ship Country"
+            ],
+            "format": "str"
+        },
+        "teapplix": {
+            "header": [
+                "address_country"
+            ],
+            "format": "str",
+            "ctry_type": "full"
+        }
+    },
+    "dim1": {
+        "shipstation": {
+            "header": [
+                "Length"
+            ],
+            "format": "float",
+            "unit": "in"
+        }
+    },
+    "dim2": {
+        "shipstation": {
+            "header": [
+                "Width"
+            ],
+            "format": "float",
+            "unit": "in"
+        }
+    },
+    "dim3": {
+        "shipstation": {
+            "header": [
+                "Height"
+            ],
+            "format": "float",
+            "unit": "in"
+        }
+    }
+}
