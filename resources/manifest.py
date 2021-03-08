@@ -31,9 +31,8 @@ class ManifestColumns(Resource):
 
 class ManifestManual(Resource):
     def post(self):
-        print('here')
         data = request.form
-        print(data)
+        print(data.keys())
         if 'manifest' not in request.files:
             print('No manifest file')
             return {'message': 'No manifest file'}, 400
@@ -56,7 +55,6 @@ class ManifestManual(Resource):
         if end_date < start_date:
             print(f'End date {end_date} can\'t be earlier than start date {start_date}')
             return {'message': f'End date {end_date} can\'t be earlier than start date {start_date}'}, 400
-        print('here2')
         zone_weights = []
         for i in list(range(1, 9))+list(range(11, 14)):
             if f'zone {i}' not in data:
@@ -88,7 +86,6 @@ class ManifestManual(Resource):
         filename = secure_filename(file.filename)
         upload_directory = ManifestModel.upload_directory
         api_file_path = os.path.join(upload_directory, filename)
-        print('here3')
         file.save(api_file_path)
         print(filename)
         existing = ManifestModel.find_by_name(name=name)
@@ -118,7 +115,7 @@ class ManifestNames(Resource):
 
     def put(self):
         args = request.args
-        print(args)
+        print(args.keys())
         errors = manifest_update_schema.validate(request.args)
         if errors:
             return errors, 400
@@ -138,7 +135,7 @@ class ManifestNames(Resource):
 
     def delete(self):
         args = request.args
-        print(args)
+        print(args.keys())
         errors = manifest_schema.validate(request.args)
         if errors:
             return errors, 400
@@ -163,7 +160,7 @@ class Manifest(Resource):
         # return json_manifests
         # return 'in construction'
         args = request.args
-        print(args)
+        print(args.keys())
         errors = manifest_schema.validate(request.args)
         if errors:
             return errors, 400
@@ -198,7 +195,7 @@ class Manifest(Resource):
     def post(self):
         data = request.form.to_dict()
         # ImmutableMultiDict([('Shipment #', 'dim1'), ('Order #', 'dim3'), ('Recipient', 'orderno'), ('file name', 'shipstation_Shippping_details_2.xlsx'), ('name', 'asss'), ('start date', '2021-01-03'), ('end date', '2021-03-04'), ('zone 1', '3'), ('zone 2', '3'), ('zone 3', '3'), ('zone 4', '3'), ('zone 5', '3'), ('zone 6', '3'), ('zone 7', '3'), ('zone 8', '3'), ('zone 11', '1'), ('zone 12', '1'), ('zone 13', '1'), ('domestic service', 'first Class Parcels'), ('international service', 'DHL Packket International')])
-        print(data)
+        print(data.keys())
         if 'name' not in data:
             print('No name chosen')
             return {'message': 'No name chosen'}, 400
@@ -350,7 +347,6 @@ class Manifest(Resource):
                 # print(x.columns)
                 # weights = x
                 # print(list(weights))
-                print(df.head(8))
                 df['zone'] = zones_df.sample(len(df.index), weights=weights, replace=True).reset_index()[0]
                 print(df.head(8))
                 generated_columns['zip'], generated_columns['country'] = 'zip_gen', 'country_gen'
@@ -726,7 +722,6 @@ class Manifest(Resource):
                         break
             else:
                 df = create_df(columns, dtype, headers)
-            print(df.tail(5))
             if sv_alt0 and sv_alt1:
 
                 # df[['service_code', 'service_provider']].replace(np.nan, '', regex=True, inplace=True)
@@ -836,10 +831,8 @@ class Manifest(Resource):
         #     elif v[-1] == 'international':
         #         intl_service_names.append(v[3])
         # dom_intl = {'domestic services': dom_service_names, 'international services': intl_service_names}
-        print(df.columns)
         df.columns = df.columns.str.replace(' ', '_')
         df.columns = df.columns.str.replace('.', '')
-        print(df.columns)
         response = {'filtered shipments': {k: v for k, v in df.to_dict(orient='list').items() if k != 'weight_threshold'},
                     'summary': summary, 'service options': dom_intl,
                     'suggested services': df_unique_services.to_dict(orient='records'),
@@ -903,7 +896,7 @@ class Manifest(Resource):
 class ManifestFilter(Resource):
     def post(self):
         request_data = request.get_json()
-        print(request_data)
+        print(request_data.keys())
         if 'name' not in request_data:
             print('No name chosen')
             return {'message': 'No name chosen'}, 400

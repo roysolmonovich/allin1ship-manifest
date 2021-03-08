@@ -281,7 +281,7 @@ class CarrierCharge:
         date = str(date)
         last_active_date = CarrierCharge.charge_validate(carrier, location, date, service_code, ship_zone, weight)
         if last_active_date is None:
-            print(f"Active date prior to {date} could not be found for - {carrier} - {location}")
+            # print(f"Active date prior to {date} could not be found for - {carrier} - {location}")
             return
         weight_charge = CarrierCharge.map[carrier][location][last_active_date][service_code][ship_zone]
         weights = sorted(list(weight_charge.keys()))
