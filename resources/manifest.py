@@ -101,7 +101,7 @@ class ManifestManual(Resource):
         elif f_ext == 'csv':
             df = pd.read_csv(api_file_path, nrows=10, dtype=str)
         df = df.replace({nan: None})
-        response = {'shipments': df.to_dict(orient='list'), 'file name': filename}
+        response = {'shipments': df.to_dict(orient='records'), 'file name': filename}
         response.update(data.to_dict())
         return response
 
@@ -833,10 +833,13 @@ class Manifest(Resource):
         # dom_intl = {'domestic services': dom_service_names, 'international services': intl_service_names}
         df.columns = df.columns.str.replace(' ', '_')
         df.columns = df.columns.str.replace('.', '')
-        response = {'filtered shipments': {k: v for k, v in df.to_dict(orient='list').items() if k != 'weight_threshold'},
+        weight_thres_column = df['weight_threshold']
+        del df['weight_threshold']
+        response = {'filtered shipments': df.to_dict(orient='records'),
                     'summary': summary, 'service options': dom_intl,
                     'suggested services': df_unique_services.to_dict(orient='records'),
                     'date range': date_range}
+        df['weight_threshold'] = weight_thres_column
         generated_columns_rev = {v: k for k, v in generated_columns.items()}
         df = df.rename(generated_columns_rev, axis=1)
         manifest_user = ManifestModel(name=name)
