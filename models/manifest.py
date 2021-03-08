@@ -281,8 +281,8 @@ class ManifestDataModel(db.Model):
 
 
 class ManifestFormat:
-    if os.path.exists(r'Manifests/format.json'):
-        with open(r'Manifests/format.json', 'r') as f:
+    if os.path.exists(r'manifests/format.json'):
+        with open(r'manifests/format.json', 'r') as f:
             format = json.load(f)
     else:
         format = {}
