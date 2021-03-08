@@ -578,8 +578,6 @@ class ManifestModel(db.Model):
                     print(f'Weight threshold not found for service name: {sv_name}.')
             else:
                 print(f'{dom_intl} not found for service name: {sv_name}.')
-        else:
-            print(f'Service name {sv_name} not found')
         return [None, None, weight_thres]
 
     # def row_to_rate(row):
