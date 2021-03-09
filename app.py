@@ -6,7 +6,7 @@ from app_lib import service
 # import mysql.connector
 # import pickle
 from resources.carrieritem import CarrierItem
-from resources.user import User
+from resources.user import User, UserLogin, TokenRefresh
 from resources.manifest import Manifest, ManifestFilter, ManifestNames, ManifestColumns, ManifestManual, ManifestAuthTest
 # from models.manifest import ManifestModel
 from flask import Flask, jsonify
@@ -129,6 +129,8 @@ api.add_resource(ManifestNames, '/previous-manifests')
 api.add_resource(ManifestColumns, '/column-headers')
 api.add_resource(ManifestAuthTest, '/manifest-auth-test')
 api.add_resource(ManifestManual, '/manifest-manual')
+api.add_resource(UserLogin, '/login')
+api.add_resource(TokenRefresh, '/refresh')
 # manifest-manual
 # manifest-manual-submit
 
