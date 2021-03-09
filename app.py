@@ -10,6 +10,7 @@ from resources.user import User
 from resources.manifest import Manifest, ManifestFilter, ManifestNames, ManifestColumns, ManifestManual, ManifestAuthTest
 # from models.manifest import ManifestModel
 from flask import Flask, jsonify
+from blacklist import BLACKLIST
 from flask_jwt_extended import JWTManager
 from flask_restful import Api
 import os
@@ -40,17 +41,27 @@ def allowed_file(filename):
 
 type_conv = {'str': str, 'float': float, 'int': pd.Int64Dtype(), 'bool': bool}
 
+db_cred = os.environ.get('DATABASE_URL')
+if not db_cred:
+    from c import db_cred
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL')
+app.config['SQLALCHEMY_DATABASE_URI'] = db_cred
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_size': 100, 'pool_recycle': 280, 'pool_pre_ping': True}
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAX_CONTENT_LENGTH'] = 20 * 1024 * 1024
 app.config['PROPAGATE_EXCEPTIONS'] = True
 app.config['UPLOAD_FOLDER'] = 'api_uploads'
+app.config['JWT_BLACKLIST_ENABLED'] = True
+app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
 app.secret_key = 'roy'
 api = Api(app)
 jwt = JWTManager(app)
+
+
+@jwt.token_in_blacklist_loader
+def check_if_token_in_blacklist(decrypted_token):
+    return decrypted_token['identity'] in BLACKLIST
 
 
 @jwt.expired_token_loader
