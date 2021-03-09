@@ -59,9 +59,9 @@ api = Api(app)
 jwt = JWTManager(app)
 
 
-@jwt.token_in_blacklist_loader
-def check_if_token_in_blacklist(decrypted_token):
-    return decrypted_token['identity'] in BLACKLIST
+# @jwt.token_in_blacklist_loader
+# def check_if_token_in_blacklist(decrypted_token):
+#     return decrypted_token['identity'] in BLACKLIST
 
 
 @jwt.expired_token_loader
