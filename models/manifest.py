@@ -3,7 +3,7 @@ from db import db
 from datetime import datetime, date
 # import mf_lib as mflib
 import pandas as pd
-from numpy import random, int64
+from numpy import random, int64, nan
 # from flask-sqlalchemy import
 from app_lib import CarrierCharge, country_to_code, service as lib_service, dhl_zip_zone_2020, ca_zip_zone, service_names, sv_to_code
 import re
@@ -116,6 +116,23 @@ class ManifestDataModel(db.Model):
     def find_distinct_services(cls, _id):
         return cls.query.distinct().with_entities(cls.service, cls.weight_threshold, cls.country, cls.sugg_service).filter(cls.id == _id).all()
 
+    @classmethod
+    def find_distinct_zones(cls, _id):
+        all_zones = cls.query.distinct().with_entities(cls.zone).filter(cls.id == _id).order_by(cls.zone).all()
+        domestic_zones, international_zones = [], []
+        for zone in all_zones:
+            if zone[0][:5] == 'Zone ':
+                domestic_zones.append(zone[0])
+            else:
+                international_zones.append(zone[0])
+        return domestic_zones, international_zones
+
+    @classmethod
+    def find_date_range(cls, _id):
+        start_date = cls.query.with_entities(cls.date).filter(cls.id == _id).min()
+        end_date = cls.query.with_entities(cls.date).filter(cls.id == _id).max()
+        return start_date, end_date
+
     @ classmethod
     def find_filtered_shipments(cls, _id, shipment_filter):
         #         {'name': 'ship1212', 'filters': {'shipdates': [False, '2021-01-01', '2021-01-12'], 'weight_zone': [{'weight': [False, '1', '4'], 'zone': [True, 'Non-contiguous US', 'International']}, {'weight': [True, '1', '2'], 'zone': [False, 'zone b', 'non contiguous b', 'non contiguous c', 'International']}], 'services': [{'service name': 'USPS First Class Mail', 'location': 'US', 'weight threshold': '<', 'service': None}, {'service name': 'USPS Priority Mail', 'location': 'US', 'weight threshold': '>=', 'service': 'DHL SmartMail Parcel Plus Expedited'}, {'service name': 'USPS First Class Mail Intl', 'location': 'Intl', 'weight threshold': '<', 'service': None}]}}
@@ -178,7 +195,7 @@ class ManifestDataModel(db.Model):
                     f"(cls.service == '{service['service name']}' and cls.weight_threshold == '{service['weight threshold']}' and cls.country {'==' if service['location'] == 'US' else '!='} 'US')")
             query.append((' | ').join(service_query))
         # return eval("cls.query.filter((cls.id == _id, cls.shipdate.between('2021-01-01', '2021-01-12'), (_or(~(cls.weight.between(1, 4))), (_or(cls.zone._in('Zone 11', 'Zone 12', 'Zone 13'), cls.country != 'US')), (_or(cls.weight.between(1, 2))), (~(cls.zone._in('Zone 1', 'Zone 3'), cls.country != 'US'))))).all()")
-        query_string = f"cls.query.filter(cls.id == _id, {(', ').join(query)}).all()"
+        query_string = f"cls.query.filter(cls.id == _id, {(', ').join(query)}).order_by(cls.shipdate).all()"
         # print('func query:\n', query_string)
         return eval(query_string)
         # return eval("cls.query.filter(((cls.id == _id)) & ((cls.shipdate.between('2021-01-01', '2021-01-12')))).all()")
@@ -431,6 +448,8 @@ class ManifestModel(db.Model):
     format = ManifestFormat.format
     ai1s_headers = {'orderno', 'shipdate', 'weight', 'service provider and name', 'service provider', 'service name', 'zip', 'country', 'price',
                     'insured', 'dim1', 'dim2', 'dim3', 'address'}
+    ai1s_headers_ordered = ['orderno', 'shipdate', 'weight', 'service', 'zip', 'country', 'price',
+                            'insured', 'dim1', 'dim2', 'dim3', 'tier_1_2021', 'tier_2_2021', 'tier_3_2021', 'tier_4_2021', 'tier_5_2021', 'dhl_2021', 'usps_2021', 'dhl_shipdate', 'usps_shipdate']
     upload_directory = 'api_uploads'
     type_conv = {'str': str, 'float': float, 'int': pd.Int64Dtype(), 'bool': bool}
     # with open(r'dependencies\services\dhl_service_hash.json', 'r') as f:
@@ -641,6 +660,14 @@ class ManifestModel(db.Model):
     #
     #     output.extend([dhl_c_2021, usps_c_2021, dhl_c, usps_c])
     #     return output
+    def add_to_zip_ctry(add):
+        add_split = add.split(', ')
+        n = len(add_split)-2
+        for i in range(n):
+            if re.search(r'\d', add_split[n-i]) or not add_split[n-i]:
+                zip = add_split[n-i]
+                country = ' '.join(add_split[n-i+1:])
+                return (zip, country)
 
     def update_services(row):
         if row['service'] is not nan:
