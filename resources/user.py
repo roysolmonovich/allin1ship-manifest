@@ -76,6 +76,7 @@ class UserLogin(Resource):
                 return {'access_token': access_token, 'refresh_token': refresh_token}
             except exceptions.VerifyMismatchError:
                 return {'message': 'Wrong password entered.'}, 401
+        return {'message': 'Username not found'}, 401
 
 
 class TokenRefresh(Resource):
