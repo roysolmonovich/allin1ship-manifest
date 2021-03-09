@@ -40,7 +40,7 @@ class ManifestDataModel(db.Model):
     __tablename__ = 'manifest_data_test'
     id = db.Column(db.Integer, db.ForeignKey('manifest.id'), primary_key=True)
     orderno = db.Column(db.String(45), primary_key=True)
-    shipdate = db.Column(db.Date())
+    shipdate = db.Column(db.Date(), index=True)
     weight = db.Column(db.Float(precision=3))
     service = db.Column(db.String(45))
     zip = db.Column(db.String(45))
@@ -110,7 +110,11 @@ class ManifestDataModel(db.Model):
         #     .filter(friendships.user_id == userID)\
         #     .paginate(page, 1, False)
         # return cls.query.join(ManifestModel, ManifestModel.id == cls.id).filter(cls.id == _id).all()
-        return cls.query.filter(cls.id == _id).all()
+        return cls.query.filter(cls.id == _id).order_by(cls.shipdate).all()
+
+    @ classmethod
+    def find_distinct_services(cls, _id):
+        return cls.query.distinct().with_entities(cls.service, cls.weight_threshold, cls.country, cls.sugg_service).filter(cls.id == _id).all()
 
     @ classmethod
     def find_filtered_shipments(cls, _id, shipment_filter):
@@ -277,7 +281,7 @@ class ManifestDataModel(db.Model):
         return self
 
     def weight_threshold_display(row):
-        return f"{'Under' if row.weight_threshold == '<' else 'Over or equal to'} {'1 lb' if row.country == 'US' else '4.4 lbs'}"
+        return f"{'Under' if row['weight_threshold'] == '<' else 'Over or equal to'} {'1 lb' if row['country'] == 'US' else '4.4 lbs'}"
 
 
 class ManifestFormat:

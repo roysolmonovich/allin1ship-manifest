@@ -149,16 +149,6 @@ class ManifestNames(Resource):
 
 class Manifest(Resource):
     def get(self):
-        # args = request.args
-        # print(args)
-        # all_manifests = ManifestModel.find_all()
-        # # for manifest in all_manifests:
-        # #     print(manifest.name, manifest.init_date)
-        # json_manifests = {manifest.name: str(manifest.init_date) for manifest in all_manifests}
-        # print(json_manifests)
-        # return json_manifests
-        # return json_manifests
-        # return 'in construction'
         args = request.args
         print(args.keys())
         errors = manifest_schema.validate(request.args)
@@ -188,9 +178,22 @@ class Manifest(Resource):
             for missing_column in missing_columns:
                 shipment[missing_column+' (gen.)'] = shipment.pop(missing_column)
             shipments.append(shipment)
+        date_range = [shipments[0]['shipdate'], shipments[-1]['shipdate']] if shipments else [None, None]
+        # 'date range': date_range
         #     print(shipment.keys())
         # print(shipments)
-        return {'filtered shipments': shipments}
+        # distinct_services = []
+        # for service in ManifestDataModel.find_distinct_services(existing.id):
+        #     print(service)
+        # services = [{'service': sv, 'weight_threshold': wt, 'country': ctry, 'sugg_service': sg_sv}
+        #             for sv, wt, ctry, sg_sv in ManifestDataModel.find_distinct_services(existing.id)]
+        services = []
+        for service, weight_threshold, country, sugg_service in ManifestDataModel.find_distinct_services(existing.id):
+            service_parameters = {'service': service, 'weight_threshold': weight_threshold,
+                                  'country': country, 'sugg_service': sugg_service}
+            service_parameters['weight_threshold'] = ManifestDataModel.weight_threshold_display(service_parameters)
+            services.append(service_parameters)
+        return {'filtered shipments': shipments, 'service options': dom_intl, 'date range': date_range, 'suggested services': services}
 
     def post(self):
         data = request.form.to_dict()

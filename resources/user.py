@@ -2,8 +2,8 @@
 from argon2 import PasswordHasher, exceptions
 from flask_restful import Resource, reqparse
 from models.user import UserModel
-from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity  # , get_raw_jwt
-# from blacklist import BLACKLIST
+from flask_jwt_extended import create_access_token, create_refresh_token, jwt_required, get_jwt_identity, get_jwt
+from blocklist import BLOCKLIST
 
 ph = PasswordHasher()
 
@@ -89,6 +89,6 @@ class TokenRefresh(Resource):
 class UserLogout(Resource):
     @jwt_required()
     def post(self):
-        jti = get_raw_jwt()['jti']  # jti is JWT ID - the unique JWT identifier
-        # BLACKLIST.add(jti)
+        jti = get_jwt()['jti']  # jti is JWT ID - the unique JWT identifier
+        BLOCKLIST.add(jti)
         return {'message': 'Successfully logged out.'}, 200
