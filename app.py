@@ -11,6 +11,7 @@ from resources.manifest import Manifest, ManifestFilter, ManifestNames, Manifest
 # from models.manifest import ManifestModel
 from security import identity, authenticate
 from flask import Flask, jsonify
+from flask_jwt_extended import JWTManager
 from flask_restful import Api
 import os
 # from werkzeug.utils import secure_filename
@@ -54,7 +55,6 @@ app.config['PROPAGATE_EXCEPTIONS'] = True
 app.config['UPLOAD_FOLDER'] = 'api_uploads'
 app.secret_key = 'roy'
 api = Api(app)
-jwt = JWT(app, authenticate, identity)
 # cors = CORS(app) #REDO
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 # CORS(app, support_credentials=True)

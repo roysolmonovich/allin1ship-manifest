@@ -89,6 +89,6 @@ class TokenRefresh(Resource):
 class UserLogout(Resource):
     @jwt_required()
     def post(self):
-        # jti = get_raw_jwt()['jti'] # jti is JWT ID - the unique JWT identifier
+        jti = get_raw_jwt()['jti']  # jti is JWT ID - the unique JWT identifier
         # BLACKLIST.add(jti)
         return {'message': 'Successfully logged out.'}, 200
