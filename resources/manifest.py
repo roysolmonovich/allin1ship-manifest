@@ -924,7 +924,7 @@ class ManifestFilter(Resource):
         missing_columns = ManifestMissingModel.json(_id=id)
         service_replacements = {}
         for service_override in filters['services']:
-            if service_override['service'] is not None:
+            if service_override.get('service') is not None:
                 service_replacements[(service_override['service name'], service_override['location'],
                                       service_override['weight threshold'])] = service_override['service']
         shipments = []
