@@ -21,6 +21,10 @@ class User(Resource):
         required=True,
         help="This field cannot be blank."
     )
+    parser.add_argument(
+        'new_password',
+        type=str,
+    )
 
     def post(self):
         data = User.parser.parse_args()
@@ -37,12 +41,34 @@ class User(Resource):
             lower = True if char.islower() else lower
         if not (upper and lower):
             return {'message': 'Password has to contain at least 8 characters and at least 1 uppercase and 1 lowercase letters.'}, 400
-        user = UserModel(**data)
+        user = UserModel(data['username'], ph.hash(data['password']))
         print(user, user.username, user.hashed_pw)
         user.save_to_db()
         return {'message': f'User {data["username"]} added successfully.'}, 201
 
-    @jwt_required(fresh=True)
+    @jwt_required()
+    def put(self):
+        data = User.parser.parse_args()
+        existing = UserModel.find_by_username(username=data['username'])
+        if not existing:
+            return {'message': f'Username {data["username"]} not found.'}, 400
+        try:
+            ph.verify(existing.hashed_pw, data['password'])
+        except exceptions.VerifyMismatchError:
+            return {'message': 'Wrong password entered.'}, 400
+        if len(data['new_password']) < 8:
+            return {'message': 'Password has to contain at least 8 characters and at least 1 uppercase and 1 lowercase letters.'}, 400
+        upper, lower = False, False
+        for char in data['new_password']:
+            upper = True if char.isupper() else upper
+            lower = True if char.islower() else lower
+        if not (upper and lower):
+            return {'message': 'Password has to contain at least 8 characters and at least 1 uppercase and 1 lowercase letters.'}, 400
+        existing.hashed_pw = ph.hash(data['new_password'])
+        existing.save_to_db()
+        return {'message': 'Password changed successfully.'}, 201
+
+    @jwt_required()
     def delete(self):
         data = User.parser.parse_args()
         existing = UserModel.find_by_username(username=data['username'])
