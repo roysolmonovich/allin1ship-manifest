@@ -292,7 +292,6 @@ class CarrierCharge:
                 f"Charge not found based on given information: {carrier, location, date, service_code, ship_zone, weight}.")
             return
         if weight > weights[-1]:
-            print(f"Weight larger than max weight bracket: {weights[-1]}.")
             return
         while i_l <= i_r:
             m = (i_r+i_l)//2
@@ -321,7 +320,6 @@ class CarrierCharge:
                 f"Charge not found based on given information: {carrier, location, date, service_code, ship_zone, weight}.")
             return -2
         if weight > weights[-1]:
-            print(f"Weight larger than max weight bracket: {weights[-1]}.")
             return -3
         while i_l <= i_r:
             m = (i_r+i_l)//2

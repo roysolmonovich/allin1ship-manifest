@@ -28,7 +28,15 @@ class User(Resource):
         if existing:
             return {'message': f'Username {data["username"]} already taken.'}, 400
         if len(data['username']) > 45:
-            return {'message': f'Invalid username - cannot exceed 45 characters.'}, 400
+            return {'message': 'Invalid username - cannot exceed 45 characters.'}, 400
+        if len(data['password']) < 8:
+            return {'message': 'Password has to contain at least 8 characters and at least 1 uppercase and 1 lowercase letters.'}, 400
+        upper, lower = False, False
+        for char in data['password']:
+            upper = True if char.isupper() else upper
+            lower = True if char.islower() else lower
+        if not (upper and lower):
+            return {'message': 'Password has to contain at least 8 characters and at least 1 uppercase and 1 lowercase letters.'}, 400
         user = UserModel(**data)
         print(user, user.username, user.hashed_pw)
         user.save_to_db()

@@ -90,7 +90,7 @@ def check_if_token_in_blocklist(jwt_header, jwt_payload):
 
 
 @jwt.expired_token_loader
-def expired_token_callback():
+def expired_token_callback(self, callback):
     return jsonify({'description': 'The token has expired.',
                     'error': 'token_expired'}), 401
 
@@ -108,14 +108,13 @@ def missing_token_callback(error):
 
 
 @jwt.needs_fresh_token_loader
-def token_not_fresh_callback():
+def token_not_fresh_callback(self, callback):
     return jsonify({'description': 'The token is not fresh.',
                     'error': 'fresh_token_required'}), 401
 
 
 @jwt.revoked_token_loader
-def revoked_token_callback(self, error):
-    print(self, error)
+def revoked_token_callback(self, callback):
     return jsonify({'description': 'The token has been revoked.',
                     'error': 'token_revoked'}), 401
 
