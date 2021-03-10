@@ -186,9 +186,10 @@ class ManifestDataModel(db.Model):
             service_query = []
             for service in shipment_filter['services']:
                 service_query.append(
-                    f"(cls.service == '{service['service name']}' and cls.weight_threshold == {'>=' if service['weight threshold'][:5] == 'Over ' else '<'} and cls.country {'==' if service['location'] == 'US' else '!='} 'US')")
+                    f"(cls.service == '{service['service name']}' and cls.weight_threshold == '{'>=' if service['weight threshold'][:5] == 'Over ' else '<'}' and cls.country {'==' if service['location'] == 'US' else '!='} 'US')")
             query.append((' | ').join(service_query))
         query_string = f"cls.query.filter(cls.id == _id, {(', ').join(query)}).order_by(cls.shipdate).all()"
+        print(query_string)
         return eval(query_string)
         # return eval("cls.query.filter(((cls.id == _id)) & ((cls.shipdate.between('2021-01-01', '2021-01-12')))).all()")
         # query_final=(' & ').join(query)
