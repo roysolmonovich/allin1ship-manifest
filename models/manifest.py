@@ -182,21 +182,13 @@ class ManifestDataModel(db.Model):
                     weight_zone_sub += zones_list
                 weight_zone_query.append('('+(' & ').join(weight_zone_sub)+')')
             query.append((' | ').join(weight_zone_query))
-
-        # print(user_input)
-        # for item in eval(user_input):
-        #     print(item)
-        # print(query)
-        # print(shipment_filter['services'])
         if 'services' in shipment_filter:
             service_query = []
             for service in shipment_filter['services']:
                 service_query.append(
-                    f"(cls.service == '{service['service name']}' and cls.weight_threshold == '{service['weight threshold']}' and cls.country {'==' if service['location'] == 'US' else '!='} 'US')")
+                    f"(cls.service == '{service['service name']}' and cls.weight_threshold == {'>=' if service['weight threshold'][:5] == 'Over ' else '<'} and cls.country {'==' if service['location'] == 'US' else '!='} 'US')")
             query.append((' | ').join(service_query))
-        # return eval("cls.query.filter((cls.id == _id, cls.shipdate.between('2021-01-01', '2021-01-12'), (_or(~(cls.weight.between(1, 4))), (_or(cls.zone._in('Zone 11', 'Zone 12', 'Zone 13'), cls.country != 'US')), (_or(cls.weight.between(1, 2))), (~(cls.zone._in('Zone 1', 'Zone 3'), cls.country != 'US'))))).all()")
         query_string = f"cls.query.filter(cls.id == _id, {(', ').join(query)}).order_by(cls.shipdate).all()"
-        # print('func query:\n', query_string)
         return eval(query_string)
         # return eval("cls.query.filter(((cls.id == _id)) & ((cls.shipdate.between('2021-01-01', '2021-01-12')))).all()")
         # query_final=(' & ').join(query)

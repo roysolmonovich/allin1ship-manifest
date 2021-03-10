@@ -11,7 +11,7 @@ from math import ceil
 from app_lib import service as lib_service
 from numpy import nan
 from flask_jwt_extended import jwt_required
-from xlrd import open_workbook
+# from xlrd import open_workbook
 manifest_schema = ManifestSchema()
 manifest_update_schema = ManifestUpdateSchema()
 # from flask_jwt import jwt_required
@@ -1093,8 +1093,8 @@ class ManifestBufferTest(Resource):
                 print('No manifest file')
                 return {'message': 'No manifest file'}, 400
             file = request.files['manifest']
-            wb = open_workbook(file_contents=file.read())
-            print(wb)
+            # wb = open_workbook(file_contents=file.read())
+            # print(wb)
             if file.filename == '':
                 return {'message': 'No selected file'}, 400
             if not ManifestModel.allowed_file(file.filename):
