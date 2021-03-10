@@ -147,7 +147,7 @@ class ManifestDataModel(db.Model):
             else:
                 if start:
                     query.append(f"{'' if include else '~'}cls.shipdate >= '{start}'")
-                else:
+                elif end:
                     query.append(f"{'' if include else '~'}cls.shipdate <= '{end}'")
         if 'weight_zone' in shipment_filter:
             weight_zone_query = []
@@ -161,7 +161,7 @@ class ManifestDataModel(db.Model):
                     else:
                         if min_weight:
                             weight_zone_sub.append(f"{'' if include else '~'}cls.weight >= {min_weight}")
-                        else:
+                        elif max_weight:
                             weight_zone_sub.append(f"{'' if include else '~'}cls.weight <= {max_weight}")
                 if 'zone' in weight_zone:
                     include, *zones = weight_zone['zone']
