@@ -1,4 +1,3 @@
-# from sqlalchemy import create_engine, select, MetaData, Table
 from argon2 import PasswordHasher, exceptions
 from flask_restful import Resource, reqparse
 from models.user import UserModel

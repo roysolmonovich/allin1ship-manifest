@@ -155,6 +155,7 @@ class ManifestDataModel(db.Model):
                 weight_zone_sub = []
                 if 'weight' in weight_zone:
                     include, min_weight, max_weight = weight_zone['weight']
+                    print(include, min_weight, max_weight)
                     if None not in (min_weight, max_weight):
                         weight_zone_sub.append(
                             f"{'' if include else '~'}cls.weight.between({min_weight}, {max_weight})")
@@ -441,8 +442,8 @@ class ManifestModel(db.Model):
     format = ManifestFormat.format
     ai1s_headers = {'orderno', 'shipdate', 'weight', 'service provider and name', 'service provider', 'service name', 'zip', 'country', 'price',
                     'insured', 'dim1', 'dim2', 'dim3', 'address'}
-    ai1s_headers_ordered = ['orderno', 'shipdate', 'weight', 'service', 'zip', 'country', 'price',
-                            'insured', 'dim1', 'dim2', 'dim3', 'tier_1_2021', 'tier_2_2021', 'tier_3_2021', 'tier_4_2021', 'tier_5_2021', 'dhl_2021', 'usps_2021', 'dhl_shipdate', 'usps_shipdate']
+    ai1s_headers_ordered = ['orderno', 'shipdate', 'weight', 'service', 'zip', 'country', 'insured', 'dim1', 'dim2', 'dim3', 'price', 'zone',
+                            'sugg_service', 'tier_1_2021', 'tier_2_2021', 'tier_3_2021', 'tier_4_2021', 'tier_5_2021', 'dhl_2021', 'usps_2021', 'dhl_shipdate', 'usps_shipdate']
     upload_directory = 'api_uploads'
     type_conv = {'str': str, 'float': float, 'int': pd.Int64Dtype(), 'bool': bool}
     # with open(r'dependencies\services\dhl_service_hash.json', 'r') as f:
