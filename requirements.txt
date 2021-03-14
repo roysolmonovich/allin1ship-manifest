@@ -40,7 +40,6 @@ google-crc32c==1.1.2
 google-resumable-media==1.2.0
 googleapis-common-protos==1.52.0
 gspread==3.6.0
-gunicorn
 httplib2==0.18.1
 idna==2.10
 intuit-oauth==1.2.3
