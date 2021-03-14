@@ -1,2 +1,2 @@
 runtime: python38
-entrypoint: uwsgi -b :$PORT app:app
+entrypoint: gunicorn -b :$PORT app:app
