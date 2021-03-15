@@ -110,7 +110,7 @@ class ManifestManual(Resource):
 class ManifestNames(Resource):
     def get(self):
         all_manifests = ManifestModel.find_all()
-        json_manifests = {manifest.name: str(manifest.init_date) for manifest in all_manifests}
+        json_manifests = {manifest.name: str(manifest.init_time)[:10] for manifest in all_manifests}
         print(json_manifests)
         return json_manifests
 
@@ -1655,7 +1655,7 @@ class ManifestBufferTest(Resource):
         # return jsonify({'dataframe': df.values.tolist()})
         # result = jsonify({'object1': 1, 'object2': 2})
         # print(result, 'x')
-        manifest_id_insert = 'INSERT INTO manifest (name, init_date) \
+        manifest_id_insert = 'INSERT INTO manifest (name, init_time) \
             VALUES (%s, %s)'
         manifest_data_insert = 'INSERT INTO manifest_data (id, order_no, ship_date, weight, service \
             address, address1, insured, dim1, dim2, dim3) \

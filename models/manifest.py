@@ -500,7 +500,7 @@ class ManifestModel(db.Model):
     __tablename__ = 'manifest'
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(45))
-    init_date = db.Column(db.Date())
+    init_time = db.Column(db.DateTime())
     manifest_data = db.relationship('ManifestDataModel', cascade='all,delete', lazy='dynamic')
     manifest_missing = db.relationship('ManifestMissingModel', cascade='all,delete', lazy='dynamic')
     format = ManifestFormat.format
@@ -515,7 +515,7 @@ class ManifestModel(db.Model):
 
     def __init__(self, name):
         self.name = name
-        self.init_date = date.today()
+        self.init_time = datetime.today()
 
     @ classmethod
     def find_by_name(cls, name):
@@ -593,7 +593,7 @@ class ManifestModel(db.Model):
 
     @ classmethod
     def find_all(cls):
-        return cls.query.order_by(cls.init_date.desc()).all()
+        return cls.query.order_by(cls.init_time.desc()).all()
 
     def save_to_db(self):
         db.session.add(self)
