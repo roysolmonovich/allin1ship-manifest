@@ -156,26 +156,26 @@ class ManifestDataModel(db.Model):
             for weight_zone in shipment_filter['weight_zone']:
                 weight_zone_sub = []
                 if 'weight' in weight_zone:
-                    include, min_weight, max_weight = weight_zone['weight']
-                    print(include, min_weight, max_weight)
+                    min_weight, max_weight = weight_zone['weight']
                     weight_zone_sub.append(
-                        f"{'' if include else '~'}cls.weight.between({min_weight or 0}, {max_weight or 999999})")
+                        f"cls.weight.between({min_weight or 0}, {max_weight or 999999})")
                 if 'zone' in weight_zone:
-                    include, *zones = weight_zone['zone']
+                    zones = weight_zone['zone']
                     zones_list = []
                     include_international = False
                     for zone in zones:
                         if zone in cls.zone_areas:
                             zones_list += cls.zone_areas[zone]
                         else:
-                            zones_list.append(zone)
                             if zone == 'International':
                                 include_international = True
+                            else:
+                                zones_list.append(zone)
                     if not include_international:
-                        zones_list = [f"{'' if include else '~'}cls.zone.in_({zones_list})"]
+                        zones_list = [f"cls.zone.in_({zones_list})"]
                     else:
                         zones_list = [
-                            f"{'' if include else '~'}(cls.zone.in_({zones_list[:-1]}) | ~cls.country.in_(['US']))"]
+                            f"(cls.zone.in_({zones_list[:-1]}) | ~cls.country.__eq__('US'))"]
                     weight_zone_sub += zones_list
                     print(weight_zone_sub)
                 weight_zone_query.append('('+(' & ').join(weight_zone_sub)+')')
@@ -184,7 +184,7 @@ class ManifestDataModel(db.Model):
             service_query = []
             for service in shipment_filter['services']:
                 service_query.append(
-                    f"(cls.service == '{service['service name']}' and cls.weight_threshold == '{'>=' if service['weight threshold'][:5] == 'Over ' else '<'}' and cls.country {'==' if service['location'] == 'US' else '!='} 'US')")
+                    f"(cls.service.__eq__('{service['service name']}') & cls.weight_threshold.__eq__('{'>=' if service['weight threshold'][:5] == 'Over ' else '<'}') & cls.country.{'__eq__' if service['location'] == 'US' else '__ne__'}('US'))")
             query.append((' | ').join(service_query))
         query_string = f"cls.query.filter(cls.id == _id, {(', ').join(query)}).order_by(cls.shipdate).paginate({page}, {per_page}, False)"
         print(query_string)
