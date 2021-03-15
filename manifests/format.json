@@ -9,6 +9,7 @@
         },
         "shipstation": {
             "header": [
+				"Order - Number",
                 "OrderNumber",
                 "Shipment #",
                 "Order #",
@@ -41,7 +42,8 @@
         "shipstation": {
             "header": [
                 "ShipDate",
-                "Ship Date"
+                "Ship Date",
+				"Date - Shipped Date"
             ],
             "format": "str"
         },
@@ -67,7 +69,8 @@
         "shipstation": {
             "header": [
                 "WeightOz",
-                "Weight"
+                "Weight",
+				"Shipment - Weight (Oz)"
             ],
             "format": "float",
             "parse": "None",
@@ -183,7 +186,8 @@
         "shipstation": {
             "header": [
                 "PostalCode",
-                "Postal Code"
+                "Postal Code",
+				"Ship To - Postal Code"
             ],
             "format": "str"
         },

@@ -1,6 +1,7 @@
 # from sqlalchemy import create_engine, select, MetaData, Table
 from db import db
 from datetime import datetime, date
+from sqlalchemy.sql import func
 # import mf_lib as mflib
 import pandas as pd
 from numpy import random, int64, nan
@@ -9,6 +10,7 @@ from app_lib import CarrierCharge, country_to_code, service as lib_service, dhl_
 import re
 import os
 import json
+from sqlalchemy.exc import ProgrammingError
 
 # manifest_data.tier_1_2021
 
@@ -102,7 +104,7 @@ class ManifestDataModel(db.Model):
         return cls.query.filter_by(id=_id).first()
 
     @ classmethod
-    def find_all_shipments(cls, _id):
+    def find_all_shipments(cls, _id, page=1, per_page=20):
         # userList = users.query\
         #     .join(friendships, users.id==friendships.user_id)\
         #     .add_columns(users.userId, users.name, users.email, friends.userId, friendId)\
@@ -110,7 +112,7 @@ class ManifestDataModel(db.Model):
         #     .filter(friendships.user_id == userID)\
         #     .paginate(page, 1, False)
         # return cls.query.join(ManifestModel, ManifestModel.id == cls.id).filter(cls.id == _id).all()
-        return cls.query.filter(cls.id == _id).order_by(cls.shipdate).all()
+        return cls.query.filter(cls.id == _id).order_by(cls.shipdate).paginate(page, per_page, False)
 
     @ classmethod
     def find_distinct_services(cls, _id):
@@ -129,12 +131,12 @@ class ManifestDataModel(db.Model):
 
     @classmethod
     def find_date_range(cls, _id):
-        start_date = cls.query.with_entities(cls.date).filter(cls.id == _id).min()
-        end_date = cls.query.with_entities(cls.date).filter(cls.id == _id).max()
-        return start_date, end_date
+        start_date = cls.query.with_entities(func.min(cls.shipdate)).filter(cls.id == _id).first()
+        end_date = cls.query.with_entities(func.max(cls.shipdate)).filter(cls.id == _id).first()
+        return str(start_date[0]), str(end_date[0])
 
     @ classmethod
-    def find_filtered_shipments(cls, _id, shipment_filter):
+    def find_filtered_shipments(cls, _id, shipment_filter, page=1, per_page=20):
         #         {'name': 'ship1212', 'filters': {'shipdates': [False, '2021-01-01', '2021-01-12'], 'weight_zone': [{'weight': [False, '1', '4'], 'zone': [True, 'Non-contiguous US', 'International']}, {'weight': [True, '1', '2'], 'zone': [False, 'zone b', 'non contiguous b', 'non contiguous c', 'International']}], 'services': [{'service name': 'USPS First Class Mail', 'location': 'US', 'weight threshold': '<', 'service': None}, {'service name': 'USPS Priority Mail', 'location': 'US', 'weight threshold': '>=', 'service': 'DHL SmartMail Parcel Plus Expedited'}, {'service name': 'USPS First Class Mail Intl', 'location': 'Intl', 'weight threshold': '<', 'service': None}]}}
         # False 2021-01-01 2021-01-12
         # {'shipdates': [False, '2021-01-01', '2021-01-12'], 'weight_zone': [{'weight': [False, '1', '4'], 'zone': [True, 'Non-contiguous US', 'International']}, {'weight': [True, '1', '2'], 'zone': [False, 'zone b', 'non contiguous b', 'non contiguous c', 'International']}], 'services': [{'service name': 'USPS First Class Mail', 'location': 'US', 'weight threshold': '<', 'service': None}, {'service name': 'USPS Priority Mail', 'location': 'US', 'weight threshold': '>=', 'service': 'DHL SmartMail Parcel Plus Expedited'}, {'service name': 'USPS First Class Mail Intl', 'location': 'Intl', 'weight threshold': '<', 'service': None}]}
@@ -156,14 +158,8 @@ class ManifestDataModel(db.Model):
                 if 'weight' in weight_zone:
                     include, min_weight, max_weight = weight_zone['weight']
                     print(include, min_weight, max_weight)
-                    if None not in (min_weight, max_weight):
-                        weight_zone_sub.append(
-                            f"{'' if include else '~'}cls.weight.between({min_weight}, {max_weight})")
-                    else:
-                        if min_weight:
-                            weight_zone_sub.append(f"{'' if include else '~'}cls.weight >= {min_weight}")
-                        elif max_weight:
-                            weight_zone_sub.append(f"{'' if include else '~'}cls.weight <= {max_weight}")
+                    weight_zone_sub.append(
+                        f"{'' if include else '~'}cls.weight.between({min_weight or 0}, {max_weight or 999999})")
                 if 'zone' in weight_zone:
                     include, *zones = weight_zone['zone']
                     zones_list = []
@@ -181,6 +177,7 @@ class ManifestDataModel(db.Model):
                         zones_list = [
                             f"{'' if include else '~'}(cls.zone.in_({zones_list[:-1]}) | ~cls.country.in_(['US']))"]
                     weight_zone_sub += zones_list
+                    print(weight_zone_sub)
                 weight_zone_query.append('('+(' & ').join(weight_zone_sub)+')')
             query.append((' | ').join(weight_zone_query))
         if 'services' in shipment_filter:
@@ -189,9 +186,11 @@ class ManifestDataModel(db.Model):
                 service_query.append(
                     f"(cls.service == '{service['service name']}' and cls.weight_threshold == '{'>=' if service['weight threshold'][:5] == 'Over ' else '<'}' and cls.country {'==' if service['location'] == 'US' else '!='} 'US')")
             query.append((' | ').join(service_query))
-        query_string = f"cls.query.filter(cls.id == _id, {(', ').join(query)}).order_by(cls.shipdate).all()"
+        query_string = f"cls.query.filter(cls.id == _id, {(', ').join(query)}).order_by(cls.shipdate).paginate({page}, {per_page}, False)"
         print(query_string)
-        return eval(query_string)
+        paginated_result = eval(query_string)
+        print(paginated_result.query)
+        return paginated_result
         # return eval("cls.query.filter(((cls.id == _id)) & ((cls.shipdate.between('2021-01-01', '2021-01-12')))).all()")
         # query_final=(' & ').join(query)
         # print(query_final)
@@ -199,6 +198,71 @@ class ManifestDataModel(db.Model):
         #     return cls.query.filter((cls.id == _id) & (eval(query_final))).all()
         # else:
         #     return cls.find_all_shipments(_id)
+
+    @ classmethod
+    def find_raw_shipments(cls, _id, raw_input):
+        try:
+            return cls.query.from_statement(db.text(f"SELECT * FROM manifest_data_test WHERE id = {_id} AND {raw_input}")).all()
+        except ProgrammingError:
+            return [None]
+
+    @ classmethod
+    def find_filtered_shipments_v2(cls, _id, shipment_filter):
+        query = [f'SELECT * FROM manifest_data_test WHERE id = {_id}']
+        if 'shipdates' in shipment_filter:
+            include, start, end = shipment_filter['shipdates']
+            if None not in (start, end):
+                query.append(f"shipdate {'' if include else 'NOT '}BETWEEN '{start}' AND '{end}'")
+            else:
+                if start:
+                    query.append(f"shipdate {'>=' if include else '<'} '{start}'")
+                elif end:
+                    query.append(f"shipdate {'<=' if include else '>'} '{end}'")
+        if 'weight_zone' in shipment_filter:
+            weight_zone_query = []
+            include_weight_zones, *weight_zones = shipment_filter['weight_zone']
+            for weight_zone in weight_zones:
+                weight_zone_sub = []
+                if 'weight' in weight_zone:
+                    include, min_weight, max_weight = weight_zone['weight']
+                    print(include, min_weight, max_weight)
+                    if None not in (min_weight, max_weight):
+                        weight_zone_sub.append(
+                            f"weight {'' if include else 'NOT '}BETWEEN {min_weight} AND {max_weight}")
+                    else:
+                        if min_weight:
+                            weight_zone_sub.append(f"weight {'>=' if include else '<'} {min_weight}")
+                        elif max_weight:
+                            weight_zone_sub.append(f"weight {'<=' if include else '>'} {max_weight}")
+                if 'zone' in weight_zone:
+                    include, *zones = weight_zone['zone']
+                    zones_list = []
+                    include_international = False
+                    for zone in zones:
+                        if zone in cls.zone_areas:
+                            zones_list += cls.zone_areas[zone]
+                        else:
+                            if zone == 'International':
+                                include_international = True
+                            else:
+                                zones_list.append(zone)
+                    if not include_international:
+                        zones_list = [f"zone {'' if include else 'NOT '}IN {tuple(zones_list)}"]
+                    else:
+                        zones_list = [
+                            f"{'' if include else 'NOT '}(zone IN {tuple(zones_list)} OR country != 'US')"]
+                    weight_zone_sub += zones_list
+                weight_zone_query.append('('+(' AND ').join(weight_zone_sub)+')')
+            query.append(
+                f"{'' if include_weight_zones[1] else 'NOT ('}{(' OR ' if include_weight_zones[0] else ' AND ').join(weight_zone_query)}{'' if include_weight_zones[1] else ')'}")
+        if 'services' in shipment_filter:
+            service_query = []
+            for service in shipment_filter['services']:
+                service_query.append(
+                    f"(service = '{service['service name']}' AND weight_threshold = '{'>=' if service['weight threshold'][:5] == 'Over ' else '<'}' and country {'=' if service['location'] == 'US' else '!='} 'US')")
+            query.append('('+(' OR ').join(service_query)+')')
+        print(' AND '.join(query) + ' ORDER BY shipdate')
+        return cls.query.from_statement(db.text(' AND '.join(query) + ' ORDER BY shipdate')).all()
 
     def save_to_db(self):
         db.session.add(self)
@@ -217,7 +281,7 @@ class ManifestDataModel(db.Model):
         else:
             ctry_code = country_to_code.get(re.sub(r'[^\w]', '', row.country).lower())
         domestic = True if ctry_code == 'US' else False
-        sv_name = re.sub(r'[^\w]', '', (row['service'] if isinstance(row['service'], str) else '')).lower()
+        sv_name = row['service'] if isinstance(row['service'], str) else ''
         sc = ManifestModel.service_from_params(sv_name, ctry_code, row['weight'])
         if not ctry_code:
             print(f'{row.country} not in country to code hash table')
@@ -587,6 +651,9 @@ class ManifestModel(db.Model):
             weight_thres = '<' if weight < 16 else '>='
         else:
             weight_thres = '<' if weight < 70.4 else '>='
+        if sv_name in service_names:
+            return [int(service_names[sv_name]), sv_name, weight_thres]
+        sv_name = re.sub(r'[^\w]', '', sv_name).lower()
         if sv_name in sv_to_code:
             if dom_intl in sv_to_code[sv_name]:
                 if weight_thres in sv_to_code[sv_name][dom_intl]:
