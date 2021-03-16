@@ -55,21 +55,21 @@ class ManifestDataModel(db.Model):
     zone = db.Column(db.String(7))
     weight_threshold = db.Column(db.String(2))
     sugg_service = db.Column(db.String(45))
-    tier_1_2021 = db.Column(db.Float(precision=2))
-    tier_2_2021 = db.Column(db.Float(precision=2))
-    tier_3_2021 = db.Column(db.Float(precision=2))
-    tier_4_2021 = db.Column(db.Float(precision=2))
-    tier_5_2021 = db.Column(db.Float(precision=2))
-    dhl_2021 = db.Column(db.Float(precision=2))
+    dhl_tier_1_2021 = db.Column(db.Float(precision=2))
+    dhl_tier_2_2021 = db.Column(db.Float(precision=2))
+    dhl_tier_3_2021 = db.Column(db.Float(precision=2))
+    dhl_tier_4_2021 = db.Column(db.Float(precision=2))
+    dhl_tier_5_2021 = db.Column(db.Float(precision=2))
+    dhl_cost_2021 = db.Column(db.Float(precision=2))
     usps_2021 = db.Column(db.Float(precision=2))
-    dhl_shipdate = db.Column(db.Float(precision=2))
+    dhl_cost_shipdate = db.Column(db.Float(precision=2))
     usps_shipdate = db.Column(db.Float(precision=2))
     manifest = db.relationship('ManifestModel')
     zone_areas = {
         'Non-contiguous US': [f'Zone {i}' for i in range(11, 14)], 'Contiguous US': [f'Zone {i:02}' for i in range(1, 9)]}
-    # "{:02d}".format(1)
+    carrier_fields = {}
 
-    def __init__(self, id, orderno, shipdate, weight, service, zip, country, insured, dim1, dim2, dim3, price, zone, weight_threshold, sugg_service, tier_1_2021, tier_2_2021, tier_3_2021, tier_4_2021, tier_5_2021, dhl_2021, usps_2021, shipdate_dhl, shipdate_usps):
+    def __init__(self, id, orderno, shipdate, weight, service, zip, country, insured, dim1, dim2, dim3, price, zone, weight_threshold, sugg_service, dhl_tier_1_2021, dhl_tier_2_2021, dhl_tier_3_2021, dhl_tier_4_2021, dhl_tier_5_2021, dhl_cost_2021, usps_2021, dhl_cost_shipdate, usps_shipdate):
         self.id = id
         self.orderno = orderno
         self.shipdate = shipdate
@@ -85,15 +85,15 @@ class ManifestDataModel(db.Model):
         self.zone = zone
         self.weight_threshold = weight_threshold
         self.sugg_service = sugg_service
-        self.tier_1_2021 = tier_1_2021
-        self.tier_2_2021 = tier_2_2021
-        self.tier_3_2021 = tier_3_2021
-        self.tier_4_2021 = tier_4_2021
-        self.tier_5_2021 = tier_5_2021
-        self.dhl_2021 = dhl_2021
+        self.dhl_tier_1_2021 = dhl_tier_1_2021
+        self.dhl_tier_2_2021 = dhl_tier_2_2021
+        self.dhl_tier_3_2021 = dhl_tier_3_2021
+        self.dhl_tier_4_2021 = dhl_tier_4_2021
+        self.dhl_tier_5_2021 = dhl_tier_5_2021
+        self.dhl_cost_2021 = dhl_cost_2021
         self.usps_2021 = usps_2021
-        self.shipdate_dhl = shipdate_dhl
-        self.shipdate_usps = shipdate_usps
+        self.dhl_cost_shipdate = dhl_cost_shipdate
+        self.usps_shipdate = usps_shipdate
 
     # @ classmethod
     # def find_by_name(cls, name):
@@ -136,11 +136,7 @@ class ManifestDataModel(db.Model):
         return str(start_date[0]), str(end_date[0])
 
     @ classmethod
-    def find_filtered_shipments(cls, _id, shipment_filter, page=1, per_page=20):
-        #         {'name': 'ship1212', 'filters': {'shipdates': [False, '2021-01-01', '2021-01-12'], 'weight_zone': [{'weight': [False, '1', '4'], 'zone': [True, 'Non-contiguous US', 'International']}, {'weight': [True, '1', '2'], 'zone': [False, 'zone b', 'non contiguous b', 'non contiguous c', 'International']}], 'services': [{'service name': 'USPS First Class Mail', 'location': 'US', 'weight threshold': '<', 'service': None}, {'service name': 'USPS Priority Mail', 'location': 'US', 'weight threshold': '>=', 'service': 'DHL SmartMail Parcel Plus Expedited'}, {'service name': 'USPS First Class Mail Intl', 'location': 'Intl', 'weight threshold': '<', 'service': None}]}}
-        # False 2021-01-01 2021-01-12
-        # {'shipdates': [False, '2021-01-01', '2021-01-12'], 'weight_zone': [{'weight': [False, '1', '4'], 'zone': [True, 'Non-contiguous US', 'International']}, {'weight': [True, '1', '2'], 'zone': [False, 'zone b', 'non contiguous b', 'non contiguous c', 'International']}], 'services': [{'service name': 'USPS First Class Mail', 'location': 'US', 'weight threshold': '<', 'service': None}, {'service name': 'USPS Priority Mail', 'location': 'US', 'weight threshold': '>=', 'service': 'DHL SmartMail Parcel Plus Expedited'}, {'service name': 'USPS First Class Mail Intl', 'location': 'Intl', 'weight threshold': '<', 'service': None}]}
-        # cls.zone_areas = {'Non-contiguous US': list(range(11, 14)), 'Contiguous US': list(range(1, 9))}
+    def filtered_query_builder(cls, _id, shipment_filter):
         query = []
         if 'shipdates' in shipment_filter:
             include, start, end = shipment_filter['shipdates']
@@ -186,18 +182,81 @@ class ManifestDataModel(db.Model):
                 service_query.append(
                     f"(cls.service.__eq__('{service['service name']}') & cls.weight_threshold.__eq__('{'>=' if service['weight threshold'][:5] == 'Over ' else '<'}') & cls.country.{'__eq__' if service['location'] == 'US' else '__ne__'}('US'))")
             query.append((' | ').join(service_query))
-        query_string = f"cls.query.filter(cls.id == _id, {(', ').join(query)}).order_by(cls.shipdate).paginate({page}, {per_page}, False)"
+        query_string = f"cls.query.filter(cls.id == {_id}, {(', ').join(query)}).order_by(cls.shipdate)"
         print(query_string)
-        paginated_result = eval(query_string)
-        print(paginated_result.query)
+        return query_string
+
+    @ classmethod
+    def find_filtered_shipments(cls, filter_query, page=1, per_page=20):
+        paginated_result = eval(filter_query).paginate(page, per_page, False)
         return paginated_result
-        # return eval("cls.query.filter(((cls.id == _id)) & ((cls.shipdate.between('2021-01-01', '2021-01-12')))).all()")
-        # query_final=(' & ').join(query)
-        # print(query_final)
-        # if query_final:
-        #     return cls.query.filter((cls.id == _id) & (eval(query_final))).all()
-        # else:
-        #     return cls.find_all_shipments(_id)
+
+    @ classmethod
+    def filter_based_report(cls, filter_query):
+        # 	"lowest_cost": [cost, date],
+        # 	"highest_cost": [cost, date],
+        # 	"duration": number of days,
+        # 	“pickups”; # of pickups,
+        # 	“daily_packages”: # of daily packages,
+        # 	"carrier_stats": [
+        # 			{
+        # 			"carrier_name": name,
+        # 				“domestic_tier_stats”:
+        # {
+        # 					“tier_name”: name,
+        # "current_cost": cost,
+        # 					"tier_cost": cost,
+        # 					"savings_$": savings $,
+        # 					"savings_%": savings %,
+        # 					"our_cost": cost,
+        # 					"profit_$": profit $,
+        # 					"profit_%": profit %,
+        # 					"pickups": # of pickups,
+        # 					"daily_packages": # of daily packages
+        # 					},
+        #
+        #
+        # 			“international_tier_stats”:
+        #  {
+        # 				“tier_name”: name,
+        # "current_cost": cost,
+        # 				"tier_cost": cost,
+        # 				"savings_$": savings $,
+        # 				"savings_%": savings %,
+        # 				"our_cost": cost,
+        # 				"profit_$": profit $,
+        # 				"profit_%": profit %,
+        # 				"pickups": # of pickups,
+        # 				"daily_packages": # of daily packages
+        # 				}
+        # 			]
+        # 			},
+        # 			{... more carriers ...}
+        # 			]
+        # 	}
+        query_eval = eval(filter_query)
+        df = pd.read_sql(query_eval.statement, query_eval.session.bind)
+        pd.set_option('display.max_columns', None)
+        lowest_cost, highest_cost = df.price.min(), df.price.max()
+        lowest_cost = None if lowest_cost is nan else lowest_cost
+        highest_cost = None if highest_cost is nan else highest_cost
+        unique_dates = pd.to_datetime(df.shipdate.drop_duplicates(inplace=False), errors='coerce')
+        weekdays = unique_dates.dt.dayofweek
+        pickup_days_count = len(weekdays[weekdays < 5])
+        # Sat, Sun = 5, 6
+        packages_count = len(df.index)
+        daily_package = round(packages_count/pickup_days_count, 2)
+        start_date, end_date = df.shipdate.min(), df.shipdate.max()
+        year, month, day = end_date.year-start_date.year, end_date.month-start_date.month, end_date.day-start_date.day
+        duration = []
+        for time_field in 'year', 'month', 'day':
+            val = eval(time_field)
+            if val:
+                duration.append(f'{val} {time_field}{"s" if val>1 else ""}')
+        print(df.head)
+        duration_str = (', ').join(duration)
+        print(duration_str, start_date, end_date, lowest_cost, highest_cost, pickup_days_count, daily_package)
+        return duration_str, start_date, end_date, lowest_cost, highest_cost, pickup_days_count, daily_package
 
     @ classmethod
     def find_raw_shipments(cls, _id, raw_input):
@@ -335,21 +394,21 @@ class ManifestDataModel(db.Model):
     def correct_service_rates(self, service_override):
         service = int(service_names[service_override])
         self.sugg_service = service_override
-        self.tier_1_2021 = CarrierCharge.charge_rate(1, 'domestic' if self.country == 'US' else 'international', str(
+        self.dhl_tier_1_2021 = CarrierCharge.charge_rate(1, 'domestic' if self.country == 'US' else 'international', str(
             date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
-        self.tier_2_2021 = CarrierCharge.charge_rate(2, 'domestic' if self.country == 'US' else 'international', str(
+        self.dhl_tier_2_2021 = CarrierCharge.charge_rate(2, 'domestic' if self.country == 'US' else 'international', str(
             date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
-        self.tier_3_2021 = CarrierCharge.charge_rate(3, 'domestic' if self.country == 'US' else 'international', str(
+        self.dhl_tier_3_2021 = CarrierCharge.charge_rate(3, 'domestic' if self.country == 'US' else 'international', str(
             date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
-        self.tier_4_2021 = CarrierCharge.charge_rate(4, 'domestic' if self.country == 'US' else 'international', str(
+        self.dhl_tier_4_2021 = CarrierCharge.charge_rate(4, 'domestic' if self.country == 'US' else 'international', str(
             date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
-        self.tier_5_2021 = CarrierCharge.charge_rate(5, 'domestic' if self.country == 'US' else 'international', str(
+        self.dhl_tier_5_2021 = CarrierCharge.charge_rate(5, 'domestic' if self.country == 'US' else 'international', str(
             date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
-        self.dhl_2021 = CarrierCharge.charge_rate('DHL', 'domestic' if self.country == 'US' else 'international', str(
+        self.dhl_cost_2021 = CarrierCharge.charge_rate('DHL', 'domestic' if self.country == 'US' else 'international', str(
             date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
         self.usps_2021 = CarrierCharge.charge_rate('USPS', 'domestic' if self.country == 'US' else 'international', str(
             date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
-        self.dhl_shipdate = CarrierCharge.charge_rate('DHL', 'domestic' if self.country == 'US' else 'international', str(
+        self.dhl_cost_shipdate = CarrierCharge.charge_rate('DHL', 'domestic' if self.country == 'US' else 'international', str(
             self.shipdate), service, self.zone.replace('Zone ', 'USPS'), self.weight)
         self.usps_shipdate = CarrierCharge.charge_rate('USPS', 'domestic' if self.country == 'US' else 'international', str(
             self.shipdate), service, self.zone.replace('Zone ', 'USPS'), self.weight)
@@ -507,7 +566,7 @@ class ManifestModel(db.Model):
     ai1s_headers = {'orderno', 'shipdate', 'weight', 'service provider and name', 'service provider', 'service name', 'zip', 'country', 'price',
                     'insured', 'dim1', 'dim2', 'dim3', 'address'}
     ai1s_headers_ordered = ['orderno', 'shipdate', 'weight', 'service', 'zip', 'country', 'insured', 'dim1', 'dim2', 'dim3', 'price', 'zone',
-                            'sugg_service', 'tier_1_2021', 'tier_2_2021', 'tier_3_2021', 'tier_4_2021', 'tier_5_2021', 'dhl_2021', 'usps_2021', 'dhl_shipdate', 'usps_shipdate']
+                            'sugg_service', 'dhl_tier_1_2021', 'dhl_tier_2_2021', 'dhl_tier_3_2021', 'dhl_tier_4_2021', 'dhl_tier_5_2021', 'dhl_cost_2021', 'usps_2021', 'dhl_cost_shipdate', 'usps_shipdate']
     upload_directory = 'api_uploads'
     type_conv = {'str': str, 'float': float, 'int': pd.Int64Dtype(), 'bool': bool}
     # with open(r'dependencies\services\dhl_service_hash.json', 'r') as f:

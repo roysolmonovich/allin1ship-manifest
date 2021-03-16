@@ -780,9 +780,9 @@ class Manifest(Resource):
         df, generated_columns = generate_defaults(df)
         # if ''
         # print(df.iloc[:, :])
-        df[['country', 'zone', 'weight_threshold', 'sugg_service', 'bill_weight', 'tier_1_2021',
-            'tier_2_2021', 'tier_3_2021', 'tier_4_2021',
-            'tier_5_2021', 'dhl_2021', 'usps_2021', 'dhl_shipdate', 'usps_shipdate']] = df.apply(
+        df[['country', 'zone', 'weight_threshold', 'sugg_service', 'bill_weight', 'dhl_tier_1_2021',
+            'dhl_tier_2_2021', 'dhl_tier_3_2021', 'dhl_tier_4_2021',
+            'dhl_tier_5_2021', 'dhl_cost_2021', 'usps_2021', 'dhl_cost_shipdate', 'usps_shipdate']] = df.apply(
             lambda row: ManifestDataModel.row_to_rate(row), axis=1, result_type='expand')
         df.weight = df.apply(lambda row: ceil(row.weight) if row.weight < 16 else ceil(row.weight/16)*16, axis=1)
         df.loc[~df['bill_weight'].isna(), 'weight'] = df['bill_weight']
@@ -869,9 +869,10 @@ class Manifest(Resource):
                                          weight=row.weight, service=row.service, zip=row.zip, country=row.country,
                                          insured=row.insured, dim1=row.dim1, dim2=row.dim2, dim3=row.dim3, price=row.price,
                                          zone=row.zone, weight_threshold=row.weight_threshold, sugg_service=row.sugg_service,
-                                         tier_1_2021=row['tier_1_2021'], tier_2_2021=row['tier_2_2021'], tier_3_2021=row['tier_3_2021'],
-                                         tier_4_2021=row['tier_4_2021'], tier_5_2021=row['tier_5_2021'], dhl_2021=row['dhl_2021'], usps_2021=row['usps_2021'],
-                                         shipdate_dhl=row['dhl_shipdate'], shipdate_usps=row['usps_shipdate'])
+                                         dhl_tier_1_2021=row['dhl_tier_1_2021'], dhl_tier_2_2021=row['dhl_tier_2_2021'], dhl_tier_3_2021=row['dhl_tier_3_2021'],
+                                         dhl_tier_4_2021=row['dhl_tier_4_2021'], dhl_tier_5_2021=row[
+                                             'dhl_tier_5_2021'], dhl_cost_2021=row['dhl_cost_2021'], usps_2021=row['usps_2021'],
+                                         dhl_shipdate=row['dhl_cost_shipdate'], usps_shipdate=row['usps_shipdate'])
             shipment.save_to_db()
         ManifestDataModel.commit_to_db()
 
@@ -935,42 +936,27 @@ class ManifestFilter(Resource):
                 service_replacements[(service_override['service name'], service_override['location'],
                                       '>=' if service_override['weight threshold'][:5] == 'Over ' else '<')] = service_override['service']
         shipments = []
-        raw_input = request_data.get('raw_input')
-        filter_v2 = request_data.get('filter_v2')
-        if filter_v2:
-            print(ManifestDataModel.find_filtered_shipments_v2(id, filter_v2))
-        if raw_input:
-            for shipment_item in ManifestDataModel.find_raw_shipments(id, raw_input):
-                if shipment_item is None:
-                    return {'message': 'Programming error. Make sure that syntax and column names are correct.'}, 400
-                if (shipment_item.service, shipment_item.country, shipment_item.weight_threshold) in service_replacements:
-                    print('here', shipment_item.service, shipment_item.country, shipment_item.weight_threshold)
-                    shipment_item = shipment_item.correct_service_rates(service_replacements[(
-                        shipment_item.service, shipment_item.country, shipment_item.weight_threshold)])
-                shipment = shipment_item.__dict__
-                del shipment['_sa_instance_state']
-                shipment['shipdate'] = str(shipment['shipdate'])
-                shipment['price'] = float(shipment['price']) if shipment['price'] else shipment['price']
-                shipment['weight'] = float(shipment['weight']) if shipment['weight'] else shipment['weight']
-                for missing_column in missing_columns:
-                    shipment[missing_column+'_gen'] = shipment.pop(missing_column)
-                shipments.append(shipment)
-        else:
-            page = request_data.get('page', 1)
-            per_page = request_data.get('per_page', 20)
-            paginated_result = ManifestDataModel.find_filtered_shipments(id, filters, page, per_page)
-            for shipment_item in paginated_result.items:
-                if (shipment_item.service, shipment_item.country, shipment_item.weight_threshold) in service_replacements:
-                    print('here', shipment_item.service, shipment_item.country, shipment_item.weight_threshold)
-                    shipment_item = shipment_item.correct_service_rates(service_replacements[(
-                        shipment_item.service, shipment_item.country, shipment_item.weight_threshold)])
-                shipment = shipment_item.__dict__
-                print(shipment)
-                del shipment['_sa_instance_state']
-                shipment['shipdate'] = str(shipment['shipdate'])
-                for missing_column in missing_columns:
-                    shipment[missing_column+'_gen'] = shipment.pop(missing_column)
-                shipments.append(shipment)
+        # raw_input = request_data.get('raw_input')
+        # filter_v2 = request_data.get('filter_v2')
+        # if filter_v2:
+        #     print(ManifestDataModel.find_filtered_shipments_v2(id, filter_v2))
+        page = request_data.get('page', 1)
+        per_page = request_data.get('per_page', 20)
+        filter_query = ManifestDataModel.filtered_query_builder(id, filters)
+        paginated_result = ManifestDataModel.find_filtered_shipments(filter_query, page, per_page)
+        ManifestDataModel.filter_based_report(filter_query)
+        for shipment_item in paginated_result.items:
+            if (shipment_item.service, shipment_item.country, shipment_item.weight_threshold) in service_replacements:
+                print('here', shipment_item.service, shipment_item.country, shipment_item.weight_threshold)
+                shipment_item = shipment_item.correct_service_rates(service_replacements[(
+                    shipment_item.service, shipment_item.country, shipment_item.weight_threshold)])
+            shipment = shipment_item.__dict__
+            print(shipment)
+            del shipment['_sa_instance_state']
+            shipment['shipdate'] = str(shipment['shipdate'])
+            for missing_column in missing_columns:
+                shipment[missing_column+'_gen'] = shipment.pop(missing_column)
+            shipments.append(shipment)
         existing_headers_ordered = [v if v
                                     not in missing_columns else v+'_gen' for v in ManifestModel.ai1s_headers_ordered]
         return {'ordered headers': existing_headers_ordered, 'filtered shipments': shipments, 'curr_page': paginated_result.page, 'has_prev': paginated_result.has_prev, 'has_next': paginated_result.has_next, 'pages': paginated_result.pages, 'total': paginated_result.total}
