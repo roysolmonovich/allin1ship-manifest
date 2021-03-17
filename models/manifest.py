@@ -71,14 +71,15 @@ class ManifestDataModel(db.Model):
     carrier_fields = {'DHL':
                       {'cost': 'dhl_cost_shipdate',
                        'locations': {
-                           'domestic':
+                           'US':
                            ('dhl_tier_1_2021', 'dhl_tier_2_2021', 'dhl_tier_3_2021', 'dhl_tier_4_2021',
                             'dhl_tier_5_2021'),
-                           'international':
+                           'Intl':
                            ('dhl_tier_2_2021', 'dhl_tier_3_2021', 'dhl_tier_5_2021')
                        }
                        }
                       }
+    pickup_expense_const = 15
 
     def __init__(self, id, orderno, shipdate, weight, service, zip, country, insured, dim1, dim2, dim3, price, zone, weight_threshold, sugg_service, dhl_tier_1_2021, dhl_tier_2_2021, dhl_tier_3_2021, dhl_tier_4_2021, dhl_tier_5_2021, dhl_cost_2021, usps_2021, dhl_cost_shipdate, usps_shipdate):
         self.id = id
@@ -124,13 +125,19 @@ class ManifestDataModel(db.Model):
         #     .filter(friendships.user_id == userID)\
         #     .paginate(page, 1, False)
         # return cls.query.join(ManifestModel, ManifestModel.id == cls.id).filter(cls.id == _id).all()
+        # report_fields = (c.name for c in cls.__table__.c if c.name not in {
+        #                  'id', 'orderno', 'weight', 'service', 'zip', 'dim1', 'dim2', 'dim3', 'zone', 'weight_threshold', 'sugg_service'})
+        # test = cls.query.with_entities(*report_fields).filter(cls.id == _id).all()
+        # for t in test:
+        #     print(t)
+
         return cls.query.filter(cls.id == _id).order_by(cls.shipdate).paginate(page, per_page, False)
 
     @ classmethod
     def find_distinct_services(cls, _id):
         return cls.query.distinct().with_entities(cls.service, cls.weight_threshold, cls.country, cls.sugg_service).filter(cls.id == _id).all()
 
-    @classmethod
+    @ classmethod
     def find_distinct_zones(cls, _id):
         all_zones = cls.query.distinct().with_entities(cls.zone).filter(cls.id == _id).order_by(cls.zone).all()
         domestic_zones, international_zones = [], []
@@ -141,7 +148,7 @@ class ManifestDataModel(db.Model):
                 international_zones.append(zone[0])
         return domestic_zones, international_zones
 
-    @classmethod
+    @ classmethod
     def find_date_range(cls, _id):
         start_date = cls.query.with_entities(func.min(cls.shipdate)).filter(cls.id == _id).first()
         end_date = cls.query.with_entities(func.max(cls.shipdate)).filter(cls.id == _id).first()
@@ -195,8 +202,9 @@ class ManifestDataModel(db.Model):
                     f"(cls.service.__eq__('{service['service name']}') & cls.weight_threshold.__eq__('{'>=' if service['weight threshold'][:5] == 'Over ' else '<'}') & cls.country.{'__eq__' if service['location'] == 'US' else '__ne__'}('US'))")
             query.append((' | ').join(service_query))
         query_string = f"cls.query.filter(cls.id == {_id}, {(', ').join(query)}).order_by(cls.shipdate)"
+        report_query_string = f"cls.query.with_entities(*report_fields).filter(cls.id == {_id}, {(', ').join(query)}).order_by(cls.shipdate)"
         print(query_string)
-        return query_string
+        return query_string, report_query_string
 
     @ classmethod
     def find_filtered_shipments(cls, filter_query, page=1, per_page=20):
@@ -247,18 +255,32 @@ class ManifestDataModel(db.Model):
         # 			]
         # 	}
         query_eval = eval(filter_query)
+        print(query_eval.statement)
         df = pd.read_sql(query_eval.statement, query_eval.session.bind)
-
         pd.set_option('display.max_columns', None)
         df_by_date = df[['shipdate', 'price']].groupby(by='shipdate', as_index=True).sum()
+        pickup_days_count = len(df_by_date.index)
+        packages_count = len(df.index)
+        daily_packages = round(packages_count/pickup_days_count, 2) if pickup_days_count else None
+        # df_plot_test = df[['shipdate', 'price']].groupby(by='shipdate').count()
+        # df_plot_test.reset_index(inplace=True)
+        # df_plot_test['shipdate'] = df_plot_test['shipdate'].astype(str)
+        # print(df_plot_test.values.tolist(), 'df_plot_test')
+        if include_loss:
+            df_by_dom_intl = df.groupby(by='country', as_index=True).sum()
+            if 'US' in df_by_dom_intl.index:
+                current_price_total_dom = round(df_by_dom_intl['price'].loc['US'], 2)
+            if 'Intl' in df_by_dom_intl.index:
+                current_price_total_intl = round(df_by_dom_intl['price'].loc['Intl'], 2)
+            # packages_count_domestic = len(df['country'][df['country'] == 'US'].index)
+            # packages_count_intl = packages_count-packages_count_domestic
+            pickup_expenses = pickup_days_count*cls.pickup_expense_const
+
         highest_cost_date = df_by_date['price'].idxmax()
         lowest_cost_date = df_by_date['price'].idxmin()
         highest_cost, lowest_cost = round(df_by_date['price'].loc[highest_cost_date], 2), round(
             df_by_date['price'].loc[lowest_cost_date], 2)
         # weekend dates are converted to next Monday at insert - shipdate is given to be a weekday
-        pickup_days_count = len(df_by_date.index)
-        packages_count = len(df.index)
-        daily_packages = round(packages_count/pickup_days_count, 2) if pickup_days_count else None
         start_date, end_date = df.shipdate.min(), df.shipdate.max()
         diff = relativedelta.relativedelta(end_date, start_date)
         duration_dict = {'year': diff.years, 'month': diff.months, 'day': diff.days}
@@ -268,31 +290,43 @@ class ManifestDataModel(db.Model):
                 duration.append(f'{val} {time_field}{"s" if val>1 else ""}')
         carrier_stats = {}
         print(df.head)
+        carrier_dict = {}
         for carrier in cls.carrier_fields:
             cost_field = cls.carrier_fields[carrier]['cost']
-            cost = round(df[cost_field].sum(), 2)
-            print(cost, cost_field)
+            cost_total = round(df[cost_field].sum(), 2)
+            print(cost_total, cost_field)
             for location in cls.carrier_fields[carrier]['locations']:
                 for tier_field in cls.carrier_fields[carrier]['locations'][location]:
+                    if location not in df_by_dom_intl.index:
+                        continue
                     print(tier_field, location, carrier)
                     if include_loss:
                         print('include loss')
-                        tier_total = round(df[tier_field][df['country'] == (
-                            'US' if location == 'domestic' else 'Intl')].sum(), 2)
-                        savings_total = round(df[tier_field][df['country'] == (
-                            'US' if location == 'domestic' else 'Intl')].sum(), 2)
-
+                        tier_total = round(df_by_dom_intl[tier_field].loc[location], 2)
+                        print(tier_total, current_price_total_dom)
+                        savings_total_amount = round(tier_total - (current_price_total_dom if location ==
+                                                                   'US' else current_price_total_intl), 2)
+                        savings_total_percentage = round(100*savings_total_amount/(current_price_total_dom if location ==
+                                                                                   'US' else current_price_total_intl), 2)
+                        profit_total_amount = round(tier_total-cost_total-pickup_expenses, 2)
+                        profit_total_percentage = round(100*profit_total_amount/tier_total, 2)
+                        print('savings_total_amount', savings_total_amount, 'savings_total_percentage', savings_total_percentage,
+                              'pickup_expenses', pickup_expenses, 'profit_total_amount', profit_total_amount, 'profit_total_percentage', profit_total_percentage)
                     else:
                         print('exclude loss')
-                        cost = round(df[cost_field][(df['country'] == (
+                        cost_total = round(df[cost_field][(df['country'] == (
                             'US' if location == 'domestic' else 'Intl')) & (df[tier_field] > df['price'])].sum(), 2)
                         tier_total = round(df[tier_field][(df['country'] == (
                             'US' if location == 'domestic' else 'Intl')) & (df[tier_field] > df['price'])].sum(), 2)
-                    print(tier_total, tier_field)
+                    if not carrier_dict:
+                        carrier_dict[carrier] = {}
+                    if not carrier_dict[carrier]:
+                        carrier_dict[carrier]['domestic' if location == 'US' else 'international'] = {}
+                    carrier_dict[carrier]['domestic' if location == 'US' else 'international'] = []
 
         duration_str = (', ').join(duration)
-        print(duration_str, start_date, end_date, highest_cost, highest_cost_date,
-              lowest_cost, lowest_cost_date, pickup_days_count, daily_packages)
+        print('duration_str', duration_str, 'start_date', start_date, 'end_date', end_date, 'highest_cost', highest_cost, 'highest_cost_date', highest_cost_date,
+              'lowest_cost', lowest_cost, 'lowest_cost_date', lowest_cost_date, 'pickup_days_count', pickup_days_count, 'daily_packages', daily_packages)
         return duration_str, start_date, end_date, highest_cost, highest_cost_date, lowest_cost, lowest_cost_date, pickup_days_count, daily_packages
 
     @ classmethod
@@ -841,3 +875,7 @@ class ManifestModel(db.Model):
                         service_names[row['sugg. service']])
                     with open(r'dependencies\services\sv_to_code.json', 'w') as f:
                         json.dump(sv_to_code, f, indent=4)
+
+
+report_fields = set(c for c in ManifestDataModel.__table__.c if c.name not in {
+    'id', 'orderno', 'weight', 'service', 'zip', 'dim1', 'dim2', 'dim3', 'zone', 'weight_threshold', 'sugg_service'})
