@@ -872,7 +872,7 @@ class Manifest(Resource):
                                          dhl_tier_1_2021=row['dhl_tier_1_2021'], dhl_tier_2_2021=row['dhl_tier_2_2021'], dhl_tier_3_2021=row['dhl_tier_3_2021'],
                                          dhl_tier_4_2021=row['dhl_tier_4_2021'], dhl_tier_5_2021=row[
                                              'dhl_tier_5_2021'], dhl_cost_2021=row['dhl_cost_2021'], usps_2021=row['usps_2021'],
-                                         dhl_shipdate=row['dhl_cost_shipdate'], usps_shipdate=row['usps_shipdate'])
+                                         dhl_cost_shipdate=row['dhl_cost_shipdate'], usps_shipdate=row['usps_shipdate'])
             shipment.save_to_db()
         ManifestDataModel.commit_to_db()
 
@@ -931,7 +931,7 @@ class ManifestFilter(Resource):
         print(filters)
         missing_columns = ManifestMissingModel.json(_id=id)
         service_replacements = {}
-        for service_override in filters['services']:
+        for service_override in filters.get('services', []):
             if service_override.get('service') is not None:
                 service_replacements[(service_override['service name'], service_override['location'],
                                       '>=' if service_override['weight threshold'][:5] == 'Over ' else '<')] = service_override['service']
@@ -942,9 +942,10 @@ class ManifestFilter(Resource):
         #     print(ManifestDataModel.find_filtered_shipments_v2(id, filter_v2))
         page = request_data.get('page', 1)
         per_page = request_data.get('per_page', 20)
+        include_loss = request_data.get('include_loss', True)
         filter_query = ManifestDataModel.filtered_query_builder(id, filters)
         paginated_result = ManifestDataModel.find_filtered_shipments(filter_query, page, per_page)
-        ManifestDataModel.filter_based_report(filter_query)
+        ManifestDataModel.filter_based_report(filter_query, include_loss)
         for shipment_item in paginated_result.items:
             if (shipment_item.service, shipment_item.country, shipment_item.weight_threshold) in service_replacements:
                 print('here', shipment_item.service, shipment_item.country, shipment_item.weight_threshold)

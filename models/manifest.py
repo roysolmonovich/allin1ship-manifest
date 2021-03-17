@@ -1,6 +1,7 @@
 # from sqlalchemy import create_engine, select, MetaData, Table
 from db import db
 from datetime import datetime, date
+from dateutil import relativedelta
 from sqlalchemy.sql import func
 # import mf_lib as mflib
 import pandas as pd
@@ -67,12 +68,23 @@ class ManifestDataModel(db.Model):
     manifest = db.relationship('ManifestModel')
     zone_areas = {
         'Non-contiguous US': [f'Zone {i}' for i in range(11, 14)], 'Contiguous US': [f'Zone {i:02}' for i in range(1, 9)]}
-    carrier_fields = {}
+    carrier_fields = {'DHL':
+                      {'cost': 'dhl_cost_shipdate',
+                       'locations': {
+                           'domestic':
+                           ('dhl_tier_1_2021', 'dhl_tier_2_2021', 'dhl_tier_3_2021', 'dhl_tier_4_2021',
+                            'dhl_tier_5_2021'),
+                           'international':
+                           ('dhl_tier_2_2021', 'dhl_tier_3_2021', 'dhl_tier_5_2021')
+                       }
+                       }
+                      }
 
     def __init__(self, id, orderno, shipdate, weight, service, zip, country, insured, dim1, dim2, dim3, price, zone, weight_threshold, sugg_service, dhl_tier_1_2021, dhl_tier_2_2021, dhl_tier_3_2021, dhl_tier_4_2021, dhl_tier_5_2021, dhl_cost_2021, usps_2021, dhl_cost_shipdate, usps_shipdate):
         self.id = id
         self.orderno = orderno
-        self.shipdate = shipdate
+        shipdate = datetime.strptime(shipdate, '%Y-%m-%d').date()
+        self.shipdate = shipdate if shipdate.weekday() < 5 else shipdate+relativedelta.relativedelta(days=7-shipdate.weekday())
         self.weight = weight
         self.service = service
         self.zip = zip
@@ -192,7 +204,7 @@ class ManifestDataModel(db.Model):
         return paginated_result
 
     @ classmethod
-    def filter_based_report(cls, filter_query):
+    def filter_based_report(cls, filter_query, include_loss):
         # 	"lowest_cost": [cost, date],
         # 	"highest_cost": [cost, date],
         # 	"duration": number of days,
@@ -236,27 +248,52 @@ class ManifestDataModel(db.Model):
         # 	}
         query_eval = eval(filter_query)
         df = pd.read_sql(query_eval.statement, query_eval.session.bind)
+
         pd.set_option('display.max_columns', None)
-        lowest_cost, highest_cost = df.price.min(), df.price.max()
-        lowest_cost = None if lowest_cost is nan else lowest_cost
-        highest_cost = None if highest_cost is nan else highest_cost
-        unique_dates = pd.to_datetime(df.shipdate.drop_duplicates(inplace=False), errors='coerce')
-        weekdays = unique_dates.dt.dayofweek
-        pickup_days_count = len(weekdays[weekdays < 5])
-        # Sat, Sun = 5, 6
+        df_by_date = df[['shipdate', 'price']].groupby(by='shipdate', as_index=True).sum()
+        highest_cost_date = df_by_date['price'].idxmax()
+        lowest_cost_date = df_by_date['price'].idxmin()
+        highest_cost, lowest_cost = round(df_by_date['price'].loc[highest_cost_date], 2), round(
+            df_by_date['price'].loc[lowest_cost_date], 2)
+        # weekend dates are converted to next Monday at insert - shipdate is given to be a weekday
+        pickup_days_count = len(df_by_date.index)
         packages_count = len(df.index)
-        daily_package = round(packages_count/pickup_days_count, 2)
+        daily_packages = round(packages_count/pickup_days_count, 2) if pickup_days_count else None
         start_date, end_date = df.shipdate.min(), df.shipdate.max()
-        year, month, day = end_date.year-start_date.year, end_date.month-start_date.month, end_date.day-start_date.day
+        diff = relativedelta.relativedelta(end_date, start_date)
+        duration_dict = {'year': diff.years, 'month': diff.months, 'day': diff.days}
         duration = []
-        for time_field in 'year', 'month', 'day':
-            val = eval(time_field)
+        for time_field, val in duration_dict.items():
             if val:
                 duration.append(f'{val} {time_field}{"s" if val>1 else ""}')
+        carrier_stats = {}
         print(df.head)
+        for carrier in cls.carrier_fields:
+            cost_field = cls.carrier_fields[carrier]['cost']
+            cost = round(df[cost_field].sum(), 2)
+            print(cost, cost_field)
+            for location in cls.carrier_fields[carrier]['locations']:
+                for tier_field in cls.carrier_fields[carrier]['locations'][location]:
+                    print(tier_field, location, carrier)
+                    if include_loss:
+                        print('include loss')
+                        tier_total = round(df[tier_field][df['country'] == (
+                            'US' if location == 'domestic' else 'Intl')].sum(), 2)
+                        savings_total = round(df[tier_field][df['country'] == (
+                            'US' if location == 'domestic' else 'Intl')].sum(), 2)
+
+                    else:
+                        print('exclude loss')
+                        cost = round(df[cost_field][(df['country'] == (
+                            'US' if location == 'domestic' else 'Intl')) & (df[tier_field] > df['price'])].sum(), 2)
+                        tier_total = round(df[tier_field][(df['country'] == (
+                            'US' if location == 'domestic' else 'Intl')) & (df[tier_field] > df['price'])].sum(), 2)
+                    print(tier_total, tier_field)
+
         duration_str = (', ').join(duration)
-        print(duration_str, start_date, end_date, lowest_cost, highest_cost, pickup_days_count, daily_package)
-        return duration_str, start_date, end_date, lowest_cost, highest_cost, pickup_days_count, daily_package
+        print(duration_str, start_date, end_date, highest_cost, highest_cost_date,
+              lowest_cost, lowest_cost_date, pickup_days_count, daily_packages)
+        return duration_str, start_date, end_date, highest_cost, highest_cost_date, lowest_cost, lowest_cost_date, pickup_days_count, daily_packages
 
     @ classmethod
     def find_raw_shipments(cls, _id, raw_input):
