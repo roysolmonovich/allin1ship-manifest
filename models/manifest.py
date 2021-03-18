@@ -5,7 +5,7 @@ from dateutil import relativedelta
 from sqlalchemy.sql import func
 # import mf_lib as mflib
 import pandas as pd
-from numpy import random, int64, nan
+from numpy import random, int64, nan, inf
 # from flask-sqlalchemy import
 from app_lib import CarrierCharge, country_to_code, service as lib_service, dhl_zip_zone_2020, ca_zip_zone, service_names, sv_to_code, weight
 import re
@@ -258,23 +258,11 @@ class ManifestDataModel(db.Model):
         print(query_eval.statement)
         pd.set_option('display.max_columns', None)
         df = pd.read_sql(query_eval.statement, query_eval.session.bind)
-        print(df.head())
-        print(len(df.index))
         if df.empty:
-            print('\n\ndf is empty\n\n')
             return
         print(service_replacements)
-        # service_replacements_keys = tuple(service_replacements.keys())
-        # shipment_item.service, shipment_item.country, shipment_item.weight_threshold
-        # df_service_override = df[(df.service, df.country, df.weight_threshold).isin(service_replacements_keys)]
-        # print('df_service_override\n', df_service_override.head())
-        # correct_service_rates(self, service_override)
-        # df[[*report_fields]] = df.apply(lambda row: ManifestDataModel.correct_service_rates(
-        #     row.address), axis=1, result_type='expand')
         df = df.apply(lambda row: ManifestDataModel.correct_service_rates(
             row, service_replacements.get((row.service, row.country, row.weight_threshold))), axis=1)
-        print('\n\napplied service override\n\n')
-        print(df.head())
         # df[['zip', 'country']] = df.apply(lambda row: ManifestModel.add_to_zip_ctry(
         #     row.address), axis=1, result_type='expand')
         #     if (shipment_item.service, shipment_item.country, shipment_item.weight_threshold) in service_replacements:
@@ -316,9 +304,7 @@ class ManifestDataModel(db.Model):
         report = {'Duration': duration_str, 'Highest Cost': [highest_cost, str(highest_cost_date)],
                   'Lowest Cost': [lowest_cost, str(lowest_cost_date)], 'Pickups': pickup_days_count,
                   'Daily Packages': daily_packages, 'date_pcs': date_pcs_lst}
-        print(df.head)
         for carrier in cls.carrier_fields:
-            carrier_stats.append({'Carrier Name': carrier})
             cost_field = cls.carrier_fields[carrier]['cost']
             cost_total = round(df[cost_field].sum(), 2)
             print(cost_total, cost_field)
@@ -332,33 +318,26 @@ class ManifestDataModel(db.Model):
                         if 'weight_threshold' not in df_by_dom_intl.columns:
                             continue
                         current_price_total = current_price_total_dom if location == 'US' else current_price_total_intl
-                        print(df_by_dom_intl)
                         tier_total = round(df_by_dom_intl[tier_field].loc[location], 2)
-                        savings_total_amount = round(tier_total - current_price_total, 2)
-                        savings_total_percentage = round(100*savings_total_amount/current_price_total, 2)
-                        profit_total_amount = round(tier_total-cost_total-pickup_expenses, 2)
-                        profit_total_percentage = round(100*profit_total_amount/tier_total, 2)
                     else:
                         print('exclude loss')
-                        print(df.head())
-                        print(df[cost_field][df['country'] == location].head())
                         cost_total = round(df[cost_field][(df['country'] == location)
                                                           & (df[tier_field] < df['price'])].sum(), 2)
 
                         tier_total = round(df[tier_field][(df['country'] == location)
                                                           & (df[tier_field] < df['price'])].sum(), 2)
-                        print(cost_total, tier_total)
                         if not cost_total:
                             continue
                         current_price_total = round(df['price'][(df['country'] == location)
                                                                 & (df[tier_field] < df['price'])].sum(), 2)
-                        savings_total_amount = round(tier_total - current_price_total, 2)
-                        savings_total_percentage = round(100*savings_total_amount/current_price_total, 2)
                         pickup_days_count = len(df['shipdate'][df[tier_field] < df['price']].unique())
                         pickup_expenses = pickup_days_count*cls.pickup_expense_const
-                        profit_total_amount = round(tier_total-cost_total-pickup_expenses, 2)
-                        profit_total_percentage = round(100*profit_total_amount/tier_total, 2)
-                        print('pickup_days_count', pickup_days_count)
+                    savings_total_amount = round(tier_total - current_price_total, 2)
+                    savings_total_percentage = round(100*savings_total_amount/current_price_total, 2)
+                    profit_total_amount = round(tier_total-cost_total-pickup_expenses, 2)
+                    profit_total_percentage = round(100*profit_total_amount/tier_total, 2)
+                    if not carrier_stats or carrier_stats[-1]['Carrier Name'] != carrier:
+                        carrier_stats.append({'Carrier Name': carrier})
                     if f'{"Domestic" if location == "US" else "International"} Tier Stats' not in carrier_stats[-1]:
                         carrier_stats[-1][f'{"Domestic" if location == "US" else "International"} Tier Stats'] = []
                     carrier_stats[-1][f'{"Domestic" if location == "US" else "International"} Tier Stats'].append(
@@ -371,7 +350,38 @@ class ManifestDataModel(db.Model):
         print('duration_str', duration_str, 'start_date', start_date, 'end_date', end_date, 'highest_cost', highest_cost, 'highest_cost_date', highest_cost_date,
               'lowest_cost', lowest_cost, 'lowest_cost_date', lowest_cost_date, 'pickup_days_count', pickup_days_count, 'daily_packages', daily_packages,
               'carrier_stats:\n', carrier_stats)
-        report.update({'Carrier Stats': carrier_stats})
+        top_domestic_carriers = {}
+        top_international_carriers = {}
+        top_domestic_carriers['Min Tier Cost'] = min(carrier_stats, key=lambda x: x.get(
+            'Domestic Tier Stats', [{'Tier Cost': inf}])[0]['Tier Cost'])['Carrier Name']
+        top_domestic_carriers['Max Savings ($)'] = max(carrier_stats, key=lambda x: x.get(
+            'Domestic Tier Stats', [{'Savings ($)': -inf}])[0]['Savings ($)'])['Carrier Name']
+        top_domestic_carriers['Max Savings (%)'] = max(carrier_stats, key=lambda x: x.get(
+            'Domestic Tier Stats', [{'Savings (%)': -inf}])[0]['Savings (%)'])['Carrier Name']
+        top_domestic_carriers['Min Our Cost'] = max(carrier_stats, key=lambda x: x.get(
+            'Domestic Tier Stats', [{'Our Cost': inf}])[0]['Our Cost'])['Carrier Name']
+        top_domestic_carriers['Max Profit ($)'] = max(carrier_stats, key=lambda x: x.get(
+            'Domestic Tier Stats', [{'Profit ($)': -inf}])[0]['Profit ($)'])['Carrier Name']
+        top_domestic_carriers['Max Profit (%)'] = max(carrier_stats, key=lambda x: x.get(
+            'Domestic Tier Stats', [{'Profit (%)': -inf}])[0]['Profit (%)'])['Carrier Name']
+        top_international_carriers['Min Tier Cost'] = min(carrier_stats, key=lambda x: x.get(
+            'International Tier Stats', [{'Tier Cost': inf}])[0]['Tier Cost'])['Carrier Name']
+        top_international_carriers['Max Savings ($)'] = max(carrier_stats, key=lambda x: x.get(
+            'International Tier Stats', [{'Savings ($)': -inf}])[0]['Savings ($)'])['Carrier Name']
+        top_international_carriers['Max Savings (%)'] = max(carrier_stats, key=lambda x: x.get(
+            'International Tier Stats', [{'Savings (%)': -inf}])[0]['Savings (%)'])['Carrier Name']
+        top_international_carriers['Min Our Cost'] = max(carrier_stats, key=lambda x: x.get(
+            'International Tier Stats', [{'Our Cost': inf}])[0]['Our Cost'])['Carrier Name']
+        top_international_carriers['Max Profit ($)'] = max(carrier_stats, key=lambda x: x.get(
+            'International Tier Stats', [{'Profit ($)': -inf}])[0]['Profit ($)'])['Carrier Name']
+        top_international_carriers['Max Profit (%)'] = max(carrier_stats, key=lambda x: x.get(
+            'International Tier Stats', [{'Profit (%)': -inf}])[0]['Profit (%)'])['Carrier Name']
+        print(top_domestic_carriers, top_international_carriers)
+        print('Done')
+        report.update({'Carrier Stats': sorted(carrier_stats, key=lambda x: x.get(
+            'Domestic Tier Stats', [{'Tier Cost': inf}])[0]['Tier Cost']),
+            'Top Domestic Carriers': top_domestic_carriers,
+            'Top International Carriers': top_international_carriers})
         return report
 
     @ classmethod
