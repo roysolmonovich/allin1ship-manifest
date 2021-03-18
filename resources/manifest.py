@@ -782,8 +782,7 @@ class Manifest(Resource):
         # print(df.iloc[:, :])
         df[['country', 'zone', 'weight_threshold', 'sugg_service', 'bill_weight', 'dhl_tier_1_2021',
             'dhl_tier_2_2021', 'dhl_tier_3_2021', 'dhl_tier_4_2021',
-            'dhl_tier_5_2021', 'dhl_cost_2021', 'usps_2021', 'dhl_cost_shipdate', 'usps_shipdate']] = df.apply(
-            lambda row: ManifestDataModel.row_to_rate(row), axis=1, result_type='expand')
+            'dhl_tier_5_2021', 'dhl_cost_2021', 'usps_2021', 'dhl_cost_shipdate', 'usps_shipdate']] = df.apply(ManifestDataModel.row_to_rate, axis=1, result_type='expand')
         df.weight = df.apply(lambda row: ceil(row.weight) if row.weight < 16 else ceil(row.weight/16)*16, axis=1)
         df.loc[~df['bill_weight'].isna(), 'weight'] = df['bill_weight']
         del df['bill_weight']
@@ -821,8 +820,7 @@ class Manifest(Resource):
         df.sort_values(by=['shipdate', 'orderno'], ascending=[True, True], inplace=True)
         df_unique_services = df[['service', 'weight_threshold', 'country',
                                  'sugg_service']].drop_duplicates(subset=subset, inplace=False)
-        df_unique_services['weight_threshold'] = df.apply(
-            lambda row: ManifestDataModel.weight_threshold_display(row), axis=1)
+        df_unique_services['weight_threshold'] = df.apply(ManifestDataModel.weight_threshold_display, axis=1)
         df_unique_services.sort_values(by=['country', 'weight_threshold', 'service'],
                                        ascending=[False, True, True], inplace=True)
         all_zones = df['zone'].drop_duplicates(inplace=False).sort_values(inplace=False)
@@ -938,10 +936,6 @@ class ManifestFilter(Resource):
                 service_replacements[(service_override['service name'], service_override['location'],
                                       '>=' if service_override['weight threshold'][:5] == 'Over ' else '<')] = service_override['service']
         shipments = []
-        # raw_input = request_data.get('raw_input')
-        # filter_v2 = request_data.get('filter_v2')
-        # if filter_v2:
-        #     print(ManifestDataModel.find_filtered_shipments_v2(id, filter_v2))
         page = request_data.get('page', 1)
         per_page = request_data.get('per_page', 20)
         include_loss = request_data.get('include_loss', True)
@@ -949,9 +943,10 @@ class ManifestFilter(Resource):
         send_report = request_data.get('send_report', True)
         print('\n\nhere\n\n')
         print(filter_queries)
+        response = {}
         if send_report:
-            ManifestDataModel.filter_based_report(filter_queries[1], include_loss)
-        response = {'ordered headers': existing_headers_ordered}
+            response['Report'] = ManifestDataModel.filter_based_report(
+                filter_queries[1], service_replacements, include_loss)
         if per_page != 0:
             paginated_result = ManifestDataModel.find_filtered_shipments(filter_queries[0], page, per_page)
             for shipment_item in paginated_result.items:
@@ -966,9 +961,11 @@ class ManifestFilter(Resource):
                 for missing_column in missing_columns:
                     shipment[missing_column+'_gen'] = shipment.pop(missing_column)
                 shipments.append(shipment)
-            response.update()
-            return {'ordered headers': existing_headers_ordered, 'filtered shipments': shipments, 'curr_page': paginated_result.page, 'has_prev': paginated_result.has_prev, 'has_next': paginated_result.has_next, 'pages': paginated_result.pages, 'total': paginated_result.total}
-        return {}
+            response.update({'ordered headers': existing_headers_ordered,
+                             'filtered shipments': shipments, 'curr_page': paginated_result.page,
+                             'has_prev': paginated_result.has_prev, 'has_next': paginated_result.has_next,
+                             'pages': paginated_result.pages, 'total': paginated_result.total})
+        return response
         # shipments = ManifestModel.manifest_shipments(_id=id, filter=None)
         # print(id)
         # print(shipments)

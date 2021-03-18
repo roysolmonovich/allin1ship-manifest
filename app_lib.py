@@ -333,3 +333,32 @@ class CarrierCharge:
             return weights[m]
         else:
             return weights[m+1]
+
+
+def weight(actual_weight, zone, lg=0, wd=0, ht=0):
+    # weight function returns the 'final weight' (max between actual and dimensional weight)
+    # and True/False whether final weight is actual/dimensional based on following rule:
+    # if shipping is domestic:
+    #   if length + girth is less than or equal to 60 in, return actual weight
+    #   otherwise return max between actual weight and dimensional weight (= volume/166*16 [oz])
+    # if shipping is international:
+    #   return max between actual weight and dimensional weight
+    dim_weight = 0
+    weight = actual_weight
+    # If domestic (domestic zones start with 'USPS')
+    if zone[: 4] == "USPS":
+        dim_cutoff = 1728
+        # Check if dimensions less than cutoff = 60
+        # If less, weight is actual weight
+        # Otherwise, weight is greater of actual weight and dimensional weight
+        if (lg or 0)*(wd or 0)*(ht or 0) <= dim_cutoff:
+            weight = actual_weight
+        else:
+            dim_weight = lg*wd*ht/166*16
+            weight = max(dim_weight, actual_weight)
+    # If international, convert actual wight from lb to oz
+    else:
+        dim_weight = (lg or 0)*(wd or 0)*(ht or 0)/166*16
+        actual_weight *= 16
+        weight = max(dim_weight, actual_weight)
+    return (round(weight, 3), True if weight == actual_weight else False)

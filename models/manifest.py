@@ -7,7 +7,7 @@ from sqlalchemy.sql import func
 import pandas as pd
 from numpy import random, int64, nan
 # from flask-sqlalchemy import
-from app_lib import CarrierCharge, country_to_code, service as lib_service, dhl_zip_zone_2020, ca_zip_zone, service_names, sv_to_code
+from app_lib import CarrierCharge, country_to_code, service as lib_service, dhl_zip_zone_2020, ca_zip_zone, service_names, sv_to_code, weight
 import re
 import os
 import json
@@ -173,7 +173,7 @@ class ManifestDataModel(db.Model):
                 if 'weight' in weight_zone:
                     min_weight, max_weight = weight_zone['weight']
                     weight_zone_sub.append(
-                        f"cls.weight.between({min_weight or 0}, {max_weight or 999999})")
+                        f"cls.weight.between({min_weight if min_weight is not None else  0}, {max_weight if max_weight is not None else 999999})")
                 if 'zone' in weight_zone:
                     zones = weight_zone['zone']
                     zones_list = []
@@ -212,7 +212,7 @@ class ManifestDataModel(db.Model):
         return paginated_result
 
     @ classmethod
-    def filter_based_report(cls, filter_query, include_loss):
+    def filter_based_report(cls, filter_query, service_replacements, include_loss):
         # 	"lowest_cost": [cost, date],
         # 	"highest_cost": [cost, date],
         # 	"duration": number of days,
@@ -256,18 +256,41 @@ class ManifestDataModel(db.Model):
         # 	}
         query_eval = eval(filter_query)
         print(query_eval.statement)
-        df = pd.read_sql(query_eval.statement, query_eval.session.bind)
         pd.set_option('display.max_columns', None)
-        df_by_date = df[['shipdate', 'price']].groupby(by='shipdate', as_index=True).sum()
+        df = pd.read_sql(query_eval.statement, query_eval.session.bind)
+        print(df.head())
+        print(len(df.index))
+        if df.empty:
+            print('\n\ndf is empty\n\n')
+            return
+        print(service_replacements)
+        # service_replacements_keys = tuple(service_replacements.keys())
+        # shipment_item.service, shipment_item.country, shipment_item.weight_threshold
+        # df_service_override = df[(df.service, df.country, df.weight_threshold).isin(service_replacements_keys)]
+        # print('df_service_override\n', df_service_override.head())
+        # correct_service_rates(self, service_override)
+        # df[[*report_fields]] = df.apply(lambda row: ManifestDataModel.correct_service_rates(
+        #     row.address), axis=1, result_type='expand')
+        df = df.apply(lambda row: ManifestDataModel.correct_service_rates(
+            row, service_replacements.get((row.service, row.country, row.weight_threshold))), axis=1)
+        print('\n\napplied service override\n\n')
+        print(df.head())
+        # df[['zip', 'country']] = df.apply(lambda row: ManifestModel.add_to_zip_ctry(
+        #     row.address), axis=1, result_type='expand')
+        #     if (shipment_item.service, shipment_item.country, shipment_item.weight_threshold) in service_replacements:
+        #         print('here', shipment_item.service, shipment_item.country, shipment_item.weight_threshold)
+        #         shipment_item = shipment_item.correct_service_rates(service_replacements[(
+        #             shipment_item.service, shipment_item.country, shipment_item.weight_threshold)])
+        print(report_fields)
+        df_date_pcs = df[['shipdate', 'country']].groupby(by='shipdate', sort=False, as_index=False).count()
+        df_date_pcs['shipdate'] = df_date_pcs['shipdate'].astype(str)
+        date_pcs_lst = df_date_pcs.values.tolist()
+        df_by_date = df[['shipdate', 'price']].groupby(by='shipdate', sort=False).sum()
         pickup_days_count = len(df_by_date.index)
         packages_count = len(df.index)
         daily_packages = round(packages_count/pickup_days_count, 2) if pickup_days_count else None
-        # df_plot_test = df[['shipdate', 'price']].groupby(by='shipdate').count()
-        # df_plot_test.reset_index(inplace=True)
-        # df_plot_test['shipdate'] = df_plot_test['shipdate'].astype(str)
-        # print(df_plot_test.values.tolist(), 'df_plot_test')
+        df_by_dom_intl = df.groupby(by='country', sort=False, as_index=True).sum()
         if include_loss:
-            df_by_dom_intl = df.groupby(by='country', as_index=True).sum()
             if 'US' in df_by_dom_intl.index:
                 current_price_total_dom = round(df_by_dom_intl['price'].loc['US'], 2)
             if 'Intl' in df_by_dom_intl.index:
@@ -283,51 +306,73 @@ class ManifestDataModel(db.Model):
         # weekend dates are converted to next Monday at insert - shipdate is given to be a weekday
         start_date, end_date = df.shipdate.min(), df.shipdate.max()
         diff = relativedelta.relativedelta(end_date, start_date)
-        duration_dict = {'year': diff.years, 'month': diff.months, 'day': diff.days}
+        duration_dict = {'year': diff.years, 'month': diff.months, 'day': diff.days+1}
         duration = []
         for time_field, val in duration_dict.items():
             if val:
                 duration.append(f'{val} {time_field}{"s" if val>1 else ""}')
-        carrier_stats = {}
+        duration_str = (', ').join(duration)
+        carrier_stats = []
+        report = {'Duration': duration_str, 'Highest Cost': [highest_cost, str(highest_cost_date)],
+                  'Lowest Cost': [lowest_cost, str(lowest_cost_date)], 'Pickups': pickup_days_count,
+                  'Daily Packages': daily_packages, 'date_pcs': date_pcs_lst}
         print(df.head)
-        carrier_dict = {}
         for carrier in cls.carrier_fields:
+            carrier_stats.append({'Carrier Name': carrier})
             cost_field = cls.carrier_fields[carrier]['cost']
             cost_total = round(df[cost_field].sum(), 2)
             print(cost_total, cost_field)
             for location in cls.carrier_fields[carrier]['locations']:
+                if location not in df_by_dom_intl.index:
+                    continue
                 for tier_field in cls.carrier_fields[carrier]['locations'][location]:
-                    if location not in df_by_dom_intl.index:
-                        continue
                     print(tier_field, location, carrier)
                     if include_loss:
                         print('include loss')
+                        if 'weight_threshold' not in df_by_dom_intl.columns:
+                            continue
+                        current_price_total = current_price_total_dom if location == 'US' else current_price_total_intl
+                        print(df_by_dom_intl)
                         tier_total = round(df_by_dom_intl[tier_field].loc[location], 2)
-                        print(tier_total, current_price_total_dom)
-                        savings_total_amount = round(tier_total - (current_price_total_dom if location ==
-                                                                   'US' else current_price_total_intl), 2)
-                        savings_total_percentage = round(100*savings_total_amount/(current_price_total_dom if location ==
-                                                                                   'US' else current_price_total_intl), 2)
+                        savings_total_amount = round(tier_total - current_price_total, 2)
+                        savings_total_percentage = round(100*savings_total_amount/current_price_total, 2)
                         profit_total_amount = round(tier_total-cost_total-pickup_expenses, 2)
                         profit_total_percentage = round(100*profit_total_amount/tier_total, 2)
-                        print('savings_total_amount', savings_total_amount, 'savings_total_percentage', savings_total_percentage,
-                              'pickup_expenses', pickup_expenses, 'profit_total_amount', profit_total_amount, 'profit_total_percentage', profit_total_percentage)
                     else:
                         print('exclude loss')
-                        cost_total = round(df[cost_field][(df['country'] == (
-                            'US' if location == 'domestic' else 'Intl')) & (df[tier_field] > df['price'])].sum(), 2)
-                        tier_total = round(df[tier_field][(df['country'] == (
-                            'US' if location == 'domestic' else 'Intl')) & (df[tier_field] > df['price'])].sum(), 2)
-                    if not carrier_dict:
-                        carrier_dict[carrier] = {}
-                    if not carrier_dict[carrier]:
-                        carrier_dict[carrier]['domestic' if location == 'US' else 'international'] = {}
-                    carrier_dict[carrier]['domestic' if location == 'US' else 'international'] = []
+                        print(df.head())
+                        print(df[cost_field][df['country'] == location].head())
+                        cost_total = round(df[cost_field][(df['country'] == location)
+                                                          & (df[tier_field] < df['price'])].sum(), 2)
 
-        duration_str = (', ').join(duration)
+                        tier_total = round(df[tier_field][(df['country'] == location)
+                                                          & (df[tier_field] < df['price'])].sum(), 2)
+                        print(cost_total, tier_total)
+                        if not cost_total:
+                            continue
+                        current_price_total = round(df['price'][(df['country'] == location)
+                                                                & (df[tier_field] < df['price'])].sum(), 2)
+                        savings_total_amount = round(tier_total - current_price_total, 2)
+                        savings_total_percentage = round(100*savings_total_amount/current_price_total, 2)
+                        pickup_days_count = len(df['shipdate'][df[tier_field] < df['price']].unique())
+                        pickup_expenses = pickup_days_count*cls.pickup_expense_const
+                        profit_total_amount = round(tier_total-cost_total-pickup_expenses, 2)
+                        profit_total_percentage = round(100*profit_total_amount/tier_total, 2)
+                        print('pickup_days_count', pickup_days_count)
+                    if f'{"Domestic" if location == "US" else "International"} Tier Stats' not in carrier_stats[-1]:
+                        carrier_stats[-1][f'{"Domestic" if location == "US" else "International"} Tier Stats'] = []
+                    carrier_stats[-1][f'{"Domestic" if location == "US" else "International"} Tier Stats'].append(
+                        {'Tier Name': tier_field, 'Current Cost': cost_total, 'Tier Cost': tier_total,
+                         'Savings ($)': savings_total_amount, 'Savings (%)': savings_total_percentage,
+                         'Our Cost': current_price_total, 'Profit ($)': profit_total_amount,
+                         'Profit (%)': profit_total_percentage, 'Pickups': pickup_days_count,
+                         'Daily Packages': daily_packages}
+                    )
         print('duration_str', duration_str, 'start_date', start_date, 'end_date', end_date, 'highest_cost', highest_cost, 'highest_cost_date', highest_cost_date,
-              'lowest_cost', lowest_cost, 'lowest_cost_date', lowest_cost_date, 'pickup_days_count', pickup_days_count, 'daily_packages', daily_packages)
-        return duration_str, start_date, end_date, highest_cost, highest_cost_date, lowest_cost, lowest_cost_date, pickup_days_count, daily_packages
+              'lowest_cost', lowest_cost, 'lowest_cost_date', lowest_cost_date, 'pickup_days_count', pickup_days_count, 'daily_packages', daily_packages,
+              'carrier_stats:\n', carrier_stats)
+        report.update({'Carrier Stats': carrier_stats})
+        return report
 
     @ classmethod
     def find_raw_shipments(cls, _id, raw_input):
@@ -335,64 +380,6 @@ class ManifestDataModel(db.Model):
             return cls.query.from_statement(db.text(f"SELECT * FROM manifest_data_test WHERE id = {_id} AND {raw_input}")).all()
         except ProgrammingError:
             return [None]
-
-    @ classmethod
-    def find_filtered_shipments_v2(cls, _id, shipment_filter):
-        query = [f'SELECT * FROM manifest_data_test WHERE id = {_id}']
-        if 'shipdates' in shipment_filter:
-            include, start, end = shipment_filter['shipdates']
-            if None not in (start, end):
-                query.append(f"shipdate {'' if include else 'NOT '}BETWEEN '{start}' AND '{end}'")
-            else:
-                if start:
-                    query.append(f"shipdate {'>=' if include else '<'} '{start}'")
-                elif end:
-                    query.append(f"shipdate {'<=' if include else '>'} '{end}'")
-        if 'weight_zone' in shipment_filter:
-            weight_zone_query = []
-            include_weight_zones, *weight_zones = shipment_filter['weight_zone']
-            for weight_zone in weight_zones:
-                weight_zone_sub = []
-                if 'weight' in weight_zone:
-                    include, min_weight, max_weight = weight_zone['weight']
-                    print(include, min_weight, max_weight)
-                    if None not in (min_weight, max_weight):
-                        weight_zone_sub.append(
-                            f"weight {'' if include else 'NOT '}BETWEEN {min_weight} AND {max_weight}")
-                    else:
-                        if min_weight:
-                            weight_zone_sub.append(f"weight {'>=' if include else '<'} {min_weight}")
-                        elif max_weight:
-                            weight_zone_sub.append(f"weight {'<=' if include else '>'} {max_weight}")
-                if 'zone' in weight_zone:
-                    include, *zones = weight_zone['zone']
-                    zones_list = []
-                    include_international = False
-                    for zone in zones:
-                        if zone in cls.zone_areas:
-                            zones_list += cls.zone_areas[zone]
-                        else:
-                            if zone == 'International':
-                                include_international = True
-                            else:
-                                zones_list.append(zone)
-                    if not include_international:
-                        zones_list = [f"zone {'' if include else 'NOT '}IN {tuple(zones_list)}"]
-                    else:
-                        zones_list = [
-                            f"{'' if include else 'NOT '}(zone IN {tuple(zones_list)} OR country != 'US')"]
-                    weight_zone_sub += zones_list
-                weight_zone_query.append('('+(' AND ').join(weight_zone_sub)+')')
-            query.append(
-                f"{'' if include_weight_zones[1] else 'NOT ('}{(' OR ' if include_weight_zones[0] else ' AND ').join(weight_zone_query)}{'' if include_weight_zones[1] else ')'}")
-        if 'services' in shipment_filter:
-            service_query = []
-            for service in shipment_filter['services']:
-                service_query.append(
-                    f"(service = '{service['service name']}' AND weight_threshold = '{'>=' if service['weight threshold'][:5] == 'Over ' else '<'}' and country {'=' if service['location'] == 'US' else '!='} 'US')")
-            query.append('('+(' OR ').join(service_query)+')')
-        print(' AND '.join(query) + ' ORDER BY shipdate')
-        return cls.query.from_statement(db.text(' AND '.join(query) + ' ORDER BY shipdate')).all()
 
     def save_to_db(self):
         db.session.add(self)
@@ -405,7 +392,7 @@ class ManifestDataModel(db.Model):
         db.session.commit()
 
     def row_to_rate(row):
-        shipdate = row.shipdate.date()
+        shipdate = str(row.shipdate.date())
         if len(row.country) == 2 and row.country.isupper():
             ctry_code = country_to_code.get(row.country)
         else:
@@ -440,49 +427,56 @@ class ManifestDataModel(db.Model):
             return [ctry_code, zone_desc, sc[2], sc[1]]+[None]*10
         no_costs = []
         output = [ctry_code, zone_desc]+[sc[2], sc[1]]
+        billing_weight = weight(row.weight, zone, row.dim1, row.dim2, row.dim3)[0]
         output.append(CarrierCharge.charge_weight(
-            'DHL', 'domestic' if domestic else 'international', str(shipdate), sc[0], zone, row['weight']))
+            'DHL', 'domestic' if domestic else 'international', shipdate, sc[0], zone, billing_weight))
         if domestic and int(zone[-2:]) in (11, 12, 13) and row['weight'] < 16:
             return output+[None]*9
         for tier in range(1, 6):
             charge = CarrierCharge.charge_rate(
-                tier, 'domestic' if domestic else 'international', str(date(2021, 2, 1)), sc[0], zone, row['weight'])
+                tier, 'domestic' if domestic else 'international', str(date(2021, 2, 1)), sc[0], zone, billing_weight)
             charge = None if charge and charge < 0 else charge
             output.append(charge)
         dhl_c_2021 = CarrierCharge.charge_rate("DHL", "domestic" if domestic else "international",
-                                               str(date(2021, 2, 1)), sc[0], zone, row['weight'])
+                                               str(date(2021, 2, 1)), sc[0], zone, billing_weight)
         usps_c_2021 = CarrierCharge.charge_rate("USPS", "domestic" if domestic else "international",
-                                                str(date(2021, 2, 1)), sc[0], zone, row['weight'])
+                                                str(date(2021, 2, 1)), sc[0], zone, billing_weight)
         dhl_c = CarrierCharge.charge_rate("DHL", "domestic" if domestic else "international",
-                                          str(shipdate), sc[0], zone, row['weight'])
+                                          shipdate, sc[0], zone, billing_weight)
         usps_c = CarrierCharge.charge_rate("USPS", "domestic" if domestic else "international",
-                                           str(shipdate), sc[0], zone, row['weight'])
+                                           shipdate, sc[0], zone, billing_weight)
         # rates.extend([lib.CarrierCharge.charge_rate('DHL', 'domestic' if domestic else 'international', date(2021, 2, 1), sc, zone, w), lib.CarrierCharge.charge_rate('USPS', 'domestic' if domestic else 'international', date(2021, 2, 1), sc, zone, w), our_c, dhl_c, usps_c, ship_date])
 
         output.extend([dhl_c_2021, usps_c_2021, dhl_c, usps_c])
         return output
 
     def correct_service_rates(self, service_override):
-        service = int(service_names[service_override])
+        if service_override is None:
+            return self
+        service = int(service_names.get(service_override, 0))
         self.sugg_service = service_override
-        self.dhl_tier_1_2021 = CarrierCharge.charge_rate(1, 'domestic' if self.country == 'US' else 'international', str(
-            date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
-        self.dhl_tier_2_2021 = CarrierCharge.charge_rate(2, 'domestic' if self.country == 'US' else 'international', str(
-            date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
-        self.dhl_tier_3_2021 = CarrierCharge.charge_rate(3, 'domestic' if self.country == 'US' else 'international', str(
-            date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
-        self.dhl_tier_4_2021 = CarrierCharge.charge_rate(4, 'domestic' if self.country == 'US' else 'international', str(
-            date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
-        self.dhl_tier_5_2021 = CarrierCharge.charge_rate(5, 'domestic' if self.country == 'US' else 'international', str(
-            date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
-        self.dhl_cost_2021 = CarrierCharge.charge_rate('DHL', 'domestic' if self.country == 'US' else 'international', str(
-            date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
-        self.usps_2021 = CarrierCharge.charge_rate('USPS', 'domestic' if self.country == 'US' else 'international', str(
-            date(2021, 3, 1)), service, self.zone.replace('Zone ', 'USPS'), self.weight)
-        self.dhl_cost_shipdate = CarrierCharge.charge_rate('DHL', 'domestic' if self.country == 'US' else 'international', str(
-            self.shipdate), service, self.zone.replace('Zone ', 'USPS'), self.weight)
-        self.usps_shipdate = CarrierCharge.charge_rate('USPS', 'domestic' if self.country == 'US' else 'international', str(
-            self.shipdate), service, self.zone.replace('Zone ', 'USPS'), self.weight)
+        zone = self.zone.replace('Zone ', 'USPS')
+        location = 'domestic' if self.country == 'US' else 'international'
+        print(location, zone)
+        billing_weight = weight(self.weight, zone, self.dim1, self.dim2, self.dim3)[0]
+        self.dhl_tier_1_2021 = CarrierCharge.charge_rate(1, location, str(
+            date(2021, 3, 1)), service, zone, billing_weight)
+        self.dhl_tier_2_2021 = CarrierCharge.charge_rate(2, location, str(
+            date(2021, 3, 1)), service, zone, billing_weight)
+        self.dhl_tier_3_2021 = CarrierCharge.charge_rate(3, location, str(
+            date(2021, 3, 1)), service, zone, billing_weight)
+        self.dhl_tier_4_2021 = CarrierCharge.charge_rate(4, location, str(
+            date(2021, 3, 1)), service, zone, billing_weight)
+        self.dhl_tier_5_2021 = CarrierCharge.charge_rate(5, location, str(
+            date(2021, 3, 1)), service, zone, billing_weight)
+        self.dhl_cost_2021 = CarrierCharge.charge_rate('DHL', location, str(
+            date(2021, 3, 1)), service, zone, billing_weight)
+        self.usps_2021 = CarrierCharge.charge_rate('USPS', location, str(
+            date(2021, 3, 1)), service, zone, billing_weight)
+        self.dhl_cost_shipdate = CarrierCharge.charge_rate('DHL', location, str(
+            self.shipdate), service, zone, billing_weight)
+        self.usps_shipdate = CarrierCharge.charge_rate('USPS', location, str(
+            self.shipdate), service, zone, billing_weight)
         return self
 
     def weight_threshold_display(row):
@@ -878,4 +872,4 @@ class ManifestModel(db.Model):
 
 
 report_fields = set(c for c in ManifestDataModel.__table__.c if c.name not in {
-    'id', 'orderno', 'weight', 'service', 'zip', 'dim1', 'dim2', 'dim3', 'zone', 'weight_threshold', 'sugg_service'})
+    'id', 'orderno', 'zip', 'sugg_service'})
