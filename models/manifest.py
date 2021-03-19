@@ -263,6 +263,8 @@ class ManifestDataModel(db.Model):
         print(service_replacements)
         df = df.apply(lambda row: ManifestDataModel.correct_service_rates(
             row, service_replacements.get((row.service, row.country, row.weight_threshold))), axis=1)
+        df['price'].fillna(0, inplace=True)
+        print(df.head())
         # df[['zip', 'country']] = df.apply(lambda row: ManifestModel.add_to_zip_ctry(
         #     row.address), axis=1, result_type='expand')
         #     if (shipment_item.service, shipment_item.country, shipment_item.weight_threshold) in service_replacements:
@@ -270,6 +272,7 @@ class ManifestDataModel(db.Model):
         #         shipment_item = shipment_item.correct_service_rates(service_replacements[(
         #             shipment_item.service, shipment_item.country, shipment_item.weight_threshold)])
         print(report_fields)
+        print(df_by_dom_intl.head())
         df_date_pcs = df[['shipdate', 'country']].groupby(by='shipdate', sort=False, as_index=False).count()
         df_date_pcs['shipdate'] = df_date_pcs['shipdate'].astype(str)
         date_pcs_lst = df_date_pcs.values.tolist()
@@ -323,11 +326,10 @@ class ManifestDataModel(db.Model):
                         print('exclude loss')
                         cost_total = round(df[cost_field][(df['country'] == location)
                                                           & (df[tier_field] < df['price'])].sum(), 2)
-
-                        tier_total = round(df[tier_field][(df['country'] == location)
-                                                          & (df[tier_field] < df['price'])].sum(), 2)
                         if not cost_total:
                             continue
+                        tier_total = round(df[tier_field][(df['country'] == location)
+                                                          & (df[tier_field] < df['price'])].sum(), 2)
                         current_price_total = round(df['price'][(df['country'] == location)
                                                                 & (df[tier_field] < df['price'])].sum(), 2)
                         pickup_days_count = len(df['shipdate'][df[tier_field] < df['price']].unique())
