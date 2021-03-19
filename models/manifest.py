@@ -263,7 +263,9 @@ class ManifestDataModel(db.Model):
         print(service_replacements)
         df = df.apply(lambda row: ManifestDataModel.correct_service_rates(
             row, service_replacements.get((row.service, row.country, row.weight_threshold))), axis=1)
-        df['price'].fillna(0, inplace=True)
+        price_sum = df['price'].sum()
+        df.drop(['weight', 'weight_threshold', 'dim1', 'dim2', 'dim3', 'zone', 'service'], axis=1)
+
         print(df.head())
         # df[['zip', 'country']] = df.apply(lambda row: ManifestModel.add_to_zip_ctry(
         #     row.address), axis=1, result_type='expand')
@@ -272,28 +274,27 @@ class ManifestDataModel(db.Model):
         #         shipment_item = shipment_item.correct_service_rates(service_replacements[(
         #             shipment_item.service, shipment_item.country, shipment_item.weight_threshold)])
         print(report_fields)
-        print(df_by_dom_intl.head())
         df_date_pcs = df[['shipdate', 'country']].groupby(by='shipdate', sort=False, as_index=False).count()
         df_date_pcs['shipdate'] = df_date_pcs['shipdate'].astype(str)
         date_pcs_lst = df_date_pcs.values.tolist()
-        df_by_date = df[['shipdate', 'price']].groupby(by='shipdate', sort=False).sum()
-        pickup_days_count = len(df_by_date.index)
+        df_by_date = df[['shipdate', 'price']].groupby(by='shipdate', sort=False).sum() if price_sum else None
+        pickup_days_count = len(df_by_date.index) if price_sum else None
         packages_count = len(df.index)
         daily_packages = round(packages_count/pickup_days_count, 2) if pickup_days_count else None
         df_by_dom_intl = df.groupby(by='country', sort=False, as_index=True).sum()
+        print(df_by_dom_intl.head())
         if include_loss:
             if 'US' in df_by_dom_intl.index:
-                current_price_total_dom = round(df_by_dom_intl['price'].loc['US'], 2)
+                current_price_total_dom = round(df_by_dom_intl['price'].loc['US'], 2) if price_sum else None
             if 'Intl' in df_by_dom_intl.index:
-                current_price_total_intl = round(df_by_dom_intl['price'].loc['Intl'], 2)
+                current_price_total_intl = round(df_by_dom_intl['price'].loc['Intl'], 2) if price_sum else None
             # packages_count_domestic = len(df['country'][df['country'] == 'US'].index)
             # packages_count_intl = packages_count-packages_count_domestic
-            pickup_expenses = pickup_days_count*cls.pickup_expense_const
-
-        highest_cost_date = df_by_date['price'].idxmax()
-        lowest_cost_date = df_by_date['price'].idxmin()
-        highest_cost, lowest_cost = round(df_by_date['price'].loc[highest_cost_date], 2), round(
-            df_by_date['price'].loc[lowest_cost_date], 2)
+            pickup_expenses = pickup_days_count*cls.pickup_expense_const if price_sum else None
+        highest_cost_date = df_by_date['price'].idxmax() if price_sum else None
+        lowest_cost_date = df_by_date['price'].idxmin() if price_sum else None
+        (highest_cost, lowest_cost) = (round(df_by_date['price'].loc[highest_cost_date], 2), round(
+            df_by_date['price'].loc[lowest_cost_date], 2)) if price_sum else (None, None)
         # weekend dates are converted to next Monday at insert - shipdate is given to be a weekday
         start_date, end_date = df.shipdate.min(), df.shipdate.max()
         diff = relativedelta.relativedelta(end_date, start_date)
@@ -318,8 +319,9 @@ class ManifestDataModel(db.Model):
                     print(tier_field, location, carrier)
                     if include_loss:
                         print('include loss')
-                        if 'weight_threshold' not in df_by_dom_intl.columns:
-                            continue
+                        print(df_by_dom_intl.head())
+                        # if 'weight_threshold' not in df_by_dom_intl.columns:
+                        #     continue
                         current_price_total = current_price_total_dom if location == 'US' else current_price_total_intl
                         tier_total = round(df_by_dom_intl[tier_field].loc[location], 2)
                     else:
@@ -334,6 +336,7 @@ class ManifestDataModel(db.Model):
                                                                 & (df[tier_field] < df['price'])].sum(), 2)
                         pickup_days_count = len(df['shipdate'][df[tier_field] < df['price']].unique())
                         pickup_expenses = pickup_days_count*cls.pickup_expense_const
+                    print('here')
                     savings_total_amount = round(tier_total - current_price_total, 2)
                     savings_total_percentage = round(100*savings_total_amount/current_price_total, 2)
                     profit_total_amount = round(tier_total-cost_total-pickup_expenses, 2)
@@ -354,6 +357,7 @@ class ManifestDataModel(db.Model):
               'carrier_stats:\n', carrier_stats)
         top_domestic_carriers = {}
         top_international_carriers = {}
+        print(carrier_stats)
         top_domestic_carriers['Min Tier Cost'] = min(carrier_stats, key=lambda x: x.get(
             'Domestic Tier Stats', [{'Tier Cost': inf}])[0]['Tier Cost'])['Carrier Name']
         top_domestic_carriers['Max Savings ($)'] = max(carrier_stats, key=lambda x: x.get(
