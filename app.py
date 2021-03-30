@@ -7,7 +7,7 @@ from app_lib import service
 # import pickle
 from resources.carrieritem import CarrierItem
 from resources.user import User, UserLogin, UserLogout, TokenRefresh
-from resources.manifest import Manifest, ManifestFilter, ManifestNames, ManifestColumns, ManifestManual, ManifestAuthTest
+from resources.manifest import Manifest, ManifestFilter, ManifestNames, ManifestColumns, ManifestManual, ManifestAuthTest, ManifestFormat
 # from models.manifest import ManifestModel
 # from security import identity, authenticate
 from flask import Flask, jsonify  # , flash, redirect
@@ -171,6 +171,7 @@ api.add_resource(ManifestManual, '/manifest-manual')
 api.add_resource(UserLogin, '/login')
 api.add_resource(TokenRefresh, '/refresh')
 api.add_resource(UserLogout, '/logout')
+api.add_resource(ManifestFormat, '/manifest-format')
 # manifest-manual
 # manifest-manual-submit
 

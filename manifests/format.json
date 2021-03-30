@@ -204,7 +204,7 @@
             "format": "str"
         }
     },
-    "address1": {
+    "address_country": {
         "shipstation": {
             "header": [
                 "CountryCode",

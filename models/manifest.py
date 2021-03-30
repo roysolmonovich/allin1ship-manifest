@@ -7,12 +7,18 @@ from sqlalchemy.sql import func
 import pandas as pd
 from numpy import random, int64, nan, inf
 # from flask-sqlalchemy import
-from app_lib import CarrierCharge, country_to_code, service as lib_service, dhl_zip_zone_2020, ca_zip_zone, service_names, sv_to_code, weight
+from app_lib import CarrierCharge, country_to_code, service as lib_service, dhl_zip_zone_2020, ca_zip_zone, service_names, weight
 import re
 import os
 import json
 from sqlalchemy.exc import ProgrammingError
-
+from pymongo import MongoClient
+from bson.objectid import ObjectId
+mongodb_url = os.environ.get('MONGO_URL')
+if not mongodb_url:
+    from c import mongodb_url
+client = MongoClient(mongodb_url)
+mongo_db = client.manifests
 # manifest_data.tier_1_2021
 
 
@@ -81,6 +87,7 @@ class ManifestDataModel(db.Model):
                       }
     pickup_expense_const = 15
 
+
     def __init__(self, id, orderno, shipdate, weight, service, zip, country, insured, dim1, dim2, dim3, price, zone, weight_threshold, sugg_service, dhl_tier_1_2021, dhl_tier_2_2021, dhl_tier_3_2021, dhl_tier_4_2021, dhl_tier_5_2021, dhl_cost_2021, usps_2021, dhl_cost_shipdate, usps_shipdate):
         self.id = id
         self.orderno = orderno
@@ -118,20 +125,12 @@ class ManifestDataModel(db.Model):
 
     @ classmethod
     def find_all_shipments(cls, _id, page=1, per_page=20):
-        # userList = users.query\
-        #     .join(friendships, users.id==friendships.user_id)\
-        #     .add_columns(users.userId, users.name, users.email, friends.userId, friendId)\
-        #     .filter(users.id == friendships.friend_id)\
-        #     .filter(friendships.user_id == userID)\
-        #     .paginate(page, 1, False)
-        # return cls.query.join(ManifestModel, ManifestModel.id == cls.id).filter(cls.id == _id).all()
-        # report_fields = (c.name for c in cls.__table__.c if c.name not in {
-        #                  'id', 'orderno', 'weight', 'service', 'zip', 'dim1', 'dim2', 'dim3', 'zone', 'weight_threshold', 'sugg_service'})
-        # test = cls.query.with_entities(*report_fields).filter(cls.id == _id).all()
-        # for t in test:
-        #     print(t)
-
         return cls.query.filter(cls.id == _id).order_by(cls.shipdate).paginate(page, per_page, False)
+
+    @ classmethod
+    def find_all_shipments_query(cls, _id):
+        # cls.query.with_entities(*report_fields).filter(cls.id == {_id}, {(', ').join(query)}).order_by(cls.shipdate)
+        return f'cls.query.with_entities(*report_fields).filter(cls.id == {_id}).order_by(cls.shipdate)'
 
     @ classmethod
     def find_distinct_services(cls, _id):
@@ -212,77 +211,32 @@ class ManifestDataModel(db.Model):
         return paginated_result
 
     @ classmethod
-    def filter_based_report(cls, filter_query, service_replacements, include_loss):
-        # 	"lowest_cost": [cost, date],
-        # 	"highest_cost": [cost, date],
-        # 	"duration": number of days,
-        # 	“pickups”; # of pickups,
-        # 	“daily_packages”: # of daily packages,
-        # 	"carrier_stats": [
-        # 			{
-        # 			"carrier_name": name,
-        # 				“domestic_tier_stats”:
-        # {
-        # 					“tier_name”: name,
-        # "current_cost": cost,
-        # 					"tier_cost": cost,
-        # 					"savings_$": savings $,
-        # 					"savings_%": savings %,
-        # 					"our_cost": cost,
-        # 					"profit_$": profit $,
-        # 					"profit_%": profit %,
-        # 					"pickups": # of pickups,
-        # 					"daily_packages": # of daily packages
-        # 					},
-        #
-        #
-        # 			“international_tier_stats”:
-        #  {
-        # 				“tier_name”: name,
-        # "current_cost": cost,
-        # 				"tier_cost": cost,
-        # 				"savings_$": savings $,
-        # 				"savings_%": savings %,
-        # 				"our_cost": cost,
-        # 				"profit_$": profit $,
-        # 				"profit_%": profit %,
-        # 				"pickups": # of pickups,
-        # 				"daily_packages": # of daily packages
-        # 				}
-        # 			]
-        # 			},
-        # 			{... more carriers ...}
-        # 			]
-        # 	}
-        query_eval = eval(filter_query)
-        print(query_eval.statement)
-        pd.set_option('display.max_columns', None)
-        df = pd.read_sql(query_eval.statement, query_eval.session.bind)
-        if df.empty:
-            return
-        print(service_replacements)
-        df = df.apply(lambda row: ManifestDataModel.correct_service_rates(
-            row, service_replacements.get((row.service, row.country, row.weight_threshold))), axis=1)
+    def shipment_report(cls, filter_query=None, service_replacements=None, df=None, include_loss=True):
+        if filter_query:
+            query_eval = eval(filter_query)
+            print(query_eval.statement)
+            pd.set_option('display.max_columns', None)
+            df = pd.read_sql(query_eval.statement, query_eval.session.bind)
+            if df.empty:
+                return
+            if service_replacements:
+                df = df.apply(lambda row: ManifestDataModel.correct_service_rates(
+                    row, service_replacements.get((row.service, row.country, row.weight_threshold))), axis=1)
+        elif df is None:
+            raise TypeError('Filter_query or df argument required to generate report.')
         price_sum = df['price'].sum()
-        df.drop(['weight', 'weight_threshold', 'dim1', 'dim2', 'dim3', 'zone', 'service'], axis=1)
-
-        print(df.head())
-        # df[['zip', 'country']] = df.apply(lambda row: ManifestModel.add_to_zip_ctry(
-        #     row.address), axis=1, result_type='expand')
-        #     if (shipment_item.service, shipment_item.country, shipment_item.weight_threshold) in service_replacements:
-        #         print('here', shipment_item.service, shipment_item.country, shipment_item.weight_threshold)
-        #         shipment_item = shipment_item.correct_service_rates(service_replacements[(
-        #             shipment_item.service, shipment_item.country, shipment_item.weight_threshold)])
-        print(report_fields)
+        print(price_sum)
+        df.drop(['weight', 'weight_threshold', 'dim1', 'dim2', 'dim3', 'zone', 'service'], inplace=True, axis=1)
+        price_columns = [_ for _ in df.columns if _ not in ('shipdate', 'country', 'insured', 'price')]
+        print(price_columns)
         df_date_pcs = df[['shipdate', 'country']].groupby(by='shipdate', sort=False, as_index=False).count()
         df_date_pcs['shipdate'] = df_date_pcs['shipdate'].astype(str)
         date_pcs_lst = df_date_pcs.values.tolist()
-        df_by_date = df[['shipdate', 'price']].groupby(by='shipdate', sort=False).sum() if price_sum else None
-        pickup_days_count = len(df_by_date.index) if price_sum else None
+        df_by_date = df[['shipdate', 'price'] if price_sum else ['shipdate']].groupby(by='shipdate', sort=False).sum()
+        pickup_days_count = len(df_by_date.index)
         packages_count = len(df.index)
-        daily_packages = round(packages_count/pickup_days_count, 2) if pickup_days_count else None
+        daily_packages = round(packages_count/pickup_days_count, 2)
         df_by_dom_intl = df.groupby(by='country', sort=False, as_index=True).sum()
-        print(df_by_dom_intl.head())
         if include_loss:
             if 'US' in df_by_dom_intl.index:
                 current_price_total_dom = round(df_by_dom_intl['price'].loc['US'], 2) if price_sum else None
@@ -290,13 +244,17 @@ class ManifestDataModel(db.Model):
                 current_price_total_intl = round(df_by_dom_intl['price'].loc['Intl'], 2) if price_sum else None
             # packages_count_domestic = len(df['country'][df['country'] == 'US'].index)
             # packages_count_intl = packages_count-packages_count_domestic
-            pickup_expenses = pickup_days_count*cls.pickup_expense_const if price_sum else None
+            pickup_expenses = pickup_days_count*cls.pickup_expense_const
         highest_cost_date = df_by_date['price'].idxmax() if price_sum else None
-        lowest_cost_date = df_by_date['price'].idxmin() if price_sum else None
+        lowest_cost_date = df_by_date[df_by_date['price'] > 0]['price'].idxmin() if price_sum else None
         (highest_cost, lowest_cost) = (round(df_by_date['price'].loc[highest_cost_date], 2), round(
             df_by_date['price'].loc[lowest_cost_date], 2)) if price_sum else (None, None)
         # weekend dates are converted to next Monday at insert - shipdate is given to be a weekday
         start_date, end_date = df.shipdate.min(), df.shipdate.max()
+        if isinstance(start_date, str):
+            start_date, end_date = datetime.strptime(
+                start_date, '%Y-%m-%d').date(), datetime.strptime(end_date, '%Y-%m-%d').date()
+        print(start_date, type(start_date))
         diff = relativedelta.relativedelta(end_date, start_date)
         duration_dict = {'year': diff.years, 'month': diff.months, 'day': diff.days+1}
         duration = []
@@ -305,21 +263,20 @@ class ManifestDataModel(db.Model):
                 duration.append(f'{val} {time_field}{"s" if val>1 else ""}')
         duration_str = (', ').join(duration)
         carrier_stats = []
-        report = {'Duration': duration_str, 'Highest Cost': [highest_cost, str(highest_cost_date)],
-                  'Lowest Cost': [lowest_cost, str(lowest_cost_date)], 'Pickups': pickup_days_count,
+        report = {'Duration': duration_str, 'Highest Cost': [highest_cost, str(highest_cost_date) if highest_cost_date else None],
+                  'Lowest Cost': [lowest_cost, str(lowest_cost_date) if lowest_cost_date else None], 'Pickups': pickup_days_count,
                   'Daily Packages': daily_packages, 'date_pcs': date_pcs_lst}
+        top_carriers = {'US': {}, 'Intl': {}}
         for carrier in cls.carrier_fields:
             cost_field = cls.carrier_fields[carrier]['cost']
             cost_total = round(df[cost_field].sum(), 2)
-            print(cost_total, cost_field)
             for location in cls.carrier_fields[carrier]['locations']:
                 if location not in df_by_dom_intl.index:
                     continue
+                first_tier = True
                 for tier_field in cls.carrier_fields[carrier]['locations'][location]:
-                    print(tier_field, location, carrier)
                     if include_loss:
                         print('include loss')
-                        print(df_by_dom_intl.head())
                         # if 'weight_threshold' not in df_by_dom_intl.columns:
                         #     continue
                         current_price_total = current_price_total_dom if location == 'US' else current_price_total_intl
@@ -327,20 +284,22 @@ class ManifestDataModel(db.Model):
                     else:
                         print('exclude loss')
                         cost_total = round(df[cost_field][(df['country'] == location)
-                                                          & (df[tier_field] < df['price'])].sum(), 2)
+                                                          & (df[tier_field] < df['price'])].sum(), 2) if price_sum else None
                         if not cost_total:
                             continue
                         tier_total = round(df[tier_field][(df['country'] == location)
                                                           & (df[tier_field] < df['price'])].sum(), 2)
                         current_price_total = round(df['price'][(df['country'] == location)
-                                                                & (df[tier_field] < df['price'])].sum(), 2)
-                        pickup_days_count = len(df['shipdate'][df[tier_field] < df['price']].unique())
+                                                                & (df[tier_field] < df['price'])].sum(), 2) if price_sum else None
+                        pickup_days_count = len(df['shipdate'][df[tier_field] < df['price']
+                                                               ].unique()) if price_sum else None
                         pickup_expenses = pickup_days_count*cls.pickup_expense_const
-                    print('here')
-                    savings_total_amount = round(tier_total - current_price_total, 2)
-                    savings_total_percentage = round(100*savings_total_amount/current_price_total, 2)
-                    profit_total_amount = round(tier_total-cost_total-pickup_expenses, 2)
-                    profit_total_percentage = round(100*profit_total_amount/tier_total, 2)
+                    savings_total_amount = round(tier_total - current_price_total, 2) if price_sum else None
+                    savings_total_percentage = round(100*savings_total_amount /
+                                                     current_price_total, 2) if price_sum and current_price_total else None
+                    profit_total_amount = round(tier_total-cost_total-pickup_expenses,
+                                                2) if tier_total is not None and cost_total is not None else None
+                    profit_total_percentage = round(100*profit_total_amount/tier_total, 2) if tier_total else None
                     if not carrier_stats or carrier_stats[-1]['Carrier Name'] != carrier:
                         carrier_stats.append({'Carrier Name': carrier})
                     if f'{"Domestic" if location == "US" else "International"} Tier Stats' not in carrier_stats[-1]:
@@ -352,42 +311,23 @@ class ManifestDataModel(db.Model):
                          'Profit (%)': profit_total_percentage, 'Pickups': pickup_days_count,
                          'Daily Packages': daily_packages}
                     )
-        print('duration_str', duration_str, 'start_date', start_date, 'end_date', end_date, 'highest_cost', highest_cost, 'highest_cost_date', highest_cost_date,
-              'lowest_cost', lowest_cost, 'lowest_cost_date', lowest_cost_date, 'pickup_days_count', pickup_days_count, 'daily_packages', daily_packages,
-              'carrier_stats:\n', carrier_stats)
-        top_domestic_carriers = {}
-        top_international_carriers = {}
-        print(carrier_stats)
-        top_domestic_carriers['Min Tier Cost'] = min(carrier_stats, key=lambda x: x.get(
-            'Domestic Tier Stats', [{'Tier Cost': inf}])[0]['Tier Cost'])['Carrier Name']
-        top_domestic_carriers['Max Savings ($)'] = max(carrier_stats, key=lambda x: x.get(
-            'Domestic Tier Stats', [{'Savings ($)': -inf}])[0]['Savings ($)'])['Carrier Name']
-        top_domestic_carriers['Max Savings (%)'] = max(carrier_stats, key=lambda x: x.get(
-            'Domestic Tier Stats', [{'Savings (%)': -inf}])[0]['Savings (%)'])['Carrier Name']
-        top_domestic_carriers['Min Our Cost'] = max(carrier_stats, key=lambda x: x.get(
-            'Domestic Tier Stats', [{'Our Cost': inf}])[0]['Our Cost'])['Carrier Name']
-        top_domestic_carriers['Max Profit ($)'] = max(carrier_stats, key=lambda x: x.get(
-            'Domestic Tier Stats', [{'Profit ($)': -inf}])[0]['Profit ($)'])['Carrier Name']
-        top_domestic_carriers['Max Profit (%)'] = max(carrier_stats, key=lambda x: x.get(
-            'Domestic Tier Stats', [{'Profit (%)': -inf}])[0]['Profit (%)'])['Carrier Name']
-        top_international_carriers['Min Tier Cost'] = min(carrier_stats, key=lambda x: x.get(
-            'International Tier Stats', [{'Tier Cost': inf}])[0]['Tier Cost'])['Carrier Name']
-        top_international_carriers['Max Savings ($)'] = max(carrier_stats, key=lambda x: x.get(
-            'International Tier Stats', [{'Savings ($)': -inf}])[0]['Savings ($)'])['Carrier Name']
-        top_international_carriers['Max Savings (%)'] = max(carrier_stats, key=lambda x: x.get(
-            'International Tier Stats', [{'Savings (%)': -inf}])[0]['Savings (%)'])['Carrier Name']
-        top_international_carriers['Min Our Cost'] = max(carrier_stats, key=lambda x: x.get(
-            'International Tier Stats', [{'Our Cost': inf}])[0]['Our Cost'])['Carrier Name']
-        top_international_carriers['Max Profit ($)'] = max(carrier_stats, key=lambda x: x.get(
-            'International Tier Stats', [{'Profit ($)': -inf}])[0]['Profit ($)'])['Carrier Name']
-        top_international_carriers['Max Profit (%)'] = max(carrier_stats, key=lambda x: x.get(
-            'International Tier Stats', [{'Profit (%)': -inf}])[0]['Profit (%)'])['Carrier Name']
-        print(top_domestic_carriers, top_international_carriers)
+                    if not first_tier:
+                        continue
+                    if savings_total_amount and savings_total_amount > top_carriers[location].get('Max Savings', -inf):
+                        top_carriers[location]['Max Savings'] = carrier
+                    if profit_total_amount and profit_total_amount > top_carriers[location].get('Max Profit', -inf):
+                        top_carriers[location]['Max Profit'] = carrier
+                    first_tier = False
+                    print(tier_total, savings_total_amount, savings_total_percentage,
+                          cost_total, profit_total_amount, profit_total_percentage)
+        df.dropna(subset=price_columns, how='all', inplace=True)
+        prices_found = len(df.index)
+        print(f'A price was found for {round(100*prices_found/packages_count, 2)}% of shipments.')
         print('Done')
         report.update({'Carrier Stats': sorted(carrier_stats, key=lambda x: x.get(
-            'Domestic Tier Stats', [{'Tier Cost': inf}])[0]['Tier Cost']),
-            'Top Domestic Carriers': top_domestic_carriers,
-            'Top International Carriers': top_international_carriers})
+            f'{"Domestic" if "US" in df_by_dom_intl.index else "International"} Tier Stats', [{'Tier Cost': inf}])[0]['Tier Cost']),
+            'Top Domestic Carriers': top_carriers.get('US'),
+            'Top International Carriers': top_carriers.get('Intl')})
         return report
 
     @ classmethod
@@ -499,12 +439,14 @@ class ManifestDataModel(db.Model):
         return f"{'Under' if row['weight_threshold'] == '<' else 'Over or equal to'} {'1 lb' if row['country'] == 'US' else '4.4 lbs'}"
 
 
-class ManifestFormat:
-    if os.path.exists(r'manifests/format.json'):
-        with open(r'manifests/format.json', 'r') as f:
-            format = json.load(f)
-    else:
-        format = {}
+class ManifestFormatModel:
+    # if os.path.exists(r'manifests/format.json'):
+    #     with open(r'manifests/format.json', 'r') as f:
+    #         format = json.load(f)
+    # else:
+    #     format = {}
+    Collection = mongo_db.format
+    format = Collection.find_one({"_id": ObjectId("605b48c443fb2bf66ebb32c0")})
 
     def __init__(self, sw, order_no=None, date=None, weight=None, service=None, current_price=None, insured_parcel=None, address=None, address1=None, dim1=None, dim2=None, dim3=None):
         self.sw = sw
@@ -519,64 +461,64 @@ class ManifestFormat:
         self.dim1 = dim1
         self.dim2 = dim2
         self.dim3 = dim3
-        if ManifestFormat.format.get('order_no') is None:
-            ManifestFormat.format['order_no'] = {}
-        if ManifestFormat.format['order_no'].get(sw) is None and order_no:
-            ManifestFormat.format['order_no'][sw] = order_no
+        if ManifestFormatModel.format.get('order_no') is None:
+            ManifestFormatModel.format['order_no'] = {}
+        if ManifestFormatModel.format['order_no'].get(sw) is None and order_no:
+            ManifestFormatModel.format['order_no'][sw] = order_no
 
-        if ManifestFormat.format.get('date') is None:
-            ManifestFormat.format['date'] = {}
-        if ManifestFormat.format['date'].get(sw) is None and date:
-            ManifestFormat.format['date'][sw] = date
+        if ManifestFormatModel.format.get('date') is None:
+            ManifestFormatModel.format['date'] = {}
+        if ManifestFormatModel.format['date'].get(sw) is None and date:
+            ManifestFormatModel.format['date'][sw] = date
 
-        if ManifestFormat.format.get('weight') is None:
-            ManifestFormat.format['weight'] = {}
-        if ManifestFormat.format['weight'].get(sw) is None and weight:
-            ManifestFormat.format['weight'][sw] = weight
+        if ManifestFormatModel.format.get('weight') is None:
+            ManifestFormatModel.format['weight'] = {}
+        if ManifestFormatModel.format['weight'].get(sw) is None and weight:
+            ManifestFormatModel.format['weight'][sw] = weight
 
-        if ManifestFormat.format.get('service') is None:
-            ManifestFormat.format['service'] = {}
-        if ManifestFormat.format['service'].get(sw) is None and service:
-            ManifestFormat.format['service'][sw] = service
+        if ManifestFormatModel.format.get('service') is None:
+            ManifestFormatModel.format['service'] = {}
+        if ManifestFormatModel.format['service'].get(sw) is None and service:
+            ManifestFormatModel.format['service'][sw] = service
 
-        if ManifestFormat.format.get('current_price') is None:
-            ManifestFormat.format['current_price'] = {}
-        if ManifestFormat.format['current_price'].get(sw) is None and current_price:
-            ManifestFormat.format['current_price'][sw] = current_price
+        if ManifestFormatModel.format.get('current_price') is None:
+            ManifestFormatModel.format['current_price'] = {}
+        if ManifestFormatModel.format['current_price'].get(sw) is None and current_price:
+            ManifestFormatModel.format['current_price'][sw] = current_price
 
-        if ManifestFormat.format.get('insured_parcel') is None:
-            ManifestFormat.format['insured_parcel'] = {}
-        if ManifestFormat.format['insured_parcel'].get(sw) is None and insured_parcel:
-            ManifestFormat.format['insured_parcel'][sw] = insured_parcel
+        if ManifestFormatModel.format.get('insured_parcel') is None:
+            ManifestFormatModel.format['insured_parcel'] = {}
+        if ManifestFormatModel.format['insured_parcel'].get(sw) is None and insured_parcel:
+            ManifestFormatModel.format['insured_parcel'][sw] = insured_parcel
 
-        if ManifestFormat.format.get('address') is None:
-            ManifestFormat.format['address'] = {}
-        if ManifestFormat.format['address'].get(sw) is None and address:
-            ManifestFormat.format['address'][sw] = address
+        if ManifestFormatModel.format.get('address') is None:
+            ManifestFormatModel.format['address'] = {}
+        if ManifestFormatModel.format['address'].get(sw) is None and address:
+            ManifestFormatModel.format['address'][sw] = address
 
-        if ManifestFormat.format.get('address1') is None:
-            ManifestFormat.format['address1'] = {}
-        if ManifestFormat.format['address1'].get(sw) is None and address1:
-            ManifestFormat.format['address1'][sw] = address1
+        if ManifestFormatModel.format.get('address1') is None:
+            ManifestFormatModel.format['address1'] = {}
+        if ManifestFormatModel.format['address1'].get(sw) is None and address1:
+            ManifestFormatModel.format['address1'][sw] = address1
 
-        if ManifestFormat.format.get('dim1') is None:
-            ManifestFormat.format['dim1'] = {}
-        if ManifestFormat.format['dim1'].get(sw) is None and dim1:
-            ManifestFormat.format['dim1'][sw] = dim1
+        if ManifestFormatModel.format.get('dim1') is None:
+            ManifestFormatModel.format['dim1'] = {}
+        if ManifestFormatModel.format['dim1'].get(sw) is None and dim1:
+            ManifestFormatModel.format['dim1'][sw] = dim1
 
-        if ManifestFormat.format.get('dim2') is None:
-            ManifestFormat.format['dim2'] = {}
-        if ManifestFormat.format['dim2'].get(sw) is None and dim2:
-            ManifestFormat.format['dim2'][sw] = dim2
+        if ManifestFormatModel.format.get('dim2') is None:
+            ManifestFormatModel.format['dim2'] = {}
+        if ManifestFormatModel.format['dim2'].get(sw) is None and dim2:
+            ManifestFormatModel.format['dim2'][sw] = dim2
 
-        if ManifestFormat.format.get('dim3') is None:
-            ManifestFormat.format['dim3'] = {}
-        if ManifestFormat.format['dim3'].get(sw) is None and dim3:
-            ManifestFormat.format['dim3'][sw] = dim3
+        if ManifestFormatModel.format.get('dim3') is None:
+            ManifestFormatModel.format['dim3'] = {}
+        if ManifestFormatModel.format['dim3'].get(sw) is None and dim3:
+            ManifestFormatModel.format['dim3'][sw] = dim3
 
         # if CarrierCharge.map[carrier][location][date][service_code][ship_zone].get(weight) is None:
-        with open(r'Manifests\format.json', 'w') as f:
-            json.dump(ManifestFormat.format, f, indent=4)
+        # with open(r'Manifests\format.json', 'w') as f:
+        #     json.dump(ManifestFormatModel.format, f, indent=4)
 
     def __str__(self):
         return (f"Software: {self.sw}\nSoftware: {self.sw}\nOrder No: {self.order_no}\n\
@@ -608,32 +550,91 @@ class ManifestFormat:
 
     def address(self):
         return self.address
+    #
+    # def update_sw_format(sw, order_no=None, date=None, weight=None, service=None, current_price=None, insured_parcel=None, address=None, address1=None, dim1=None, dim2=None, dim3=None):
+    #     if order_no:
+    #         ManifestFormatModel.format['order_no'][sw] = order_no
+    #     if date:
+    #         ManifestFormatModel.format['date'][sw] = date
+    #     if weight:
+    #         ManifestFormatModel.format['weight'][sw] = weight
+    #     if service:
+    #         ManifestFormatModel.format['service'][sw] = service
+    #     if current_price:
+    #         ManifestFormatModel.format['current_price'][sw] = current_price
+    #     if insured_parcel:
+    #         ManifestFormatModel.format['insured_parcel'][sw] = insured_parcel
+    #     if address:
+    #         ManifestFormatModel.format['address'][sw] = address
+    #     if address1:
+    #         ManifestFormatModel.format['address1'][sw] = address
+    #     if dim1:
+    #         ManifestFormatModel.format['dim1'][sw] = dim1
+    #     if dim2:
+    #         ManifestFormatModel.format['dim2'][sw] = dim1
+    #     if dim3:
+    #         ManifestFormatModel.format['dim3'][sw] = dim1
+    #     with open(r'Manifests\format.json', 'w') as f:
+    #         json.dump(ManifestFormatModel.format, f, indent=4)
 
-    def update_sw_format(sw, order_no=None, date=None, weight=None, service=None, current_price=None, insured_parcel=None, address=None, address1=None, dim1=None, dim2=None, dim3=None):
-        if order_no:
-            ManifestFormat.format['order_no'][sw] = order_no
-        if date:
-            ManifestFormat.format['date'][sw] = date
-        if weight:
-            ManifestFormat.format['weight'][sw] = weight
-        if service:
-            ManifestFormat.format['service'][sw] = service
-        if current_price:
-            ManifestFormat.format['current_price'][sw] = current_price
-        if insured_parcel:
-            ManifestFormat.format['insured_parcel'][sw] = insured_parcel
-        if address:
-            ManifestFormat.format['address'][sw] = address
-        if address1:
-            ManifestFormat.format['address1'][sw] = address
-        if dim1:
-            ManifestFormat.format['dim1'][sw] = dim1
-        if dim2:
-            ManifestFormat.format['dim2'][sw] = dim1
-        if dim3:
-            ManifestFormat.format['dim3'][sw] = dim1
-        with open(r'Manifests\format.json', 'w') as f:
-            json.dump(ManifestFormat.format, f, indent=4)
+    @classmethod
+    def find_platformat(cls, platform):
+        platformat = {}
+        for field in cls.format:
+            if field == '_id':
+                continue
+            if platform in cls.format[field]:
+                platformat[field] = {'header': cls.format[field][platform]['header']}
+                if 'header_alt' in cls.format[field][platform]:
+                    platformat[field]['header_alt'] = cls.format[field][platform]['header_alt']
+        return platformat
+
+    @classmethod
+    def add_format_fields(cls, platform, field, header, value, index):
+        if header == 'header_alt':
+            cls.Collection.update_one({"_id": ObjectId("605b48c443fb2bf66ebb32c0")}, {
+                                      '$push': {f'{field}.{platform}.{header}.{index}': value}})
+            cls.format[field][platform][header][index].append(value)
+        else:
+            cls.Collection.update_one({"_id": ObjectId("605b48c443fb2bf66ebb32c0")}, {
+                                      '$push': {f'{field}.{platform}.{header}': value}})
+            cls.format[field][platform][header].append(value)
+
+
+class ManifestRaw:
+    ManifestCollection = mongo_db.manifest_names
+
+    def __init__(self, name, init_time):
+        self.name = name
+        self.init_time = init_time
+
+    @classmethod
+    def find_manifest_by_id(cls, _id):
+        manifest = cls.ManifestCollection.find_one({'_id': ObjectId(_id)}, {'_id': 0})
+        return manifest
+
+    @classmethod
+    def find_shipments_by_name(cls, name, columns, dtype=None, limit=0):
+        headers = {col: 1 for col in columns}
+        headers['_id'] = 0
+        df = pd.DataFrame(
+            list(mongo_db[name].find({}, headers, limit=limit)), columns=columns, dtype=dtype)
+        print(name, columns, limit, headers, df.head(5), df.columns)
+        return pd.DataFrame(list(mongo_db[name].find({}, headers, limit=limit)), columns=columns, dtype=dtype)
+
+    @classmethod
+    def save_to_db(cls, df, **kwargs):
+        RawCollection = mongo_db[kwargs['name']]
+        RawCollection.insert_many(df.to_dict('records'))
+        kwargs['init_time'] = datetime.now()
+        _id = cls.ManifestCollection.insert(kwargs)
+        return str(_id)
+
+    def delete_from_db(cls, _id):
+        name = cls.ManifestCollection.find_one_and_delete({'_id': _id}, {'name': 1, '_id': 0})
+        if name:
+            mongo_db[name].drop()
+        # continue manual manifest - complete saving to db, db to df, deleting afterwards
 
 
 class ManifestModel(db.Model):
@@ -643,15 +644,15 @@ class ManifestModel(db.Model):
     init_time = db.Column(db.DateTime())
     manifest_data = db.relationship('ManifestDataModel', cascade='all,delete', lazy='dynamic')
     manifest_missing = db.relationship('ManifestMissingModel', cascade='all,delete', lazy='dynamic')
-    format = ManifestFormat.format
     ai1s_headers = {'orderno', 'shipdate', 'weight', 'service provider and name', 'service provider', 'service name', 'zip', 'country', 'price',
                     'insured', 'dim1', 'dim2', 'dim3', 'address'}
     ai1s_headers_ordered = ['orderno', 'shipdate', 'weight', 'service', 'zip', 'country', 'insured', 'dim1', 'dim2', 'dim3', 'price', 'zone',
                             'sugg_service', 'dhl_tier_1_2021', 'dhl_tier_2_2021', 'dhl_tier_3_2021', 'dhl_tier_4_2021', 'dhl_tier_5_2021', 'dhl_cost_2021', 'usps_2021', 'dhl_cost_shipdate', 'usps_shipdate']
+    default_types = {'price': 'float', 'dim1': 'float', 'dim2': 'float', 'dim3': 'float'}
     upload_directory = 'api_uploads'
     type_conv = {'str': str, 'float': float, 'int': pd.Int64Dtype(), 'bool': bool}
-    # with open(r'dependencies\services\dhl_service_hash.json', 'r') as f:
-    # service = json.load(f)
+    ServiceCollection = mongo_db.service_to_code
+    sv_to_code = ServiceCollection.find_one()
 
     def __init__(self, name):
         self.name = name
@@ -782,7 +783,8 @@ class ManifestModel(db.Model):
         # print(val_total)
         return val_total
 
-    def service_from_params(sv_name, ctry_code, weight):
+    @classmethod
+    def service_from_params(cls, sv_name, ctry_code, weight):
         # OVERRIDE:
 
         # sv_to_code = service_override
@@ -794,10 +796,10 @@ class ManifestModel(db.Model):
         if sv_name in service_names:
             return [int(service_names[sv_name]), sv_name, weight_thres]
         sv_name = re.sub(r'[^\w]', '', sv_name).lower()
-        if sv_name in sv_to_code:
-            if dom_intl in sv_to_code[sv_name]:
-                if weight_thres in sv_to_code[sv_name][dom_intl]:
-                    return [sv_to_code[sv_name][dom_intl][weight_thres], lib_service[str(sv_to_code[sv_name][dom_intl][weight_thres])][3], weight_thres]
+        if sv_name in cls.sv_to_code:
+            if dom_intl in cls.sv_to_code[sv_name]:
+                if weight_thres in cls.sv_to_code[sv_name][dom_intl]:
+                    return [cls.sv_to_code[sv_name][dom_intl][weight_thres], lib_service[str(cls.sv_to_code[sv_name][dom_intl][weight_thres])][3], weight_thres]
                 else:
                     print(f'Weight threshold not found for service name: {sv_name}.')
             else:
@@ -870,21 +872,30 @@ class ManifestModel(db.Model):
                 country = ' '.join(add_split[n-i+1:])
                 return (zip, country)
 
-    def update_services(row):
-        if row['service'] is not nan:
-            sv_name = re.sub(r'[^\w]', '', row['service']).lower()
-            dom_intl = 'domestic' if row.country == 'US' else 'international'
-            if row['sugg. service'] is not nan:
-                if sv_name not in sv_to_code:
-                    sv_to_code[sv_name] = {}
-                if dom_intl not in sv_to_code[sv_name]:
-                    sv_to_code[sv_name][dom_intl] = {}
-                # Only updates if there is no existing suggested service - no overrides
-                if row['weight threshold'] not in sv_to_code[sv_name][dom_intl]:
-                    sv_to_code[sv_name][dom_intl][row['weight threshold']] = int(
-                        service_names[row['sugg. service']])
-                    with open(r'dependencies\services\sv_to_code.json', 'w') as f:
-                        json.dump(sv_to_code, f, indent=4)
+    @classmethod
+    def update_services(cls, request, **form):
+        print(request, form)
+        sv_name = re.sub(r'[^\w]', '', form['service']).lower()
+        dom_intl = 'domestic' if form['country'] == 'US' else 'international'
+        weight_threshold = '>=' if form['weight_threshold'][:5] == 'Over ' else '<'
+        if sv_name not in cls.sv_to_code:
+            cls.sv_to_code[sv_name] = {}
+        if dom_intl not in cls.sv_to_code[sv_name]:
+            cls.sv_to_code[sv_name][dom_intl] = {}
+        if request == 'post':
+            if weight_threshold in cls.sv_to_code[sv_name][dom_intl]:
+                return 0
+            cls.sv_to_code[sv_name][dom_intl][weight_threshold] = int(
+                service_names[form['sugg_service']])
+        elif request == 'put':
+            cls.sv_to_code[sv_name][dom_intl][weight_threshold] = int(
+                service_names[form['sugg_service']])
+            # with open(r'dependencies\services\sv_to_code.json', 'w') as f:
+            #     json.dump(sv_to_code, f, indent=4)
+        else:
+            return 0
+        cls.ServiceCollection.update_one({'_id': ObjectId('605b86138bd7990a0c25a526')}, {'$set': {sv_name: cls.sv_to_code[sv_name]}})
+        return 1
 
 
 report_fields = set(c for c in ManifestDataModel.__table__.c if c.name not in {
