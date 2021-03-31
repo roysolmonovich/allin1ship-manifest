@@ -168,7 +168,7 @@ def update_table():
             else:
                 font_color = 'red'
                 flash('Something went wrong: ' + response.text)
-    return redirect(url_for('index'))
+    return redirect('https://allin1ship-app.herokuapp.com/')
 
 
 @app.route('/company-info')
@@ -235,7 +235,7 @@ def reset_session():
     """Resets session"""
     session.pop('qbo_token', None)
     session['is_authorized'] = False
-    return redirect(request.referrer or url_for('index'))
+    return redirect(request.referrer or 'https://allin1ship-app.herokuapp.com/')
 
 
 @app.route('/callback')
@@ -264,7 +264,7 @@ def callback():
     session['access_token'] = bearer['access_token']
     session['refresh_token'] = bearer['refresh_token']
 
-    return redirect(url_for('index'))
+    return redirect('https://allin1ship-app.herokuapp.com/')
 
 
 def csrf_token():
