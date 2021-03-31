@@ -10,14 +10,14 @@ SQLALCHEMY_ECHO = False
 # Mendy's CLIENT_SECRET_2 = 'INzkNGb5TsLI1iqEghyZoLqKAeOHkzWNWYdQN1Te'
 # Mendy's CLIENT_ID_3 = 'ABw4SNtV7DAcHwhzEDUHYfZu5chENS0Ggb3e4NU8NS5X0gcVAm'
 # Mendy's CLIENT_SECRET_3 = 'vmSF1ggrPuAl8Le3LXEEertBkF1gFPe86DOSjKBt'
-CLIENT_ID= 'ABw4SNtV7DAcHwhzEDUHYfZu5chENS0Ggb3e4NU8NS5X0gcVAm'
-CLIENT_SECRET = 'vmSF1ggrPuAl8Le3LXEEertBkF1gFPe86DOSjKBt'
-REDIRECT_URI = 'http://localhost:5000/callback'
+CLIENT_ID= 'ABwEUav1LdGphUfD7MtbJihfXCKRowSV90rCSUOPEsXsDLserv'
+CLIENT_SECRET = 'J6IRGJ8KlIu21BnKlTHknot2OZeFTYM3rwvLxB0i'
+REDIRECT_URI = 'https://allin1ship-app.herokuapp.com/callback'
 AUTH_TYPE = 'OAuth2'
 
 # Choose environment; default is sandbox
-# ENVIRONMENT = 'Sandbox'
-ENVIRONMENT = 'Production'
+ENVIRONMENT = 'Sandbox'
+# ENVIRONMENT = 'Production'
 
 # Set to latest at the time of updating this app, can be be configured to any minor version
 API_MINORVERSION = '40'
