@@ -126,13 +126,13 @@ def revoked_token_callback(self, callback):
 cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 
+# @app.route('/')
+# def index():
+#     return "<h1>Welcome to our server !!</h1>"
+
+
 @app.route('/')
 def index():
-    return "<h1>Welcome to our server !!</h1>"
-
-
-@app.route('/qb-welcome')
-def qb_index():
     """Index route"""
     global customer_list
     customer_list = excel.load_excel()
