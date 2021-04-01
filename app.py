@@ -16,7 +16,7 @@ from resources.carrieritem import CarrierItem
 from resources.user import User, UserLogin, UserLogout, TokenRefresh
 from resources.manifest import Manifest, ManifestFilter, ManifestNames, ManifestColumns, ManifestManual, ManifestAuthTest, ManifestFormat
 from flask import Flask, jsonify, request, redirect, url_for, session, g, flash, render_template
-  # , flash, redirect
+# , flash, redirect
 from flask_restful import Api, Resource
 from blocklist import BLOCKLIST
 from flask_jwt_extended import JWTManager, jwt_required
@@ -98,6 +98,7 @@ app.config['CELERY_RESULT_BACKEND'] = app.config['REDIS_URL']
 celery = Celery(app.name, backend='redis', broker=app.config['REDIS_URL'])
 # celery.conf.update(app.config)
 
+
 @jwt.token_in_blocklist_loader
 def check_if_token_in_blocklist(jwt_header, jwt_payload):
     jti = jwt_payload['jti']
@@ -152,6 +153,7 @@ def index():
         customer_dict=customer_list,
         title="QB Customer Leads",
     )
+
 
 @app.route('/', methods=['POST'])
 def update_table():
@@ -246,7 +248,7 @@ def reset_session():
     """Resets session"""
     session.pop('qbo_token', None)
     session['is_authorized'] = False
-    return redirect(request.referrer or 'https://allin1ship-app.herokuapp.com/')
+    return redirect('https://allin1ship-app.herokuapp.com/')
 
 
 @app.route('/callback')
@@ -284,6 +286,7 @@ def csrf_token():
         token = OAuth2Helper.secret_key()
         session['csrfToken'] = token
     return token
+
 
 @app.route('/map/')
 @jwt_required()
