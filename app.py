@@ -94,8 +94,6 @@ jwt = JWTManager(app)
 app.config['CELERY_BROKER_URL'] = app.config['REDIS_URL']
 app.config['CELERY_RESULT_BACKEND'] = app.config['REDIS_URL']
 celery = Celery(app.name, backend='redis', broker=app.config['REDIS_URL'])
-app.conf.update(BROKER_URL=os.environ['REDIS_URL'],
-                CELERY_RESULT_BACKEND=os.environ['REDIS_URL'])
 celery.conf.update(app.config)
 
 @jwt.token_in_blocklist_loader
