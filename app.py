@@ -12,7 +12,7 @@ from app_lib import service
 # import config
 from resources.carrieritem import CarrierItem
 from resources.user import User, UserLogin, UserLogout, TokenRefresh
-from resources.manifest import Manifest, ManifestFilter, ManifestNames, ManifestColumns, ManifestManual, ManifestAuthTest, ManifestFormat
+from resources.manifest import Manifest, ManifestFilter, ManifestNames, ManifestColumns, ManifestManual, ManifestAuthTest, ManifestFormat, ManifestServiceUpdate
 from flask import Flask, jsonify  # , request, redirect, url_for, session, g, flash, render_template
 # , flash, redirect
 from flask_restful import Api  # , Resource
@@ -212,6 +212,7 @@ api.add_resource(UserLogin, '/login')
 api.add_resource(TokenRefresh, '/refresh')
 api.add_resource(UserLogout, '/logout')
 api.add_resource(ManifestFormat, '/manifest-format')
+api.add_resource(ManifestServiceUpdate, '/manifest-service-update')
 # api.add_resource(Customer, '/read-customer')
 # manifest-manual
 # manifest-manual-submit
