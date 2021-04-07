@@ -12,11 +12,9 @@ SQLALCHEMY_ECHO = False
 # Mendy's CLIENT_SECRET_3 = 'vmSF1ggrPuAl8Le3LXEEertBkF1gFPe86DOSjKBt'
 # Mendy's CLIENT_ID_4 - test app development = 'ABoKrcajTt7QIjR1GnyruzZLhspMMaRn5B22F5qzhu22DRTfaz'
 # Mendy's CLIENT_SECRET_4 = 'r9E3V6u717j265mscKnXmolgweK5MVEgGYKsrbWZ'
-# Mendy's CLIENT_ID_5 - test app production = 'ABw4SNtV7DAcHwhzEDUHYfZu5chENS0Ggb3e4NU8NS5X0gcVAm'
-# Mendy's CLIENT_SECRET_5 = 'vmSF1ggrPuAl8Le3LXEEertBkF1gFPe86DOSjKBt'
 
-CLIENT_ID= 'ABoKrcajTt7QIjR1GnyruzZLhspMMaRn5B22F5qzhu22DRTfaz'
-CLIENT_SECRET = 'r9E3V6u717j265mscKnXmolgweK5MVEgGYKsrbWZ'
+CLIENT_ID= 'ABw4SNtV7DAcHwhzEDUHYfZu5chENS0Ggb3e4NU8NS5X0gcVAm'
+CLIENT_SECRET = 'vmSF1ggrPuAl8Le3LXEEertBkF1gFPe86DOSjKBt'
 REDIRECT_URI = 'https://allin1ship-app.herokuapp.com/callback'
 AUTH_TYPE = 'OAuth2'
 

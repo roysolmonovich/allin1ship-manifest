@@ -87,7 +87,6 @@ class ManifestDataModel(db.Model):
                       }
     pickup_expense_const = 15
 
-
     def __init__(self, id, orderno, shipdate, weight, service, zip, country, insured, dim1, dim2, dim3, price, zone, weight_threshold, sugg_service, dhl_tier_1_2021, dhl_tier_2_2021, dhl_tier_3_2021, dhl_tier_4_2021, dhl_tier_5_2021, dhl_cost_2021, usps_2021, dhl_cost_shipdate, usps_shipdate):
         self.id = id
         self.orderno = orderno
@@ -630,6 +629,7 @@ class ManifestRaw:
         _id = cls.ManifestCollection.insert(kwargs)
         return str(_id)
 
+    @classmethod
     def delete_from_db(cls, _id):
         name = cls.ManifestCollection.find_one_and_delete({'_id': _id}, {'name': 1, '_id': 0})
         if name:
@@ -894,7 +894,8 @@ class ManifestModel(db.Model):
             #     json.dump(sv_to_code, f, indent=4)
         else:
             return 0
-        cls.ServiceCollection.update_one({'_id': ObjectId('605b86138bd7990a0c25a526')}, {'$set': {sv_name: cls.sv_to_code[sv_name]}})
+        cls.ServiceCollection.update_one({'_id': ObjectId('605b86138bd7990a0c25a526')}, {
+                                         '$set': {sv_name: cls.sv_to_code[sv_name]}})
         return 1
 
 
