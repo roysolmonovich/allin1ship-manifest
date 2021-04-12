@@ -75,7 +75,7 @@ class ManifestDataModel(db.Model):
     zone_areas = {
         'Non-contiguous US': [f'Zone {i}' for i in range(11, 14)], 'Contiguous US': [f'Zone {i:02}' for i in range(1, 9)]}
     carrier_fields = {'DHL':
-                      {'cost': 'dhl_cost_shipdate',
+                      {'cost': 'dhl_cost_2021',
                        'locations': {
                            'US':
                            ('dhl_tier_1_2021', 'dhl_tier_2_2021', 'dhl_tier_3_2021', 'dhl_tier_4_2021',
@@ -215,6 +215,7 @@ class ManifestDataModel(db.Model):
             query_eval = eval(filter_query)
             print(query_eval.statement)
             pd.set_option('display.max_columns', None)
+            pd.set_option('display.max_rows', None)
             df = pd.read_sql(query_eval.statement, query_eval.session.bind)
             if df.empty:
                 return
@@ -226,8 +227,9 @@ class ManifestDataModel(db.Model):
         price_sum = df['price'].sum()
         print(price_sum)
         df.drop(['weight', 'weight_threshold', 'dim1', 'dim2', 'dim3', 'zone', 'service'], inplace=True, axis=1)
-        price_columns = [_ for _ in df.columns if _ not in ('shipdate', 'country', 'insured', 'price')]
+        price_columns = [_ for _ in df.columns if _ not in ('shipdate', 'country', 'insured')]
         print(price_columns)
+        print(df[['price']].head(2000))
         df_date_pcs = df[['shipdate', 'country']].groupby(by='shipdate', sort=False, as_index=False).count()
         df_date_pcs['shipdate'] = df_date_pcs['shipdate'].astype(str)
         date_pcs_lst = df_date_pcs.values.tolist()
@@ -253,7 +255,6 @@ class ManifestDataModel(db.Model):
         if isinstance(start_date, str):
             start_date, end_date = datetime.strptime(
                 start_date, '%Y-%m-%d').date(), datetime.strptime(end_date, '%Y-%m-%d').date()
-        print(start_date, type(start_date))
         diff = relativedelta.relativedelta(end_date, start_date)
         duration_dict = {'year': diff.years, 'month': diff.months, 'day': diff.days+1}
         duration = []

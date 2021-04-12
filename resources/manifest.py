@@ -607,6 +607,7 @@ class Manifest(Resource):
                     df['weight'] = df.apply(lambda row: ManifestModel.w_lbs_or_w_oz(row['weight']), axis=1)
             else:
                 df = create_df(columns, dtype, headers)
+            df['weight'] *= 16
             df[['zip', 'country']] = df.apply(lambda row: ManifestModel.add_to_zip_ctry(
                 row.address), axis=1, result_type='expand')
             # At this point we either have a service column with vendor and service code,
