@@ -2,7 +2,7 @@ from flask_restful import Resource
 from models.manifest import ManifestModel, ManifestDataModel, ManifestMissingModel, ManifestFormatModel, ManifestRaw
 from schemas.manifest import ManifestSchema, ManifestUpdateSchema, ManifestFormatSchema, ManifestServiceUpdateSchema
 # from flask import jsonify, request
-from flask import request
+from flask import request, url_for
 from werkzeug.utils import secure_filename
 import os
 # from celery import Celery
@@ -12,13 +12,18 @@ from math import ceil
 from app_lib import service as lib_service
 from numpy import nan, where
 from flask_jwt_extended import jwt_required
+if os.environ.get('REDIS_URL') is not None:
+    redis_cred = os.environ['REDIS_URL']
+else:
+    # from c import redis_cred
+    redis_cred = 'redis://localhost:6379'
 # from xlrd import open_workbook
 manifest_schema = ManifestSchema()
 manifest_update_schema = ManifestUpdateSchema()
 manifest_format_schema = ManifestFormatSchema()
 manifest_service_update_schema = ManifestServiceUpdateSchema()
 # celery = Celery('apptst_h - Copy', backend='redis',
-#                 broker='redis://:p62ec9530586b558b8a416ac999122f565069ba2bc5658de5ff6ca065aa7889b5@ec2-54-198-194-83.compute-1.amazonaws.com:15420')
+#                 broker=redis_cred)
 
 # from flask_jwt import jwt_required
 dom_service_names = []
@@ -28,12 +33,54 @@ for v in lib_service.values():
         dom_service_names.append(v[3])
     elif v[-1] == 'international':
         intl_service_names.append(v[3])
+dom_service_names.append('Service Currently Not Provided')
+intl_service_names.append('Service Currently Not Provided')
 dom_intl = {'domestic services': dom_service_names, 'international services': intl_service_names}
 
 
 class ManifestColumns(Resource):
     def get(self):
         return {'headers': sorted(list(ManifestModel.ai1s_headers))}
+
+
+class ManifestTaskStatus(Resource):
+    def get(self):
+        task_id = request.args.get('task_id')
+        print(self)
+        print(task_id)
+        task = get_task.AsyncResult(task_id)
+        if task.state == 'PENDING':
+            # job did not start yet
+            response = {
+                'state': task.state,
+                'current': 0,
+                'total': 1,
+                'status': 'Pending...'
+            }
+        elif task.state != 'FAILURE':
+            response = {
+                'state': task.state,
+                'current': task.info.get('current', 0),
+                'total': task.info.get('total', 1),
+                'status': task.info.get('status', '')
+            }
+            if 'result' in task.info:
+                response['result'] = task.info['result']
+        else:
+            # something went wrong in the background job
+            response = {
+                'state': task.state,
+                'current': 1,
+                'total': 1,
+                'status': str(task.info),  # this is the exception raised
+            }
+        return response
+
+
+# class ManifestColumnsTest(Resource):
+#     def get(self):
+#         task = get_task.apply_async()
+#         return {'message': 'In progress.'}, 202, {'Location': url_for('manifesttaskstatus', task_id=task.id)}
 
 
 class ManifestManual(Resource):
@@ -193,15 +240,14 @@ class Manifest(Resource):
         paginated_result = ManifestDataModel.find_all_shipments(existing.id)
         query = ManifestDataModel.find_all_shipments_query(existing.id)
         for shipment_item in paginated_result.items:
-            # '_sa_instance_state'
             shipment = shipment_item.__dict__
             del shipment['_sa_instance_state']
             shipment['shipdate'] = str(shipment['shipdate'])
             for missing_column in missing_columns:
                 shipment[missing_column+'_gen'] = shipment.pop(missing_column)
             shipments.append(shipment)
-        date_range = [shipments[0].get('shipdate') or shipments[0].get(
-            'shipdate_gen'), shipments[-1].get('shipdate') or shipments[-1].get('shipdate_gen')] if shipments else [None, None]
+        # date_range = [shipments[0].get('shipdate') or shipments[0].get(
+        #     'shipdate_gen'), shipments[-1].get('shipdate') or shipments[-1].get('shipdate_gen')] if shipments else [None, None]
         date_range = ManifestDataModel.find_date_range(existing.id)
         services = []
         for service, weight_threshold, country, sugg_service in ManifestDataModel.find_distinct_services(existing.id):
@@ -1660,3 +1706,9 @@ class ManifestAuthTest(Resource):
     @ jwt_required()
     def get(self):
         return 'ok'
+
+
+# @ celery.task(bind=True)
+# def get_task(self):
+#     self.update_state(state='PROGRESS')
+#     return {'headers': sorted(list(ManifestModel.ai1s_headers))}

@@ -1,21 +1,8 @@
 import os
 import csv
-import mysql.connector
 import pickle
 import json
-import pandas as pd
-import math
 from datetime import datetime, date
-from math import ceil
-import bisect
-import re
-import string
-# with open(r'dependencies\overlabeled\overlabeled.pkl', 'rb') as f:
-#     overlabeled = pickle.load(f)
-# with open(r'dependencies\overlabeled\overlabeled.json', 'w') as f:
-#     json.dump(overlabeled, f, indent=4)
-# with open(r'dependencies\sheets\customers.pkl', 'rb') as f:
-#     customers = pickle.load(f)
 try:
     with open(r'dependencies/overlabeled/overlabeled.json', 'r') as f:
         overlabeled = json.load(f)

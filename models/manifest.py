@@ -5,12 +5,11 @@ from dateutil import relativedelta
 from sqlalchemy.sql import func
 # import mf_lib as mflib
 import pandas as pd
-from numpy import random, int64, nan, inf
+from numpy import random, int64, inf
 # from flask-sqlalchemy import
 from app_lib import CarrierCharge, country_to_code, service as lib_service, dhl_zip_zone_2020, ca_zip_zone, service_names, weight
 import re
 import os
-import json
 from sqlalchemy.exc import ProgrammingError
 from pymongo import MongoClient
 from bson.objectid import ObjectId
