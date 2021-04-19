@@ -227,8 +227,8 @@ class ManifestDataModel(db.Model):
         print(price_sum)
         df.drop(['weight', 'weight_threshold', 'dim1', 'dim2', 'dim3', 'zone', 'service'], inplace=True, axis=1)
         price_columns = [_ for _ in df.columns if _ not in ('shipdate', 'country', 'insured')]
-        print(price_columns)
-        print(df[['price']].head(2000))
+        # print(price_columns)
+        # print(df[['price']].head(2000))
         df_date_pcs = df[['shipdate', 'country']].groupby(by='shipdate', sort=False, as_index=False).count()
         df_date_pcs['shipdate'] = df_date_pcs['shipdate'].astype(str)
         date_pcs_lst = df_date_pcs.values.tolist()
@@ -304,9 +304,9 @@ class ManifestDataModel(db.Model):
                     if f'{"Domestic" if location == "US" else "International"} Tier Stats' not in carrier_stats[-1]:
                         carrier_stats[-1][f'{"Domestic" if location == "US" else "International"} Tier Stats'] = []
                     carrier_stats[-1][f'{"Domestic" if location == "US" else "International"} Tier Stats'].append(
-                        {'Tier Name': tier_field, 'Current Cost': cost_total, 'Tier Cost': tier_total,
+                        {'Tier Name': tier_field, 'Current Cost': current_price_total, 'Tier Cost': tier_total,
                          'Savings ($)': savings_total_amount, 'Savings (%)': savings_total_percentage,
-                         'Our Cost': current_price_total, 'Profit ($)': profit_total_amount,
+                         'Our Cost': cost_total, 'Profit ($)': profit_total_amount,
                          'Profit (%)': profit_total_percentage, 'Pickups': pickup_days_count,
                          'Daily Packages': daily_packages}
                     )
