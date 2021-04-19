@@ -304,11 +304,14 @@ class ManifestDataModel(db.Model):
                     if f'{"Domestic" if location == "US" else "International"} Tier Stats' not in carrier_stats[-1]:
                         carrier_stats[-1][f'{"Domestic" if location == "US" else "International"} Tier Stats'] = []
                     carrier_stats[-1][f'{"Domestic" if location == "US" else "International"} Tier Stats'].append(
-                        {'Tier Name': tier_field, 'Current Cost': current_price_total, 'Tier Cost': tier_total,
-                         'Savings ($)': savings_total_amount, 'Savings (%)': savings_total_percentage,
-                         'Our Cost': cost_total, 'Profit ($)': profit_total_amount,
-                         'Profit (%)': profit_total_percentage, 'Pickups': pickup_days_count,
-                         'Daily Packages': daily_packages}
+                        {'Tier Name': tier_field, 'Current Cost': f"${current_price_total}" if current_price_total else current_price_total,
+                         'Tier Cost': f"${tier_total}" if tier_total else tier_total,
+                         'Savings ($)': f"${savings_total_amount}" if savings_total_amount else savings_total_amount,
+                         'Savings (%)': f"{savings_total_percentage}%" if savings_total_percentage else savings_total_percentage,
+                         'Our Cost': f"${cost_total}" if cost_total else cost_total,
+                         'Profit ($)': f"${profit_total_amount}" if profit_total_amount else profit_total_amount,
+                         'Profit (%)': f"{profit_total_percentage}%" if profit_total_percentage else profit_total_percentage,
+                         'Pickups': pickup_days_count, 'Daily Packages': daily_packages}
                     )
                     if not first_tier:
                         continue
