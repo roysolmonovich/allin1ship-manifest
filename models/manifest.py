@@ -280,6 +280,7 @@ class ManifestDataModel(db.Model):
                         #     continue
                         current_price_total = current_price_total_dom if location == 'US' else current_price_total_intl
                         tier_total = round(df_by_dom_intl[tier_field].loc[location], 2)
+                        tier_total = tier_total if tier_total else None
                     else:
                         print('exclude loss')
                         cost_total = round(df[cost_field][(df['country'] == location)
@@ -288,14 +289,16 @@ class ManifestDataModel(db.Model):
                             continue
                         tier_total = round(df[tier_field][(df['country'] == location)
                                                           & (df[tier_field] < df['price'])].sum(), 2)
+                        tier_total = tier_total if tier_total else None
                         current_price_total = round(df['price'][(df['country'] == location)
                                                                 & (df[tier_field] < df['price'])].sum(), 2) if price_sum else None
                         pickup_days_count = len(df['shipdate'][df[tier_field] < df['price']
                                                                ].unique()) if price_sum else None
                         pickup_expenses = pickup_days_count*cls.pickup_expense_const
-                    savings_total_amount = round(current_price_total - tier_total, 2) if price_sum else None
+                    savings_total_amount = round(current_price_total - tier_total,
+                                                 2) if price_sum and tier_total else None
                     savings_total_percentage = round(100*savings_total_amount /
-                                                     current_price_total, 2) if price_sum and current_price_total else None
+                                                     current_price_total, 2) if tier_total and price_sum and current_price_total else None
                     profit_total_amount = round(tier_total-cost_total-pickup_expenses,
                                                 2) if tier_total is not None and cost_total is not None else None
                     profit_total_percentage = round(100*profit_total_amount/tier_total, 2) if tier_total else None
