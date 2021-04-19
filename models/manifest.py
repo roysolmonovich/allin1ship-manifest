@@ -268,11 +268,11 @@ class ManifestDataModel(db.Model):
         top_carriers = {'US': {}, 'Intl': {}}
         for carrier in cls.carrier_fields:
             cost_field = cls.carrier_fields[carrier]['cost']
-            cost_total = round(df[cost_field].sum(), 2)
             for location in cls.carrier_fields[carrier]['locations']:
                 if location not in df_by_dom_intl.index:
                     continue
                 first_tier = True
+                cost_total = round(df[cost_field][df['country'] == location].sum(), 2)
                 for tier_field in cls.carrier_fields[carrier]['locations'][location]:
                     if include_loss:
                         print('include loss')
@@ -293,7 +293,7 @@ class ManifestDataModel(db.Model):
                         pickup_days_count = len(df['shipdate'][df[tier_field] < df['price']
                                                                ].unique()) if price_sum else None
                         pickup_expenses = pickup_days_count*cls.pickup_expense_const
-                    savings_total_amount = round(tier_total - current_price_total, 2) if price_sum else None
+                    savings_total_amount = round(current_price_total - tier_total, 2) if price_sum else None
                     savings_total_percentage = round(100*savings_total_amount /
                                                      current_price_total, 2) if price_sum and current_price_total else None
                     profit_total_amount = round(tier_total-cost_total-pickup_expenses,
