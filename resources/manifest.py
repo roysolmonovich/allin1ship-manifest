@@ -2,7 +2,7 @@ from flask_restful import Resource
 from models.manifest import ManifestModel, ManifestDataModel, ManifestMissingModel, ManifestFormatModel, ManifestRaw
 from schemas.manifest import ManifestSchema, ManifestUpdateSchema, ManifestFormatSchema, ManifestServiceUpdateSchema
 # from flask import jsonify, request
-from flask import request, url_for
+from flask import request
 from werkzeug.utils import secure_filename
 import os
 # from celery import Celery
@@ -12,6 +12,8 @@ from math import ceil
 from app_lib import service as lib_service
 from numpy import nan, where
 from flask_jwt_extended import jwt_required
+
+# Redis is currently not used
 if os.environ.get('REDIS_URL') is not None:
     redis_cred = os.environ['REDIS_URL']
 else:
@@ -43,6 +45,7 @@ class ManifestColumns(Resource):
         return {'headers': sorted(list(ManifestModel.ai1s_headers))}
 
 
+# Not in use - could be used for celery app to make function calls async
 class ManifestTaskStatus(Resource):
     def get(self):
         task_id = request.args.get('task_id')
@@ -137,7 +140,7 @@ class ManifestManual(Resource):
         #     return jsonify({'message': 'No zone weights sent'}), 400
         # shipdate_range, zone_weights = default_parameters['shipdate'], default_parameters['zone_weights']
         name = data['name']
-        if len(name) >= 45:
+        if len(name) > 45:
             return {'message': f'name is {len(name)} characters long. Please enter max 45 characters.'}, 400
         file = request.files['manifest']
         if file.filename == '':
@@ -159,8 +162,6 @@ class ManifestManual(Resource):
             print(existing)
             print(f'Name {name} already taken.')
             return {'message': f'Name {name} already taken.'}, 400
-        if len(name) > 45:
-            return {'message': 'Invalid name - cannot exceed 45 characters.'}, 400
         f_ext = filename.rsplit('.', 1)[1]
         if f_ext == 'xlsx':
             df = pd.read_excel(api_file_path, dtype=str)
@@ -367,13 +368,13 @@ class Manifest(Resource):
         #     file_ext = filename.rsplit('.', 1)[1]
         #     pf = data.pop('platform').lower()
         # def_domestic, def_international = data.pop('domestic service'), data.pop('international service')
-        print(pf)
-        print(data)
+        # print(pf)
+        # print(data)
         # sql_check = 'SELECT name FROM manifest WHERE name = %s'
         existing = ManifestModel.find_by_name(name=name)
         if existing:
-            print(existing)
-            print(f'Name {name} already taken.')
+            # print(existing)
+            # print(f'Name {name} already taken.')
             return {'message': f'Name {name} already taken.'}, 400
 
         def create_df(columns, dtype, headers):
@@ -387,7 +388,7 @@ class Manifest(Resource):
                 print(name, columns, dtype)
                 df = ManifestRaw.find_shipments_by_name(name, columns, dtype=str)
                 df = df.astype(dtype)
-                print(df.head(2), df.dtypes)
+                # print(df.head(2), df.dtypes)
             df = df[columns]
             df = df.rename(columns=headers)
             # df['orderno'] = df.index
@@ -416,25 +417,26 @@ class Manifest(Resource):
                         df = df.astype({'shipdate': 'float'})
                         df = df.astype({'shipdate': 'int'})
                         shipdate_is_numeric = True
-                        break
+                    break
                 if shipdate_is_numeric:
                     df['shipdate'] = df.apply(lambda row: datetime.fromordinal(
                         datetime(1900, 1, 1).toordinal() + int(row['shipdate']) - 2), axis=1)
                 else:
                     df['shipdate'] = pd.to_datetime(df['shipdate'])
-            pd.set_option('display.max_columns', None)
+            # pd.set_option('display.max_columns', None)
             return df
 
         def generate_defaults(df):
             generated_columns = {}
             if 'country' not in df.columns:
                 df['country'] = 'US'
+                generated_columns['country'] = 'country_gen'
             if 'zip' not in df.columns:
                 df['zip'] = 'N/A'
                 zones_df = pd.DataFrame([tuple(zone_weight.keys())[0] for zone_weight in zone_weights])
                 weights = [tuple(zone_weight.values())[0] for zone_weight in zone_weights]
                 df['zone'] = zones_df.sample(len(df.index), weights=weights, replace=True).reset_index()[0]
-                generated_columns['zip'], generated_columns['country'] = 'zip_gen', 'country_gen'
+                generated_columns['zip'] = 'zip_gen'
             if 'shipdate' not in df.columns:
                 # global start_date, end_date
                 # start_date, end_date = pd.to_datetime(start_date), pd.to_datetime(end_date)
@@ -568,6 +570,7 @@ class Manifest(Resource):
                         break
             columns = list(headers.keys())
             sv_main, sv_alt0, sv_alt1 = False, False, False
+            # change service alt lookups t oloop instead of looking at first two header fields
             if 'service' in headers.values():
                 sv_main = True
             else:
@@ -595,7 +598,7 @@ class Manifest(Resource):
                 #     return  # If service name not included, we can't process the file. Service provider name is not essential
             if weight_name:
                 weight_test = str(df[weight_name].iloc[0])
-                if weight_test.replace('.', '').isnumeric():
+                if weight_test.replace('.', '', 1).isnumeric():
                     dtype[weight_name] = weight['format']
                     df = create_df(columns, dtype, headers)
                 elif 'oz' in weight_test or 'lb' in weight_test or 'lbs' in weight_test:
@@ -604,14 +607,13 @@ class Manifest(Resource):
                     df['weight'] = df.apply(lambda row: ManifestModel.w_lbs_or_w_oz(row['weight']), axis=1)
             else:
                 df = create_df(columns, dtype, headers)
-            # At this point we either have a service column with vendor and service code,
-            # or a service code column with an optional service provider column.
-            # If service provider is given, concatenate with service code.
+
             if sv_alt0 and sv_alt1:
                 # df['service'] = df[['service_provider', 'service_code']].agg(' '.join, axis=1)
                 df['service'] = df['service_provider'].combine(df['service_code'], lambda x1, x2: f'{x1} {x2}')
                 del df['service_provider']
                 del df['service_code']
+                {1, 2, 3, 4}, {3, 4, 5}
             empty_cols = ManifestModel.ai1s_headers.difference(
                 set(df.columns)).difference({'shipdate', 'zip', 'country', 'service provider and name', 'service provider', 'service name', 'address'})
             for col in empty_cols:
@@ -763,7 +765,7 @@ class Manifest(Resource):
                 df = pd.read_excel(api_file_path, nrows=5)
             elif f_ext == 'csv':
                 df = pd.read_csv(api_file_path, nrows=5)
-            pd.set_option('display.max_columns', None)
+            # pd.set_option('display.max_columns', None)
             orderno = ManifestFormatModel.format['order_no'][pf]  # not required
             shipdate = ManifestFormatModel.format['date'][pf]
             weight = ManifestFormatModel.format['weight'][pf]
@@ -785,6 +787,7 @@ class Manifest(Resource):
 
         df.reset_index(inplace=True, drop=True)
         df, generated_columns = generate_defaults(df)
+
         df[['country', 'zone', 'weight_threshold', 'sugg_service', 'bill_weight', 'dhl_tier_1_2021',
             'dhl_tier_2_2021', 'dhl_tier_3_2021', 'dhl_tier_4_2021',
             'dhl_tier_5_2021', 'dhl_cost_2021', 'usps_2021', 'dhl_cost_shipdate', 'usps_shipdate']] = df.apply(ManifestDataModel.row_to_rate, axis=1, result_type='expand')
@@ -1551,7 +1554,7 @@ class ManifestFilter(Resource):
             return {'message': 'No filters selected'}, 400
         filters = request_data['filters']
         id = manifest.id
-        filters = request_data['filters']
+        # filters = request_data['filters']
         print(filters)
         missing_columns = ManifestMissingModel.json(_id=id)
         service_replacements = {}

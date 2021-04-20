@@ -373,7 +373,7 @@ class ManifestDataModel(db.Model):
                     zip3 = int(zip[: len(zip)-2])
                 else:
                     zip3 = int(zip[: len(zip)-6])
-                zone = dhl_zip_zone_2020[(zip3)] if zip != 'N/A' else row['zone']
+                zone = dhl_zip_zone_2020[(zip3)]
             # zone = lib.dhl_zip_zone_2020[(zip3)] if zip != 'N/A' else row['zone']
             if zone == '09':
                 zone = '08'
@@ -622,9 +622,9 @@ class ManifestRaw:
     def find_shipments_by_name(cls, name, columns, dtype=None, limit=0):
         headers = {col: 1 for col in columns}
         headers['_id'] = 0
-        df = pd.DataFrame(
-            list(mongo_db[name].find({}, headers, limit=limit)), columns=columns, dtype=dtype)
-        print(name, columns, limit, headers, df.head(5), df.columns)
+        # df = pd.DataFrame(
+        #     list(mongo_db[name].find({}, headers, limit=limit)), columns=columns, dtype=dtype)
+        # print(name, columns, limit, headers, df.head(5), df.columns)
         return pd.DataFrame(list(mongo_db[name].find({}, headers, limit=limit)), columns=columns, dtype=dtype)
 
     @classmethod

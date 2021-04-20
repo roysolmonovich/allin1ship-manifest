@@ -1,9 +1,8 @@
 from flask_cors import CORS, cross_origin
-import pandas as pd
+# import pandas as pd
 from app_lib import service
 # import random
 # import time
-# uncomment sqlalchemy
 # from sqlalchemy import create_engine, select, insert, MetaData, Table, and_
 # import mysql.connector
 # import pickle
@@ -25,26 +24,6 @@ import os
 # import mysql.connector
 # service_options = [v[3] for v in service.values()]
 
-ALLOWED_EXTENSIONS = {'csv', 'xlsx', 'gz'}
-
-supported_platforms = {'sellercloud_shipbridge', 'shipstation', 'shopify'}
-
-
-def allowed_file(filename):
-    if '.' not in filename:
-        return False
-    f_ext = filename.rsplit('.', 1)[1].lower()
-    if f_ext not in ALLOWED_EXTENSIONS:
-        return False
-    if f_ext == 'gz':
-        f_ext = filename.rsplit('.', 2)[1].lower()
-        if f_ext not in ALLOWED_EXTENSIONS:
-            return False
-    return True
-
-
-type_conv = {'str': str, 'float': float, 'int': pd.Int64Dtype(), 'bool': bool}
-
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
     'DATABASE_URL')
@@ -56,7 +35,7 @@ app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
 # app.config['UPLOAD_FOLDER'] = Manifest.upload_directory
 app.config['UPLOAD_FOLDER'] = 'api_uploads'
 app.config['JWT_BLACKLIST_ENABLED'] = True
-app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
+# app.config['JWT_BLACKLIST_TOKEN_CHECKS'] = ['access', 'refresh']
 if os.environ.get('REDIS_URL'):
     app.config['REDIS_URL'] = os.environ.get('REDIS_URL')
 else:
@@ -123,6 +102,7 @@ def get_carriers():
     return 'ok'
 
 
+# inefficient - the current services do not need to be retrieved every time, just sent
 @ app.route('/current_services/')
 @ cross_origin()  # REMOVE
 def current_services():
