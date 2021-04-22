@@ -42,7 +42,7 @@ dom_intl = {'domestic services': dom_service_names, 'international services': in
 
 class ManifestColumns(Resource):
     def get(self):
-        return {'headers': sorted(list(ManifestModel.ai1s_headers))}
+        return {'headers': sorted(list(ManifestModel.ai1s_headers_required))}
 
 
 # Not in use - could be used for celery app to make function calls async
@@ -216,6 +216,7 @@ class ManifestNames(Resource):
 
 
 class Manifest(Resource):
+    # @jwt_required()
     def get(self):
         args = request.args
         print(args.keys())

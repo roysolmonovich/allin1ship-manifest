@@ -1,0 +1,2517 @@
+{
+    "5346314": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    1
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0.02,
+        "payment method": "Credit Card",
+        "name": "Royal Note 123 Inc",
+        "qb client": "Aharon Waks"
+    },
+    "5342431": {
+        "mailer id": 902233459,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "We Do Bulbs Inc",
+        "qb client": "Marty Perl"
+    },
+    "5344480": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    "COST"
+                ],
+                [
+                    "2020-01-26",
+                    "COST"
+                ],
+                [
+                    "2021-01-24",
+                    "COST"
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    "COST"
+                ],
+                [
+                    "2020-01-26",
+                    "COST"
+                ],
+                [
+                    "2020-07-21",
+                    "COST"
+                ],
+                [
+                    "2021-01-24",
+                    "COST"
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Zack Yarmak"
+    },
+    "5344479": {
+        "mailer id": 902348370,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    "COST"
+                ],
+                [
+                    "2020-01-26",
+                    "COST"
+                ],
+                [
+                    "2021-01-24",
+                    "COST"
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    "COST"
+                ],
+                [
+                    "2020-01-26",
+                    "COST"
+                ],
+                [
+                    "2020-07-21",
+                    "COST"
+                ],
+                [
+                    "2021-01-24",
+                    "COST"
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Mendy Raksin"
+    },
+    "5345228": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    1
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Little Feet Shoes Inc",
+        "qb client": "Shuli Kahan"
+    },
+    "5345230": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    1
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Essel Eyewear Inc",
+        "qb client": "Sholem Levy"
+    },
+    "5345286": {
+        "mailer id": 902493072,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    5345286
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ],
+                [
+                    "2021-02-14",
+                    5345286
+                ],
+                [
+                    "2021-02-14",
+                    5345286
+                ],
+                [
+                    "2021-02-14",
+                    5345286
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0.02,
+        "payment method": "Credit Card",
+        "name": "Shazar Solutions Inc",
+        "qb client": "Schneur Reizes"
+    },
+    "5345229": {
+        "mailer id": 902233607,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    1
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0.02,
+        "payment method": "Credit Card",
+        "name": "Kosher Health LLC",
+        "qb client": "Zevi Gutlaizer"
+    },
+    "5346060": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    1
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Eli's Stam Corp",
+        "qb client": "Eli Perman"
+    },
+    "5346957": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    1
+                ],
+                [
+                    "2020-01-26",
+                    1
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Little Toes Inc",
+        "qb client": "Rochel Sufrin"
+    },
+    "5345767": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Boytique Inc",
+        "qb client": "Chaim Sorkin"
+    },
+    "5346956": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    1
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Ikippah LLC",
+        "qb client": "Sara Seewald"
+    },
+    "5348588": {
+        "mailer id": 902348160,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Silver Spoon Unlimited",
+        "qb client": "Mendy Schapiro"
+    },
+    "5348587": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    5348587
+                ],
+                [
+                    "2020-01-26",
+                    5348587
+                ],
+                [
+                    "2021-01-24",
+                    5348587
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    5348587
+                ],
+                [
+                    "2020-01-26",
+                    5348587
+                ],
+                [
+                    "2020-07-24",
+                    5348587
+                ],
+                [
+                    "2021-01-24",
+                    3
+                ]
+            ]
+        },
+        "fee": -0.02,
+        "payment method": "ACH",
+        "name": "Radhanite LLC",
+        "qb client": "Eli Kahalani"
+    },
+    "5348589": {
+        "mailer id": 902348162,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    1
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Challahgram Inc",
+        "qb client": "Menachem Schmukler"
+    },
+    "5349179": {
+        "mailer id": 902348234,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0.02,
+        "payment method": "Credit Card",
+        "name": "The View Optical LTD",
+        "qb client": "Yaakov Astolin"
+    },
+    "5348799": {
+        "mailer id": 902348195,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    1
+                ],
+                [
+                    "2020-01-26",
+                    1
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Advanced Nutrition Inc",
+        "qb client": "Ben Zahler"
+    },
+    "5350527": {
+        "mailer id": 902348325,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    1
+                ],
+                [
+                    "2020-01-26",
+                    1
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Mocha Trading Grp",
+        "qb client": "Moshe Kaminetzky"
+    },
+    "5350594": {
+        "mailer id": 902348338,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    1
+                ],
+                [
+                    "2020-01-26",
+                    3
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0.02,
+        "payment method": "Credit Card",
+        "name": "Even LLC",
+        "qb client": "Yakov Shemtov"
+    },
+    "5350571": {
+        "mailer id": 902348336,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    1
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Soga Wireless Inc",
+        "qb client": "Feng Zheng"
+    },
+    "5350778": {
+        "mailer id": 902348377,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    1
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "YSSG Deals Inc",
+        "qb client": "Yitzchok Silver"
+    },
+    "5350903": {
+        "mailer id": 902348398,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    1
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0.025,
+        "payment method": "Credit Card",
+        "name": "Rockland Toys For Less Corp",
+        "qb client": "Abraham Friedman"
+    },
+    "5351030": {
+        "mailer id": 902348424,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    5351030
+                ],
+                [
+                    "2021-01-24",
+                    4
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0.02,
+        "payment method": "Credit Card",
+        "name": "Benji Bros LLC",
+        "qb client": "Menachem Benjaminson"
+    },
+    "5350321": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    1
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Y&Y Jersey Trades Corp",
+        "qb client": "CB Birnbaum"
+    },
+    "5350273": {
+        "mailer id": 902348283,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "S&C Global Inc",
+        "qb client": "Sholom Wircberg"
+    },
+    "5351219": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    5351219
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "S & I Creations LLC",
+        "qb client": "Sandra Reznik"
+    },
+    "5351687": {
+        "mailer id": 902493032,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    5351687
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    3
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "MW Novelty Inc",
+        "qb client": "Wolf Weiss"
+    },
+    "5351750": {
+        "mailer id": 902493039,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    1
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0.025,
+        "payment method": "Credit Card",
+        "name": "PB Kay Inc",
+        "qb client": "Pinny Korn"
+    },
+    "5352124": {
+        "mailer id": 902493118,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    3
+                ],
+                [
+                    "2020-01-26",
+                    4
+                ],
+                [
+                    "2021-01-24",
+                    3
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0.019,
+        "payment method": "Credit Card",
+        "name": "Nimex Group Inc",
+        "qb client": "Doni Khaimov"
+    },
+    "5351503": {
+        "mailer id": 902493008,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    1
+                ],
+                [
+                    "2020-01-26",
+                    1
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Eco Cellular Inc",
+        "qb client": "David Witrol"
+    },
+    "5352217": {
+        "mailer id": 902493139,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Trasco LLC",
+        "qb client": "Ahron Weiner"
+    },
+    "5352123": {
+        "mailer id": 902493115,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    5352123
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    5352123
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Gnex Inc",
+        "qb client": "Joel Stern"
+    },
+    "5352947": {
+        "mailer id": 902493269,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    5352947
+                ],
+                [
+                    "2020-01-26",
+                    5
+                ],
+                [
+                    "2021-01-24",
+                    3
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    5352947
+                ],
+                [
+                    "2020-01-26",
+                    "M"
+                ],
+                [
+                    "2020-07-21",
+                    "M"
+                ],
+                [
+                    "2021-01-24",
+                    5
+                ]
+            ]
+        },
+        "fee": 0.01,
+        "payment method": "Credit Card",
+        "name": "Mix N More Inc",
+        "qb client": "Isaac Weider"
+    },
+    "5352946": {
+        "mailer id": 902493270,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    1
+                ],
+                [
+                    "2020-01-26",
+                    3
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0.035,
+        "payment method": "Credit Card",
+        "name": "Regal Distributions Inc",
+        "qb client": "Menachem Gopin"
+    },
+    "5353676": {
+        "mailer id": 902493311,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    5353676
+                ],
+                [
+                    "2020-01-26",
+                    5353676
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "B and M Housewares LLC",
+        "qb client": "Baile Hollede"
+    },
+    "5354264": {
+        "mailer id": 902493418,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    1
+                ],
+                [
+                    "2020-01-26",
+                    1
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Ultra Discounts Corp",
+        "qb client": "Zisha Katz"
+    },
+    "5354354": {
+        "mailer id": 902493426,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    5354354
+                ],
+                [
+                    "2020-01-26",
+                    5354354
+                ],
+                [
+                    "2021-01-24",
+                    3
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0.019,
+        "payment method": "Credit Card",
+        "name": "Ghostek LLC",
+        "qb client": "Vadim Mikhailov"
+    },
+    "5354214": {
+        "mailer id": 902493371,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    5354214
+                ],
+                [
+                    "2020-01-26",
+                    5354214
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": "-0.015",
+        "payment method": "Credit Card",
+        "name": "HLU Sales Inc",
+        "qb client": "Sam Kramer"
+    },
+    "5355154": {
+        "mailer id": 902601058,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    1
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0.02,
+        "payment method": "Credit Card",
+        "name": "Advantage Gifts Inc",
+        "qb client": "Solomon Lebowitz"
+    },
+    "5354213": {
+        "mailer id": 902493384,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    1
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Money or Honey LLC",
+        "qb client": "Joel Wolhendler"
+    },
+    "5355122": {
+        "mailer id": 902601054,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    1
+                ],
+                [
+                    "2020-01-26",
+                    1
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Deela Couture LLC",
+        "qb client": "Israel Eidlisz"
+    },
+    "5355341": {
+        "mailer id": 902601074,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    5355341
+                ],
+                [
+                    "2020-01-26",
+                    5355341
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": "-0.015",
+        "payment method": "ACH",
+        "name": "Sagus Corp",
+        "qb client": "Sam Tychuk"
+    },
+    "5355557": {
+        "mailer id": 902601091,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    1
+                ],
+                [
+                    "2020-01-26",
+                    1
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Three Bows LLC",
+        "qb client": "Chiena Avtzon"
+    },
+    "5355204": {
+        "mailer id": 902601062,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    1
+                ],
+                [
+                    "2020-01-26",
+                    1
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Accesso Wear LLC",
+        "qb client": "Abraham Katz"
+    },
+    "5356466": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2019-01-27",
+                    5356466
+                ],
+                [
+                    "2020-01-26",
+                    1
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2019-01-27",
+                    2
+                ],
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0.02,
+        "payment method": "Credit Card",
+        "name": "Grandeur sales Inc",
+        "qb client": "Moishe E Lichtenstein"
+    },
+    "5356747": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2020-01-26",
+                    5356747
+                ],
+                [
+                    "2021-01-24",
+                    5356747
+                ]
+            ],
+            "international": [
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Pure and Happy LLC",
+        "qb client": "David Gaerman"
+    },
+    "5356998": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2020-01-26",
+                    4
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ],
+            "international": [
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Sound Around Inc",
+        "qb client": "Jerry Brach"
+    },
+    "5356997": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2020-01-26",
+                    5356997
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Health Direct NY Inc",
+        "qb client": "Berish Lefkowitz"
+    },
+    "5357225": {
+        "mailer id": 902601227,
+        "tiers": {
+            "domestic": [
+                [
+                    "2020-01-26",
+                    3
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Cosmopolitan Cosmetics Inc",
+        "qb client": "Tami Turgman"
+    },
+    "5357223": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-05-24",
+                    3
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Pro Plumbing Supply Inc",
+        "qb client": "Hershy Templer"
+    },
+    "5356645": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2020-01-26",
+                    4
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ],
+            "international": [
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Diamond Wireless Corp",
+        "qb client": "Moses Guttman"
+    },
+    "5357766": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2020-01-26",
+                    5
+                ],
+                [
+                    "2021-01-24",
+                    3
+                ]
+            ],
+            "international": [
+                [
+                    "2020-01-26",
+                    "M"
+                ],
+                [
+                    "2020-07-21",
+                    "M"
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "CFH Team Inc",
+        "qb client": "Chesky Brach"
+    },
+    "5357703": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2020-01-26",
+                    3
+                ],
+                [
+                    "2021-01-24",
+                    3
+                ]
+            ],
+            "international": [
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Jeb Enterprises LLC",
+        "qb client": "Chaim Russ"
+    },
+    "5358428": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Ultimate Packers Inc",
+        "qb client": "Amrom Weinstock"
+    },
+    "5358164": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2020-01-26",
+                    1
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "XYZ Sales LLC",
+        "qb client": "Yitzchok Weber"
+    },
+    "5359915": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2020-01-26",
+                    1
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "More Kids Corp",
+        "qb client": "Saul Lozea"
+    },
+    "5359916": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2020-01-26",
+                    3
+                ],
+                [
+                    "2021-01-24",
+                    3
+                ]
+            ],
+            "international": [
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "EBS Deals Inc",
+        "qb client": "Yoel Mertz"
+    },
+    "5357848": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2020-01-26",
+                    5357848
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Blue Eagle Group Inc",
+        "qb client": "Eliezer Cik"
+    },
+    "5360086": {
+        "mailer id": 902779412,
+        "tiers": {
+            "domestic": [
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "DB Electronics LLC",
+        "qb client": "Esther Leifer"
+    },
+    "5360251": {
+        "mailer id": 902779431,
+        "tiers": {
+            "domestic": [
+                [
+                    "2020-01-26",
+                    5360251
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Merkos L'inyonei Chinuch Corp",
+        "qb client": "Yechiel Goldberg"
+    },
+    "5360902": {
+        "mailer id": 902779477,
+        "tiers": {
+            "domestic": [
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ],
+            "international": [
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "123 Deals From A to Z LLC",
+        "qb client": "Avraham Freiman"
+    },
+    "5360895": {
+        "mailer id": 902779476,
+        "tiers": {
+            "domestic": [
+                [
+                    "2020-01-26",
+                    5360895
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Royalux Inc",
+        "qb client": "Chaim Roth"
+    },
+    "5361043": {
+        "mailer id": 902779502,
+        "tiers": {
+            "domestic": [
+                [
+                    "2020-01-26",
+                    4
+                ],
+                [
+                    "2021-01-10",
+                    5361043
+                ],
+                [
+                    "2021-01-24",
+                    5361043
+                ]
+            ],
+            "international": [
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Baketivity Corp",
+        "qb client": "Eli Schwartz"
+    },
+    "5357392": {
+        "mailer id": 902493039,
+        "tiers": {
+            "domestic": [
+                [
+                    "2020-01-26",
+                    3
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ],
+            "international": [
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0.02,
+        "payment method": "Credit Card",
+        "name": "MTA Trading Inc",
+        "qb client": "Maximo Masri"
+    },
+    "5361372": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2020-01-26",
+                    3
+                ],
+                [
+                    "2020-07-21",
+                    3
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ],
+            "international": [
+                [
+                    "2020-01-26",
+                    2
+                ],
+                [
+                    "2020-07-21",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0.02,
+        "payment method": "Credit Card",
+        "name": "Royal Imports of NY Inc",
+        "qb client": "Yoel Weiss"
+    },
+    "5355340": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2020-11-22",
+                    5355340
+                ],
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "fee": 0,
+        "payment method": "ACH",
+        "name": "Kosher Vitamins & Nutrition Inc",
+        "qb client": "Ben Landau"
+    },
+    "5351220": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "payment method": "ACH",
+        "fee": 0,
+        "name": "Alltell Limited LLC",
+        "qb client": "Mark Labkovsky"
+    },
+    "5352652": {
+        "mailer id": 902493225,
+        "tiers": {
+            "domestic": [
+                [
+                    "2021-01-24",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "payment method": "Credit Card",
+        "fee": 0.02,
+        "name": "Buyless Inc",
+        "qb client": "Levi Friedman"
+    },
+    "5367056": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2021-01-22",
+                    1
+                ],
+                [
+                    "2021-01-24",
+                    3
+                ]
+            ],
+            "international": [
+                [
+                    "2021-01-22",
+                    2
+                ],
+                [
+                    "2021-01-24",
+                    2
+                ]
+            ]
+        },
+        "payment method": "Credit Card",
+        "fee": 0.035,
+        "name": "Merkos L'Inyonei Chinuch Inc",
+        "qb client": "Boruch Gancz"
+    },
+    "5367469": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2021-01-28",
+                    2
+                ]
+            ],
+            "international": [
+                [
+                    "2021-01-28",
+                    2
+                ]
+            ]
+        },
+        "payment method": "Credit Card",
+        "fee": 0.02,
+        "name": "Smart Shoppers BH LLC"
+    },
+    "5367251": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2021-03-07",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2021-03-07",
+                    2
+                ]
+            ]
+        },
+        "payment method": "Credit Card",
+        "fee": 0.035,
+        "name": "Surgical Sock Shop II, Inc"
+    },
+    "101": {
+        "mailer id": 699035,
+        "tiers": {
+            "domestic": [
+                [
+                    "2021-04-13",
+                    1
+                ]
+            ],
+            "international": [
+                [
+                    "2021-04-13",
+                    2
+                ]
+            ]
+        },
+        "payment method": "ACH",
+        "fee": 0.0,
+        "name": "JoeKal Services LLC"
+    }
+}

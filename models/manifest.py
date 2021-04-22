@@ -650,10 +650,13 @@ class ManifestModel(db.Model):
     init_time = db.Column(db.DateTime())
     manifest_data = db.relationship('ManifestDataModel', cascade='all,delete', lazy='dynamic')
     manifest_missing = db.relationship('ManifestMissingModel', cascade='all,delete', lazy='dynamic')
+    # making seperate list for manual column headeres to add (requiered)
     ai1s_headers = {'orderno', 'shipdate', 'weight', 'service provider and name', 'service provider', 'service name', 'zip', 'country', 'price',
                     'insured', 'dim1', 'dim2', 'dim3', 'address'}
     ai1s_headers_ordered = ['orderno', 'shipdate', 'weight', 'service', 'zip', 'country', 'insured', 'dim1', 'dim2', 'dim3', 'price', 'zone',
                             'sugg_service', 'dhl_tier_1_2021', 'dhl_tier_2_2021', 'dhl_tier_3_2021', 'dhl_tier_4_2021', 'dhl_tier_5_2021', 'dhl_cost_2021', 'usps_2021', 'dhl_cost_shipdate', 'usps_shipdate']
+    ai1s_headers_required = {'orderno', 'shipdate', 'weight(required)', 'service provider and name', 'service provider', 'service name', 'zip', 'country', 'price',
+                             'insured', 'dim1', 'dim2', 'dim3', 'address'}
     default_types = {'price': 'float', 'dim1': 'float', 'dim2': 'float', 'dim3': 'float'}
     upload_directory = 'api_uploads'
     type_conv = {'str': str, 'float': float, 'int': pd.Int64Dtype(), 'bool': bool}
