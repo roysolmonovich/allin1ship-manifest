@@ -354,8 +354,8 @@ class ManifestDataModel(db.Model):
 
     def row_to_rate(row):
         shipdate = str(row.shipdate.date())
-        if not row.country:
-            print('NO ROW.COUNTRY')
+        print(row.country)
+        print('DEBUGGING PRNT HERE')
         if len(row.country) == 2 and row.country.isupper():
             ctry_code = country_to_code.get(row.country)
         else:
