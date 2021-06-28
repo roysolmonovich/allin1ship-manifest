@@ -92,7 +92,7 @@ cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.route('/')
 def index():
-    return "<h1>Welcome to our server !!</h1>"
+    return "<h1>Welcome to our server Mushkie!!</h1>"
 
 
 @app.route('/map/')
@@ -202,6 +202,6 @@ if __name__ == '__main__':
     # app.run(host='192.168.50.101', threaded=True, port=5000, debug=True, ssl_context=('cert.pem', 'key.pem'))
     # app.run(host='192.168.1.24', threaded=True, port=5000, debug=True, ssl_context=('cert.pem', 'key.pem'))
     db.init_app(app)
-    app.run(threaded=True, debug=True)
-    # app.run(host='192.168.50.101', threaded=True, port=5000, debug=True)
+    # app.run(threaded=True, debug=True)
+    app.run(host='192.168.50.112', threaded=True, port=5000, debug=True)
     # app.run(host='192.168.1.24', threaded=True, port=5000, debug=True)
