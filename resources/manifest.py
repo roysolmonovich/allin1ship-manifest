@@ -13,6 +13,8 @@ from app_lib import service as lib_service
 from numpy import nan, where
 from flask_jwt_extended import jwt_required
 
+import pdb
+
 # Redis is currently not used
 if os.environ.get('REDIS_URL') is not None:
     redis_cred = os.environ['REDIS_URL']
@@ -164,7 +166,8 @@ class ManifestManual(Resource):
             return {'message': f'Name {name} already taken.'}, 400
         f_ext = filename.rsplit('.', 1)[1]
         if f_ext == 'xlsx':
-            df = pd.read_excel(api_file_path, dtype=str)
+            # df = pd.read_excel(api_file_path, dtype=str)
+            df = pd.read_excel(api_file_path, engine='openpyxl', dtype=str)
         elif f_ext == 'csv':
             df = pd.read_csv(api_file_path, dtype=str)
         df = df.replace({nan: None})
