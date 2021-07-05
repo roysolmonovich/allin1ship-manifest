@@ -1,6 +1,7 @@
 from flask_cors import CORS, cross_origin
 # import pandas as pd
 from app_lib import service
+from c import db_URL
 # import random
 # import time
 # from sqlalchemy import create_engine, select, insert, MetaData, Table, and_
@@ -25,8 +26,9 @@ import os
 # service_options = [v[3] for v in service.values()]
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
-    'DATABASE_URL')
+app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get('DATABASE_URL', db_URL)
+
+
 app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {'pool_size': 100, 'pool_recycle': 280, 'pool_pre_ping': True}
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['MAX_CONTENT_LENGTH'] = 20 * 1024 * 1024
@@ -92,7 +94,7 @@ cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.route('/')
 def index():
-    return "<h1>Welcome to our server Mushkie!!</h1>"
+    return "<h1>Welcome to our server !!</h1>"
 
 
 @app.route('/map/')
