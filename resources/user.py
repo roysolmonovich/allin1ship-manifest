@@ -26,7 +26,8 @@ class User(Resource):
         type=str,
     )
 
-    def post(self):
+    @jwt_required() # lechoureh, you shouldn't need a jwt to register, but I don't want anyone to register right now.
+    def post(self): # endpoint to register a new user
         data = User.parser.parse_args()
         existing = UserModel.find_by_username(username=data['username'])
         if existing:
@@ -49,6 +50,7 @@ class User(Resource):
     @jwt_required()
     def put(self):
         data = User.parser.parse_args()
+        print(data)
         existing = UserModel.find_by_username(username=data['username'])
         if not existing:
             return {'message': f'Username {data["username"]} not found.'}, 400

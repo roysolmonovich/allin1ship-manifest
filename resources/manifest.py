@@ -43,12 +43,14 @@ dom_intl = {'domestic services': dom_service_names, 'international services': in
 
 
 class ManifestColumns(Resource):
+    @jwt_required()
     def get(self):
         return {'headers': sorted(list(ManifestModel.ai1s_headers_required))}
 
 
 # Not in use - could be used for celery app to make function calls async
 class ManifestTaskStatus(Resource):
+    @jwt_required()
     def get(self):
         task_id = request.args.get('task_id')
         print(self)
@@ -89,6 +91,7 @@ class ManifestTaskStatus(Resource):
 
 
 class ManifestManual(Resource):
+    @jwt_required()
     def post(self):
         data = request.form.to_dict()
         print(data.keys())
@@ -179,11 +182,12 @@ class ManifestManual(Resource):
 
 
 class ManifestNames(Resource):
+    @jwt_required()
     def get(self):
         all_manifests = ManifestModel.find_all()
         json_manifests = {manifest.name: str(manifest.init_time)[:10] for manifest in all_manifests}
         return json_manifests
-
+    @jwt_required()
     def put(self):
         args = request.args
         print(args.keys())
@@ -203,7 +207,8 @@ class ManifestNames(Resource):
         existing.name = new_name
         existing.save_to_db()
         return {'message': 'Name successfully updated.'}
-
+    
+    @jwt_required()
     def delete(self):
         args = request.args
         print(args.keys())
@@ -219,7 +224,7 @@ class ManifestNames(Resource):
 
 
 class Manifest(Resource):
-    # @jwt_required()
+    @jwt_required()
     def get(self):
         args = request.args
         print(args.keys())
@@ -264,7 +269,8 @@ class Manifest(Resource):
         existing_headers_ordered = [v if v
                                     not in missing_columns else v+'_gen' for v in ManifestModel.ai1s_headers_ordered]
         return {'ordered headers': existing_headers_ordered, 'filtered shipments': shipments, 'service options': dom_intl, 'date range': date_range, 'suggested services': services, 'domestic zones': domestic_zones, 'international zones': international_zones, 'curr_page': paginated_result.page, 'has_prev': paginated_result.has_prev, 'has_next': paginated_result.has_next, 'pages': paginated_result.pages, 'total': paginated_result.total, 'Report': ManifestDataModel.shipment_report(filter_query=query)}
-
+    
+    @jwt_required()
     def post(self):
         data = request.form.to_dict()
         print(data.keys())
@@ -380,7 +386,7 @@ class Manifest(Resource):
             # print(existing)
             # print(f'Name {name} already taken.')
             return {'message': f'Name {name} already taken.'}, 400
-
+        @jwt_required()
         def create_df(columns, dtype, headers):
             if pf != 'manual':
                 f_ext = filename.rsplit('.', 1)[1]
@@ -429,7 +435,8 @@ class Manifest(Resource):
                     df['shipdate'] = pd.to_datetime(df['shipdate'])
             # pd.set_option('display.max_columns', None)
             return df
-
+        
+        @jwt_required()
         def generate_defaults(df):
             generated_columns = {}
             if 'country' not in df.columns:
@@ -454,6 +461,7 @@ class Manifest(Resource):
                 generated_columns['service'] = 'service_gen'
             return df, generated_columns
 
+        @jwt_required()
         def manual(df, headers):
             columns = list(headers.keys())
             dtype = {column: ManifestModel.default_types[headers[column]]
@@ -494,6 +502,7 @@ class Manifest(Resource):
                 df[col] = None
             return df, empty_cols
 
+        @jwt_required()
         def shopify(col_set, df):
             columns = []
             dtype = {}
@@ -541,6 +550,7 @@ class Manifest(Resource):
                 df[col] = None
             return df, empty_cols
 
+        @jwt_required()
         def shipstation(col_set, df):
             columns = []
             dtype = {}
@@ -624,6 +634,7 @@ class Manifest(Resource):
                 df[col] = None
             return df, empty_cols
 
+        @jwt_required()
         def sellercloud_shipbridge(col_set, df):
             columns = []
             dtype = {}
@@ -1544,6 +1555,7 @@ class Manifest(Resource):
 
 
 class ManifestFilter(Resource):
+    @jwt_required()
     def post(self):
         request_data = request.get_json()
         print(request_data.keys())
@@ -1630,6 +1642,7 @@ class ManifestFilter(Resource):
 #         [service_params]
 
 class ManifestFormat(Resource):
+    @jwt_required()
     def get(self):
         args = request.args
         platform = args.get('platform')
@@ -1692,6 +1705,7 @@ class ManifestFormat(Resource):
 
 
 class ManifestServiceUpdate(Resource):
+    @jwt_required()
     def post(self):
         errors = manifest_service_update_schema.validate(request.form)
         if errors:
@@ -1700,6 +1714,7 @@ class ManifestServiceUpdate(Resource):
             return {'message': 'Service parameters already exist.'}, 400
         return {'message': 'Service successfully inserted.'}
 
+    @jwt_required()
     def put(self):
         errors = manifest_service_update_schema.validate(request.form)
         if errors:
