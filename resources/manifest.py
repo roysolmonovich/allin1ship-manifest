@@ -1,6 +1,6 @@
 from flask_restful import Resource
 from models.manifest import ManifestModel, ManifestDataModel, ManifestMissingModel, ManifestFormatModel, ManifestRaw
-from schemas.manifest import ManifestSchema, ManifestUpdateSchema, ManifestFormatSchema, ManifestServiceUpdateSchema
+from schemas.manifest import ManifestSchema
 from flask import request
 from werkzeug.utils import secure_filename
 import os
@@ -127,15 +127,6 @@ class Manifest(Resource):
             if tuple(max_weight.values())[0] == 0:
                 print('Zone likeliness can\'t all be 0. Enter at least one positive integer for any zone.')
                 return {'message': 'Zone likeliness can\'t all be 0. Enter at least one positive integer for any zone.'}, 400
-        # if not data[f'zone + {str(i)}'].isnumeric() or int(data[f'zone + {str(i)}']) < 0:
-        #     return jsonify({'message': f'{data["zone "+ str(i)]} is an invalid value. Enter a non-negative integer.'}), 400
-        # default_parameters = data['default parameters']
-        # print(default_parameters)
-        # if 'shipdate' not in default_parameters:
-        #     return jsonify({'message': 'No shipdate range sent'}), 400
-        # if 'zone_weights' not in default_parameters:
-        #     return jsonify({'message': 'No zone weights sent'}), 400
-        # shipdate_range, zone_weights = default_parameters['shipdate'], default_parameters['zone_weights']
             name = data.pop('name')
             if len(name) > 45:
                 return {'message': f'name is {len(name)} characters long. Please enter max 45 characters.'}, 400
@@ -170,35 +161,8 @@ class Manifest(Resource):
                 'domestic service', -1), mongo_manifest.pop('international service', -1)
             zone_weights = mongo_manifest.pop('zone weights')
             start_date, end_date = mongo_manifest.pop('start date'), mongo_manifest.pop('end date')
-        # if 'platform' not in data:
-        #     if 'file name' not in data:
-        #         print('No platform selected')
-        #         return {'message': 'No platform selected'}, 400
-        #     pf = 'manual'
-        #     filename = filename = secure_filename(data.pop('file name'))
-        #     api_file_path = os.path.join(upload_directory, filename)
-        # else:
-        #     if 'manifest' not in request.files:
-        #         print('No manifest file')
-        #         return {'message': 'No manifest file'}, 400
-        #     file = request.files['manifest']
-        #     if file.filename == '':
-        #         return {'message': 'No selected file'}, 400
-        #     if not ManifestModel.allowed_file(file.filename):
-        #         return {'message': 'Unsupported file extension'}, 400
-        #     filename = secure_filename(file.filename)
-        #     api_file_path = os.path.join(upload_directory, filename)
-        #     file.save(api_file_path)
-        #     file_ext = filename.rsplit('.', 1)[1]
-        #     pf = data.pop('platform').lower()
-        # def_domestic, def_international = data.pop('domestic service'), data.pop('international service')
-        # print(pf)
-        # print(data)
-        # sql_check = 'SELECT name FROM manifest WHERE name = %s'
         existing = ManifestModel.find_by_name(name=name)
         if existing:
-            # print(existing)
-            # print(f'Name {name} already taken.')
             return {'message': f'Name {name} already taken.'}, 400
 
 
@@ -596,7 +560,6 @@ class Manifest(Resource):
                 df = pd.read_excel(api_file_path, nrows=5)
             elif f_ext == 'csv':
                 df = pd.read_csv(api_file_path, nrows=5)
-            # pd.set_option('display.max_columns', None)
             orderno = ManifestFormatModel.format['order_no'][pf]  # not required
             shipdate = ManifestFormatModel.format['date'][pf]
             weight = ManifestFormatModel.format['weight'][pf]
@@ -670,7 +633,6 @@ class Manifest(Resource):
         if 'price' not in df.columns:
             missing_field = ManifestMissingModel(id, 'price')
             missing_field.save_to_db()
-        # df['id'] = id
         for i, row in df.iterrows():
             shipment = ManifestDataModel(id=id, orderno=row.orderno, shipdate=row.shipdate,
                                          weight=row.weight, service=row.service, zip=row.zip, country=row.country,
@@ -684,10 +646,6 @@ class Manifest(Resource):
         ManifestDataModel.commit_to_db()
         df.drop(['orderno', 'zip', 'sugg_service'], inplace=True, axis=1)
         response.update({'Report': ManifestDataModel.shipment_report(df=df)})
-        # try:
-        #     df.to_sql(con=conn, name='manifest_data', if_exists='append', index=False)
-        # except:
-        #     manifest_user.delete_from_db()
         if pf == 'manual':
             ManifestRaw.delete_from_db(_id)
         return response
