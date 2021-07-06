@@ -61,12 +61,8 @@ def generate_defaults(df, zone_weights, start_date, end_date, def_domestic, def_
         df['zone'] = zones_df.sample(len(df.index), weights=weights, replace=True).reset_index()[0]
         generated_columns['zip'] = 'zip_gen'
     if 'shipdate' not in df.columns:
-        # global start_date, end_date
-        # start_date, end_date = pd.to_datetime(start_date), pd.to_datetime(end_date)
         df['shipdate'] = ManifestModel.random_dates(pd.to_datetime(
             start_date), pd.to_datetime(end_date), len(df.index)).sort_values()
-        # df['shipdate'] = df.apply(lambda row: mflib.rand_date_str(row), axis=1)
-        # df['shipdate'] = df['shipdate'].dt.strftime('%Y-%m-%d')
         generated_columns['shipdate'] = 'shipdate_gen'
     if 'service' not in df.columns:
         df['service'] = np.where(df['country'] == 'US', def_domestic, def_international)
