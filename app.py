@@ -12,8 +12,9 @@ from c import db_URL
 # import config
 from resources.carrieritem import CarrierItem
 from resources.user import User, UserLogin, UserLogout, TokenRefresh
-from resources import ManifestNames
-from resources.manifest import Manifest, ManifestFilter, ManifestColumns, ManifestManual, ManifestAuthTest, ManifestFormat, ManifestServiceUpdate
+from resources import ManifestNames, \
+                      ManifestManual
+from resources.manifest import Manifest, ManifestFilter, ManifestColumns, ManifestAuthTest, ManifestFormat, ManifestServiceUpdate
 from flask import Flask, jsonify  # , request, redirect, url_for, session, g, flash, render_template
 # , flash, redirect
 from flask_restful import Api  # , Resource
