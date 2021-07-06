@@ -40,16 +40,14 @@ class Manifest(Resource):
     @jwt_required()
     def get(self):
         args = request.args
-        errors = manifest_schema.validate(request.args)
-        print(errors)
-        if errors:
+        if errors := manifest_schema.validate(request.args):
             return errors, 400
         name = args['name']
         existing = ManifestModel.find_by_name(name=name.replace('%20', ' '))
         if not existing:
             return {'message': f'Name {name} not found in system.'}, 400
         missing_columns = ManifestMissingModel.json(_id=existing.id)
-        print(missing_columns)
+        print(list(missing_columns), "missing columns")
         # shipments = {'id': [], 'orderno': [],
         #              'shipdate' if 'shipdate' not in missing_columns else 'shipdate (gen.)': [],
         #              'weight': [], 'service': [], 'zip': [],
@@ -81,7 +79,21 @@ class Manifest(Resource):
         domestic_zones, international_zones = ManifestDataModel.find_distinct_zones(existing.id)
         existing_headers_ordered = [v if v
                                     not in missing_columns else v+'_gen' for v in ManifestModel.ai1s_headers_ordered]
-        return {'ordered headers': existing_headers_ordered, 'filtered shipments': shipments, 'service options': dom_intl, 'date range': date_range, 'suggested services': services, 'domestic zones': domestic_zones, 'international zones': international_zones, 'curr_page': paginated_result.page, 'has_prev': paginated_result.has_prev, 'has_next': paginated_result.has_next, 'pages': paginated_result.pages, 'total': paginated_result.total, 'Report': ManifestDataModel.shipment_report(filter_query=query)}
+        return {
+            'ordered headers': existing_headers_ordered, 
+            'filtered shipments': shipments, 
+            'service options': dom_intl, 
+            'date range': date_range, 
+            'suggested services': services, 
+            'domestic zones': domestic_zones, 
+            'international zones': international_zones, 
+            'curr_page': paginated_result.page, 
+            'has_prev': paginated_result.has_prev, 
+            'has_next': paginated_result.has_next, 
+            'pages': paginated_result.pages, 
+            'total': paginated_result.total, 
+            'Report': ManifestDataModel.shipment_report(filter_query=query)
+        }
     
     @jwt_required()
     def post(self):
