@@ -461,7 +461,19 @@ class Manifest(Resource):
             col_set = set()
             for i in df.columns:
                 col_set.add(i)
-            df, empty_cols = locals()[pf](col_set, df)
+            df, empty_cols = locals()[pf](
+                col_set, 
+                df,
+                orderno,
+                shipdate,
+                weight,
+                sv,
+                address,
+                address_country,
+                current_price,
+                insured_parcel,
+                pf, filename, api_file_path, name
+            )
         else:
             df = ManifestRaw.find_shipments_by_name(name, list(data.keys()), limit=5)
             df, empty_cols = manual(df, data, pf, filename, api_file_path, name)
