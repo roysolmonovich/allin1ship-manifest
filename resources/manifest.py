@@ -22,8 +22,6 @@ else:
 # from xlrd import open_workbook
 manifest_schema = ManifestSchema()
 manifest_update_schema = ManifestUpdateSchema()
-manifest_format_schema = ManifestFormatSchema()
-manifest_service_update_schema = ManifestServiceUpdateSchema()
 # celery = Celery('apptst_h - Copy', backend='redis',
 #                 broker=redis_cred)
 
@@ -723,71 +721,6 @@ class Manifest(Resource):
     # print(user1, len(user1))
 
 
-class ManifestFilter(Resource):
-    @jwt_required()
-    def post(self):
-        request_data = request.get_json()
-        print(request_data.keys())
-        if 'name' not in request_data:
-            print('No name chosen')
-            return {'message': 'No name chosen'}, 400
-        manifest = ManifestModel.find_by_name(name=request_data['name'])
-        if not manifest:
-            return {'message': 'Name not found in system'}, 400
-        if 'filters' not in request_data:
-            print('No filters selected')
-            return {'message': 'No filters selected'}, 400
-        filters = request_data['filters']
-        id = manifest.id
-        # filters = request_data['filters']
-        print(filters)
-        missing_columns = ManifestMissingModel.json(_id=id)
-        service_replacements = {}
-        existing_headers_ordered = [v if v
-                                    not in missing_columns else v+'_gen' for v in ManifestModel.ai1s_headers_ordered]
-        for service_override in filters.get('services', []):
-            if service_override.get('service') is not None:
-                service_replacements[(service_override['service name'], service_override['location'],
-                                      '>=' if service_override['weight threshold'][:5] == 'Over ' else '<')] = service_override['service']
-        shipments = []
-        page = request_data.get('page', 1)
-        per_page = request_data.get('per_page', 20)
-        include_loss = request_data.get('include_loss', True)
-        filter_queries = ManifestDataModel.filtered_query_builder(id, filters)
-        send_report = request_data.get('send_report', True)
-        print('\n\nhere\n\n')
-        print(filter_queries)
-        response = {}
-        if send_report:
-            response['Report'] = ManifestDataModel.shipment_report(
-                filter_query=filter_queries[1], service_replacements=service_replacements, include_loss=include_loss)
-        if per_page != 0:
-            paginated_result = ManifestDataModel.find_filtered_shipments(filter_queries[0], page, per_page)
-            for shipment_item in paginated_result.items:
-                if (shipment_item.service, shipment_item.country, shipment_item.weight_threshold) in service_replacements:
-                    print('here', shipment_item.service, shipment_item.country, shipment_item.weight_threshold)
-                    shipment_item = shipment_item.correct_service_rates(service_replacements[(
-                        shipment_item.service, shipment_item.country, shipment_item.weight_threshold)])
-                shipment = shipment_item.__dict__
-                print(shipment)
-                del shipment['_sa_instance_state']
-                shipment['shipdate'] = str(shipment['shipdate'])
-                for missing_column in missing_columns:
-                    shipment[missing_column+'_gen'] = shipment.pop(missing_column)
-                shipments.append(shipment)
-            response.update({'ordered headers': existing_headers_ordered,
-                             'filtered shipments': shipments, 'curr_page': paginated_result.page,
-                             'has_prev': paginated_result.has_prev, 'has_next': paginated_result.has_next,
-                             'pages': paginated_result.pages, 'total': paginated_result.total})
-        return response
-        # shipments = ManifestModel.manifest_shipments(_id=id, filter=None)
-        # print(id)
-        # print(shipments)
-        # for shipment in shipments:
-        #     print(shipment.shipdate)
-        # df = pd.read_sql(query.statement, query.session.bind)
-        # return request_data
-
 
 # "filters":
 #     {"shipdate":
@@ -810,87 +743,6 @@ class ManifestFilter(Resource):
 #     "services":
 #         [service_params]
 
-class ManifestFormat(Resource):
-    @jwt_required()
-    def get(self):
-        args = request.args
-        platform = args.get('platform')
-        if not platform:
-            return {'message': 'platform field missing.'}, 400
-        platformat = ManifestFormatModel.find_platformat(platform)
-        if not platformat:
-            return {'message': f'"{platform}" not found.'}, 400
-        description = "A new column name field can be added at the end of an existing list for the app to recognize in future manifests. All fields are case sensitive."
-        service_msg = "Before updating a service field, check first if there is a 'header_alt' header. If the field contains both service prodiver (e.g. 'Fedex') and service name (e.g. 'Ground') in the same column, add it to the regular 'header'. 'header_alt' is used if service provider and service name are not found in one column. In that case, they might be found in separate service provider and service name columns. For service provider only, enter field into the first header_alt list, and for service name only, enter field into the second header_alt list."
-        address_msg = "Before updating an address field, check first if there are separate 'address' and 'address_country' fields. In that case, the platform normally only includes separate zip code and country columns, and not the full address. For zip code columns, enter field into the address header, and for country name or country code, enter field into the address_country header."
-        return {'format': platformat, 'description': description, 'service_message': service_msg, 'address_message': address_msg}
-
-    def post(self):
-        args = request.form
-        errors = manifest_format_schema.validate(args)
-        if errors:
-            return errors, 400
-        # return 'ok'
-        (platform, field, header, value, index) = (args.get(_)
-                                                   for _ in ('platform', 'field', 'header', 'value', 'index'))
-        if field not in ManifestFormatModel.format:
-            return {'message': f"'{field}' field not found in format."}, 400
-        if platform not in ManifestFormatModel.format[field]:
-            return {'message': f"'{platform}' platform not found in format."}, 400
-        if header not in ManifestFormatModel.format[field][platform]:
-            return {'message': f"'{header}' header not found for '{platform}' platform."}, 400
-        if len(value) > 45:
-            return {'message': 'value length cannot exceed 45.'}, 400
-        if len(value) < 2:
-            return {'message': 'value length must exceed 1'}, 400
-        starting_letter_or_num, contains_letter = False, False
-        if value[0].isalpha():
-            starting_letter_or_num, contains_letter = True, True
-        elif value[0].isnumeric():
-            starting_letter_or_num = True
-            for char in value[1:]:
-                if char.isalpha():
-                    contains_letter = True
-                    break
-            if not contains_letter:
-                return {'message': 'value must contain at least one letter.'}, 400
-        if not starting_letter_or_num or not contains_letter:
-            return {'message': 'value has to begin with an alphanumeric character.'}, 400
-        if header == 'header_alt':
-            if index is None:
-                return {'message': "index is required for 'header_alt' header."}, 400
-            index = int(index)
-            if index >= len(ManifestFormatModel.format[field][platform][header]) or index < 0:
-                return {'message': "Array index out of range."}, 400
-            if value in ManifestFormatModel.format[field][platform][header][index]:
-                return {'message': f"'{value}' value already exists for header '{header}' within {platform}.{field}.{index}"}, 400
-        elif value in ManifestFormatModel.format[field][platform][header]:
-            return {'message': f"'{value}' value already exists for header '{header}' within {platform}.{field}."}, 400
-        ManifestFormatModel.add_format_fields(platform, field, header, value, index)
-        if header == 'header_alt':
-            return {'message': f"'{value}' value successfully added to header '{header}' within {platform}.{field}.{index}"}
-        else:
-            return {'message': f"'{value}' value successfully added to header '{header}' within {platform}.{field}."}
-
-
-class ManifestServiceUpdate(Resource):
-    @jwt_required()
-    def post(self):
-        errors = manifest_service_update_schema.validate(request.form)
-        if errors:
-            return errors, 400
-        if ManifestModel.update_services('post', **request.form) is 0:
-            return {'message': 'Service parameters already exist.'}, 400
-        return {'message': 'Service successfully inserted.'}
-
-    @jwt_required()
-    def put(self):
-        errors = manifest_service_update_schema.validate(request.form)
-        if errors:
-            return errors, 400
-        if ManifestModel.update_services('put', **request.form) is 0:
-            return {'message': 'An error occured.'}, 400
-        return {'message': 'Service successfully updated.'}
 
 
 class ManifestAuthTest(Resource):

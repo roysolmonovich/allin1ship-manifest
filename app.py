@@ -15,8 +15,10 @@ from resources.user import User, UserLogin, UserLogout, TokenRefresh
 from resources import ManifestNames, \
                       ManifestManual, \
                       ManifestFilter, \
-                      ManifestColumns
-from resources.manifest import Manifest, ManifestAuthTest, ManifestFormat, ManifestServiceUpdate
+                      ManifestColumns, \
+                      ManifestFormat, \
+                      ManifestServiceUpdate
+from resources.manifest import Manifest, ManifestAuthTest
 from flask import Flask, jsonify  # , request, redirect, url_for, session, g, flash, render_template
 # , flash, redirect
 from flask_restful import Api  # , Resource
