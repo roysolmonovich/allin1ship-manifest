@@ -14,8 +14,9 @@ from resources.carrieritem import CarrierItem
 from resources.user import User, UserLogin, UserLogout, TokenRefresh
 from resources import ManifestNames, \
                       ManifestManual, \
-                      ManifestFilter
-from resources.manifest import Manifest, ManifestColumns, ManifestAuthTest, ManifestFormat, ManifestServiceUpdate
+                      ManifestFilter, \
+                      ManifestColumns
+from resources.manifest import Manifest, ManifestAuthTest, ManifestFormat, ManifestServiceUpdate
 from flask import Flask, jsonify  # , request, redirect, url_for, session, g, flash, render_template
 # , flash, redirect
 from flask_restful import Api  # , Resource

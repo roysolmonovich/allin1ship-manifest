@@ -39,12 +39,6 @@ intl_service_names.append('Service Currently Not Provided')
 dom_intl = {'domestic services': dom_service_names, 'international services': intl_service_names}
 
 
-class ManifestColumns(Resource):
-    @jwt_required()
-    def get(self):
-        return {'headers': sorted(list(ManifestModel.ai1s_headers_required))}
-
-
 class Manifest(Resource):
     @jwt_required()
     def get(self):
