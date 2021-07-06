@@ -21,7 +21,6 @@ else:
     redis_cred = 'redis://localhost:6379'
 # from xlrd import open_workbook
 manifest_schema = ManifestSchema()
-manifest_update_schema = ManifestUpdateSchema()
 # celery = Celery('apptst_h - Copy', backend='redis',
 #                 broker=redis_cred)
 
