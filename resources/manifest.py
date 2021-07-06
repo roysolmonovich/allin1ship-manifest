@@ -48,15 +48,6 @@ class Manifest(Resource):
             return {'message': f'Name {name} not found in system.'}, 400
         missing_columns = ManifestMissingModel.json(_id=existing.id)
         print(list(missing_columns), "missing columns")
-        # shipments = {'id': [], 'orderno': [],
-        #              'shipdate' if 'shipdate' not in missing_columns else 'shipdate (gen.)': [],
-        #              'weight': [], 'service': [], 'zip': [],
-        #              'country' if 'country' not in missing_columns else 'country (gen.)': [],
-        #              'insured': [], 'dim1': [], 'dim2': [], 'dim3': [], 'price': [],
-        #              'zone' if 'zone' not in missing_columns else 'zone (gen.)': [],
-        #              'weight_threshold': [], 'sugg_service': [], 'tier_1_2021': [], 'tier_2_2021': [],
-        #              'tier_3_2021': [], 'tier_4_2021': [], 'tier_5_2021': [], 'dhl_2021': [],
-        #              'usps_2021': [], 'shipdate_dhl': [], 'shipdate_usps': []}
         shipments = []
         paginated_result = ManifestDataModel.find_all_shipments(existing.id)
         query = ManifestDataModel.find_all_shipments_query(existing.id)
@@ -67,8 +58,6 @@ class Manifest(Resource):
             for missing_column in missing_columns:
                 shipment[missing_column+'_gen'] = shipment.pop(missing_column)
             shipments.append(shipment)
-        # date_range = [shipments[0].get('shipdate') or shipments[0].get(
-        #     'shipdate_gen'), shipments[-1].get('shipdate') or shipments[-1].get('shipdate_gen')] if shipments else [None, None]
         date_range = ManifestDataModel.find_date_range(existing.id)
         services = []
         for service, weight_threshold, country, sugg_service in ManifestDataModel.find_distinct_services(existing.id):
