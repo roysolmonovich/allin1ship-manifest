@@ -68,3 +68,43 @@ def generate_defaults(df, zone_weights, start_date, end_date, def_domestic, def_
         df['service'] = np.where(df['country'] == 'US', def_domestic, def_international)
         generated_columns['service'] = 'service_gen'
     return df, generated_columns
+
+def manual(df, headers, pf, filename, api_file_path, name):
+    columns = list(headers.keys())
+    dtype = {column: ManifestModel.default_types[headers[column]]
+                for column in columns if headers[column] in ManifestModel.default_types}
+    weight_name = None
+    concatenate_services = [None, None]
+    for k, v in headers.items():
+        if v == 'weight':
+            weight_name = k
+        if v == 'service provider':
+            concatenate_services[0] = k
+        if v == 'service name':
+            concatenate_services[1] = k
+    print(df.head(3), headers)
+    if weight_name:
+        for i, row in df.iterrows():
+            weight_test = str(row[weight_name])
+            if weight_test.replace('.', '').isnumeric():
+                dtype[weight_name] = 'float'
+                df = create_df(columns, dtype, headers, pf, filename, api_file_path, name)
+                break
+            elif 'oz' in weight_test or 'lb' in weight_test or 'lbs' in weight_test:
+                dtype[weight_name] = 'str'
+                df = create_df(columns, dtype, headers, pf, filename, api_file_path, name)
+                df['weight'] = df.apply(lambda row: ManifestModel.w_lbs_or_w_oz(row['weight']), axis=1)
+                break
+    else:
+        df = create_df(columns, dtype, headers, pf, filename, api_file_path, name)
+    if concatenate_services[1]:
+        df['service'] = df['service'].combine(df['service 2nd column'], lambda x1, x2: f'{x1} {x2}')
+        del df['service 2nd column']
+    if 'address' in df.columns:
+        df[['zip', 'country']] = df.apply(lambda row: ManifestModel.add_to_zip_ctry(
+            row.address), axis=1, result_type='expand')
+    empty_cols = ManifestModel.ai1s_headers.difference(
+        set(df.columns)).difference({'shipdate', 'zip', 'country', 'service provider and name', 'service provider', 'service name', 'address'})
+    for col in empty_cols:
+        df[col] = None
+    return df, empty_cols
