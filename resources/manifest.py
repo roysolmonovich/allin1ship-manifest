@@ -1553,8 +1553,3 @@ class ManifestAuthTest(Resource):
     def get(self):
         return 'ok'
 
-
-# @ celery.task(bind=True)
-# def get_task(self):
-#     self.update_state(state='PROGRESS')
-#     return {'headers': sorted(list(ManifestModel.ai1s_headers))}
