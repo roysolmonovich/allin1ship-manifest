@@ -1,6 +1,4 @@
 from flask_restful import Resource
-from models.manifest import ManifestModel, ManifestDataModel, ManifestMissingModel, ManifestFormatModel, ManifestRaw
-from schemas.manifest import ManifestSchema
 from flask import request
 from werkzeug.utils import secure_filename
 import os
@@ -10,6 +8,10 @@ from math import ceil
 from app_lib import service as lib_service
 from numpy import nan, where
 from flask_jwt_extended import jwt_required
+
+from models.manifest import ManifestModel, ManifestDataModel, ManifestMissingModel, ManifestFormatModel, ManifestRaw
+from schemas.manifest import ManifestSchema
+from resource_helpers.manifest import create_df
 
 import pdb
 
@@ -165,56 +167,7 @@ class Manifest(Resource):
         if existing:
             return {'message': f'Name {name} already taken.'}, 400
 
-
-        @jwt_required()
-        def create_df(columns, dtype, headers):
-            if pf != 'manual':
-                f_ext = filename.rsplit('.', 1)[1]
-                if f_ext == 'xlsx':
-                    df = pd.read_excel(api_file_path, usecols=columns, dtype=dtype)
-                elif f_ext == 'csv':
-                    df = pd.read_csv(api_file_path, usecols=columns, dtype=dtype)
-            else:
-                print(name, columns, dtype)
-                df = ManifestRaw.find_shipments_by_name(name, columns, dtype=str)
-                df = df.astype(dtype)
-                # print(df.head(2), df.dtypes)
-            df = df[columns]
-            df = df.rename(columns=headers)
-            # df['orderno'] = df.index
-            df.dropna(how='all', inplace=True)
-            dup_df = df[df.duplicated(subset=['orderno'], keep=False)]
-            duplicate_index = 0
-            for i, row in dup_df.iterrows():
-                df.loc[i, 'orderno'] += f'-{duplicate_index}'
-                duplicate_index += 1
-            df.dropna(subset=['weight'], inplace=True)
-            if 'insured' in dtype and dtype['insured'] == 'float':
-                df['insured'].fillna(value=0, inplace=True)
-                df['insured'] = df['insured'].astype(bool)
-            # df.loc[~df['bill weight'].isna(), 'weight'] = df['bill weight']
-            if 'shipdate' in df.columns:
-                shipdate_is_numeric = False
-                for i, row in df.iterrows():
-                    if i == 5:
-                        break
-                    shipdate = row.shipdate
-                    if isinstance(shipdate, int):
-                        shipdate_is_numeric = True
-                        # df = df.astype({'shipdate': 'int'})
-                        # break
-                    elif isinstance(shipdate, float):
-                        df = df.astype({'shipdate': 'float'})
-                        df = df.astype({'shipdate': 'int'})
-                        shipdate_is_numeric = True
-                    break
-                if shipdate_is_numeric:
-                    df['shipdate'] = df.apply(lambda row: datetime.fromordinal(
-                        datetime(1900, 1, 1).toordinal() + int(row['shipdate']) - 2), axis=1)
-                else:
-                    df['shipdate'] = pd.to_datetime(df['shipdate'])
-            # pd.set_option('display.max_columns', None)
-            return df
+        
         
         @jwt_required()
         def generate_defaults(df):
@@ -261,15 +214,15 @@ class Manifest(Resource):
                     weight_test = str(row[weight_name])
                     if weight_test.replace('.', '').isnumeric():
                         dtype[weight_name] = 'float'
-                        df = create_df(columns, dtype, headers)
+                        df = create_df(columns, dtype, headers, pf, filename, api_file_path, name)
                         break
                     elif 'oz' in weight_test or 'lb' in weight_test or 'lbs' in weight_test:
                         dtype[weight_name] = 'str'
-                        df = create_df(columns, dtype, headers)
+                        df = create_df(columns, dtype, headers, pf, filename, api_file_path, name)
                         df['weight'] = df.apply(lambda row: ManifestModel.w_lbs_or_w_oz(row['weight']), axis=1)
                         break
             else:
-                df = create_df(columns, dtype, headers)
+                df = create_df(columns, dtype, headers, pf, filename, api_file_path, name)
             if concatenate_services[1]:
                 df['service'] = df['service'].combine(df['service 2nd column'], lambda x1, x2: f'{x1} {x2}')
                 del df['service 2nd column']
@@ -312,15 +265,15 @@ class Manifest(Resource):
                     weight_test = str(row[weight_name])
                     if weight_test.replace('.', '').isnumeric():
                         dtype[weight_name] = weight['format']
-                        df = create_df(columns, dtype, headers)
+                        df = create_df(columns, dtype, headers, pf, filename, api_file_path, name)
                         break
                     elif 'oz' in weight_test or 'lb' in weight_test or 'lbs' in weight_test:
                         dtype[weight_name] = 'str'
-                        df = create_df(columns, dtype, headers)
+                        df = create_df(columns, dtype, headers, pf, filename, api_file_path, name)
                         df['weight'] = df.apply(lambda row: ManifestModel.w_lbs_or_w_oz(row['weight']), axis=1)
                         break
             else:
-                df = create_df(columns, dtype, headers)
+                df = create_df(columns, dtype, headers, pf, filename, api_file_path, name)
             # At this point we either have a service column with vendor and service code,
             # or a service code column with an optional service provider column.
             # If service provider is given, concatenate with service code.
@@ -394,13 +347,13 @@ class Manifest(Resource):
                 weight_test = str(df[weight_name].iloc[0])
                 if weight_test.replace('.', '', 1).isnumeric():
                     dtype[weight_name] = weight['format']
-                    df = create_df(columns, dtype, headers)
+                    df = create_df(columns, dtype, headers, pf, filename, api_file_path, name)
                 elif 'oz' in weight_test or 'lb' in weight_test or 'lbs' in weight_test:
                     dtype[weight_name] = 'str'
-                    df = create_df(columns, dtype, headers)
+                    df = create_df(columns, dtype, headers, pf, filename, api_file_path, name)
                     df['weight'] = df.apply(lambda row: ManifestModel.w_lbs_or_w_oz(row['weight']), axis=1)
             else:
-                df = create_df(columns, dtype, headers)
+                df = create_df(columns, dtype, headers, pf, filename, api_file_path, name)
 
             if sv_alt0 and sv_alt1:
                 # df['service'] = df[['service_provider', 'service_code']].agg(' '.join, axis=1)
@@ -443,13 +396,13 @@ class Manifest(Resource):
                 weight_test = str(df[weight_name].iloc[0])
                 if weight_test.replace('.', '').isnumeric():
                     dtype[weight_name] = weight['format']
-                    df = create_df(columns, dtype, headers)
+                    df = create_df(columns, dtype, headers, pf, filename, api_file_path, name)
                 elif 'oz' in weight_test or 'lb' in weight_test or 'lbs' in weight_test:
                     dtype[weight_name] = 'str'
-                    df = create_df(columns, dtype, headers)
+                    df = create_df(columns, dtype, headers, pf, filename, api_file_path, name)
                     df['weight'] = df.apply(lambda row: ManifestModel.w_lbs_or_w_oz(row['weight']), axis=1)
             else:
-                df = create_df(columns, dtype, headers)
+                df = create_df(columns, dtype, headers, pf, filename, api_file_path, name)
             df['weight'] *= 16
             df[['zip', 'country']] = df.apply(lambda row: ManifestModel.add_to_zip_ctry(
                 row.address), axis=1, result_type='expand')
@@ -529,15 +482,15 @@ class Manifest(Resource):
                     weight_test = str(row[weight_name])
                     if weight_test.replace('.', '').isnumeric():
                         dtype[weight_name] = weight['format']
-                        df = create_df(columns, dtype, headers)
+                        df = create_df(columns, dtype, headers, pf, filename, api_file_path, name)
                         break
                     elif 'oz' in weight_test or 'lb' in weight_test or 'lbs' in weight_test:
                         dtype[weight_name] = 'str'
-                        df = create_df(columns, dtype, headers)
+                        df = create_df(columns, dtype, headers, pf, filename, api_file_path, name)
                         df['weight'] = df.apply(lambda row: ManifestModel.w_lbs_or_w_oz(row['weight']), axis=1)
                         break
             else:
-                df = create_df(columns, dtype, headers)
+                df = create_df(columns, dtype, headers, pf, filename, api_file_path, name)
             if sv_alt0 and sv_alt1:
 
                 # df[['service_code', 'service_provider']].replace(np.nan, '', regex=True, inplace=True)
