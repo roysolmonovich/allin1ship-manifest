@@ -1,11 +1,9 @@
 from flask_restful import Resource
 from models.manifest import ManifestModel, ManifestDataModel, ManifestMissingModel, ManifestFormatModel, ManifestRaw
 from schemas.manifest import ManifestSchema, ManifestUpdateSchema, ManifestFormatSchema, ManifestServiceUpdateSchema
-# from flask import jsonify, request
 from flask import request
 from werkzeug.utils import secure_filename
 import os
-# from celery import Celery
 import pandas as pd
 from datetime import datetime
 from math import ceil
@@ -46,42 +44,6 @@ class ManifestColumns(Resource):
     @jwt_required()
     def get(self):
         return {'headers': sorted(list(ManifestModel.ai1s_headers_required))}
-
-
-# Not in use - could be used for celery app to make function calls async
-class ManifestTaskStatus(Resource):
-    @jwt_required()
-    def get(self):
-        task_id = request.args.get('task_id')
-        print(self)
-        print(task_id)
-        task = get_task.AsyncResult(task_id)
-        if task.state == 'PENDING':
-            # job did not start yet
-            response = {
-                'state': task.state,
-                'current': 0,
-                'total': 1,
-                'status': 'Pending...'
-            }
-        elif task.state != 'FAILURE':
-            response = {
-                'state': task.state,
-                'current': task.info.get('current', 0),
-                'total': task.info.get('total', 1),
-                'status': task.info.get('status', '')
-            }
-            if 'result' in task.info:
-                response['result'] = task.info['result']
-        else:
-            # something went wrong in the background job
-            response = {
-                'state': task.state,
-                'current': 1,
-                'total': 1,
-                'status': str(task.info),  # this is the exception raised
-            }
-        return response
 
 
 # class ManifestColumnsTest(Resource):
@@ -227,8 +189,8 @@ class Manifest(Resource):
     @jwt_required()
     def get(self):
         args = request.args
-        print(args.keys())
         errors = manifest_schema.validate(request.args)
+        print(errors)
         if errors:
             return errors, 400
         name = args['name']
@@ -386,6 +348,8 @@ class Manifest(Resource):
             # print(existing)
             # print(f'Name {name} already taken.')
             return {'message': f'Name {name} already taken.'}, 400
+
+
         @jwt_required()
         def create_df(columns, dtype, headers):
             if pf != 'manual':
