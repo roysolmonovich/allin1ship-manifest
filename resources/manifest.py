@@ -15,6 +15,7 @@ from resource_helpers.manifest import create_df, \
                                       generate_defaults, \
                                       manual
 from resource_helpers.teapplix import teapplix
+from resource_helpers.sellercloud_shipbridge import sellercloud_shipbridge
 
 import pdb
 
@@ -302,57 +303,7 @@ class Manifest(Resource):
                 df[col] = None
             return df, empty_cols
 
-        @jwt_required()
-        def sellercloud_shipbridge(col_set, df):
-            columns = []
-            dtype = {}
-            headers = {}
-            not_found = []
-            weight_name = None
-            # [orderno['header'], shipdate['header'], weight['header'],
-            # sv['header'], address['header'], current_price['header']]
-            pot_columns = {'orderno': orderno, 'shipdate': shipdate, 'weight': weight,
-                           'service': sv, 'address': address, 'price': current_price}
-            for pot_c in pot_columns.keys():
-                for col in pot_columns[pot_c]['header']:
-                    found = False
-                    if col in col_set:
-                        if pot_c != 'weight':
-                            dtype[col] = pot_columns[pot_c]['format']
-                        else:
-                            weight_name = col
-                        headers[col] = pot_c
-                        found = True
-                        break
-                if not found:
-                    not_found.append(pot_c)
-            columns = list(headers.keys())
-            if weight_name:
-                weight_test = str(df[weight_name].iloc[0])
-                if weight_test.replace('.', '').isnumeric():
-                    dtype[weight_name] = weight['format']
-                    df = create_df(columns, dtype, headers, pf, filename, api_file_path, name)
-                elif 'oz' in weight_test or 'lb' in weight_test or 'lbs' in weight_test:
-                    dtype[weight_name] = 'str'
-                    df = create_df(columns, dtype, headers, pf, filename, api_file_path, name)
-                    df['weight'] = df.apply(lambda row: ManifestModel.w_lbs_or_w_oz(row['weight']), axis=1)
-            else:
-                df = create_df(columns, dtype, headers, pf, filename, api_file_path, name)
-            df['weight'] *= 16
-            df[['zip', 'country']] = df.apply(lambda row: ManifestModel.add_to_zip_ctry(
-                row.address), axis=1, result_type='expand')
-            # At this point we either have a service column with vendor and service code,
-            # or a service code column with an optional service provider column.
-            # If service provider is given, concatenate with service code.
-            # if sv_alt0:
-            #     df['service'] = df[['service_provider', 'service_code']].agg(' '.join, axis=1)
-            #     del df['service_provider']
-            #     del df['service_code']
-            empty_cols = ManifestModel.ai1s_headers.difference(
-                set(df.columns)).difference({'shipdate', 'zip', 'country', 'service provider and name', 'service provider', 'service name', 'address'})
-            for col in empty_cols:
-                df[col] = None
-            return df, empty_cols
+        
 
         if pf != 'manual':
             f_ext = filename.rsplit('.', 1)[1]
@@ -374,6 +325,19 @@ class Manifest(Resource):
             col_set = set()
             for i in df.columns:
                 col_set.add(i)
+
+
+
+
+
+
+
+
+
+
+
+
+
             df, empty_cols = locals()[pf](
                 col_set, 
                 df,
@@ -387,6 +351,21 @@ class Manifest(Resource):
                 insured_parcel,
                 pf, filename, api_file_path, name
             )
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         else:
             df = ManifestRaw.find_shipments_by_name(name, list(data.keys()), limit=5)
             df, empty_cols = manual(df, data, pf, filename, api_file_path, name)
