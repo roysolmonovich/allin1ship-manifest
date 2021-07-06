@@ -45,15 +45,6 @@ def teapplix(
                 break
         if not found:
             not_found.append(pot_c)
-    # optional_pot_columns = {'dim1': dim1, 'dim2': dim2, 'dim3': dim3}
-    # for pot_c in optional_pot_columns.keys():
-    #     for col in optional_pot_columns[pot_c]['header']:
-    #         found = False
-    #         if col in col_set:
-    #             dtype[col] = optional_pot_columns[pot_c]['format']
-    #             headers[col] = pot_c
-    #             found = True
-    #             break
     columns = list(headers.keys())
     sv_main, sv_alt0, sv_alt1 = False, False, False
     if 'service' in headers.values():
@@ -79,8 +70,6 @@ def teapplix(
             columns.append(sv['header_alt'][1][1])
             headers[columns[-1]] = 'service_code'
             dtype[headers[columns[-1]]] = ManifestModel.type_conv[sv['format']]
-            # if not (sv_alt0 and sv_alt1):
-            #     return  # If service name not included, we can't process the file. Service provider name is not essential
     if weight_name:
         df.dropna(subset=[weight_name], inplace=True)
         for i, row in df.iterrows():
@@ -97,9 +86,6 @@ def teapplix(
     else:
         df = create_df(columns, dtype, headers, pf, filename, api_file_path, name)
     if sv_alt0 and sv_alt1:
-
-        # df[['service_code', 'service_provider']].replace(np.nan, '', regex=True, inplace=True)
-        # df['service'] = df[['service_provider', 'service_code']].agg(' '.join, axis=1)
         df['service'] = df['service_provider'].combine(df['service_code'], lambda x1, x2: f'{x1} {x2}')
         del df['service_provider']
         del df['service_code']
