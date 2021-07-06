@@ -12,7 +12,8 @@ from flask_jwt_extended import jwt_required
 from models.manifest import ManifestModel, ManifestDataModel, ManifestMissingModel, ManifestFormatModel, ManifestRaw
 from schemas.manifest import ManifestSchema
 from resource_helpers.manifest import create_df, \
-                                      generate_defaults
+                                      generate_defaults, \
+                                      manual
 
 import pdb
 
@@ -463,7 +464,7 @@ class Manifest(Resource):
             df, empty_cols = locals()[pf](col_set, df)
         else:
             df = ManifestRaw.find_shipments_by_name(name, list(data.keys()), limit=5)
-            df, empty_cols = locals()[pf](df, data)
+            df, empty_cols = manual(df, data, pf, filename, api_file_path, name)
 
         df.reset_index(inplace=True, drop=True)
         df, generated_columns = generate_defaults(df, zone_weights, start_date, end_date, def_domestic, def_international)
