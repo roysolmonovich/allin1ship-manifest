@@ -200,7 +200,6 @@ class ManifestDataModel(db.Model):
             query.append((' | ').join(service_query))
         query_string = f"cls.query.filter(cls.id == {_id}, {(', ').join(query)}).order_by(cls.shipdate)"
         report_query_string = f"cls.query.with_entities(*report_fields).filter(cls.id == {_id}, {(', ').join(query)}).order_by(cls.shipdate)"
-        print(query_string)
         return query_string, report_query_string
 
     @ classmethod
@@ -809,10 +808,6 @@ class ManifestModel(db.Model):
             if dom_intl in cls.sv_to_code[sv_name]:
                 if weight_thres in cls.sv_to_code[sv_name][dom_intl]:
                     return [cls.sv_to_code[sv_name][dom_intl][weight_thres], lib_service[str(cls.sv_to_code[sv_name][dom_intl][weight_thres])][3], weight_thres]
-                else:
-                    print(f'Weight threshold not found for service name: {sv_name}.')
-            else:
-                print(f'{dom_intl} not found for service name: {sv_name}.')
         return [None, None, weight_thres]
 
     # def row_to_rate(row):
