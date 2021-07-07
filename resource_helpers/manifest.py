@@ -9,7 +9,7 @@ def create_df(columns, dtype, headers, pf, filename, api_file_path, name):
     if pf != 'manual':
         f_ext = filename.rsplit('.', 1)[1]
         if f_ext == 'xlsx':
-            df = pd.read_excel(api_file_path, usecols=columns, dtype=dtype)
+            df = pd.read_excel(api_file_path, usecols=columns, dtype=dtype, engine="openpyxl")
         elif f_ext == 'csv':
             df = pd.read_csv(api_file_path, usecols=columns, dtype=dtype)
     else:
