@@ -55,7 +55,6 @@ class Manifest(Resource):
         if not existing:
             return {'message': f'Name {name} not found in system.'}, 400
         missing_columns = ManifestMissingModel.json(_id=existing.id)
-        print(list(missing_columns), "missing columns")
         shipments = []
         paginated_result = ManifestDataModel.find_all_shipments(existing.id)
         query = ManifestDataModel.find_all_shipments_query(existing.id)
@@ -95,55 +94,42 @@ class Manifest(Resource):
     @jwt_required()
     def post(self):
         data = request.form.to_dict()
-        print(data.keys())
         if 'name' not in data and '_id' not in data:
-            print('No name or _id chosen')
             return {'message': 'No name or _id chosen'}, 400
         elif 'name' in data:
             if 'start date' not in data:
-                print('Start date not found')
                 return {'message': 'Start date not found'}, 400
             if 'end date' not in data:
-                print('End date not found')
                 return {'message': 'End date not found'}, 400
             start_date, end_date = ManifestModel.vali_date(
                 data.pop('start date')), ManifestModel.vali_date(data.pop('end date'))
             if not start_date:
-                print(f'Invalid start date {start_date}. Enter in YYYY-mm-dd format.')
                 return {'message': f'Invalid start date {start_date}. Enter in YYYY-mm-dd format.'}, 400
             if not end_date:
-                print(f'Invalid end date {end_date}. Enter in YYYY-mm-dd format.')
                 return {'message': f'Invalid end date {end_date}. Enter in YYYY-mm-dd format.'}, 400
             if end_date < start_date:
-                print(f'End date {end_date} can\'t be earlier than start date {start_date}')
                 return {'message': f'End date {end_date} can\'t be earlier than start date {start_date}'}, 400
             zone_weights = []
             for i in list(range(1, 9))+list(range(11, 14)):
                 if f'zone {i}' not in data:
-                    print(f'zone {i} not found')
                     return {'message': f'zone {i} not found'}, 400
                 zone_weight = {f'Zone {i}': data.pop(f'zone {i}')}
                 if not zone_weight[f'Zone {i}'].isnumeric() or int(zone_weight[f'Zone {i}']) < 0:
-                    print(f'Invalid value entered for zone {i}. Enter a non-negative integer.')
                     return {'message': f'Invalid value entered for zone {i}. Enter a non-negative integer.'}, 400
                 zone_weight[f'Zone {i}'] = int(zone_weight[f'Zone {i}'])
                 zone_weights.append(zone_weight)
             if not zone_weights:
-                print('Zone likeliness can\'t be left empty. Enter at least one positive integer for any zone.')
                 return {'message': 'Zone likeliness can\'t be left empty. Enter at least one non-negative integer for any zone.'}, 400
             max_weight = max(zone_weights, key=lambda x: tuple(x.items())[0][1])
             if tuple(max_weight.values())[0] == 0:
-                print('Zone likeliness can\'t all be 0. Enter at least one positive integer for any zone.')
                 return {'message': 'Zone likeliness can\'t all be 0. Enter at least one positive integer for any zone.'}, 400
             name = data.pop('name')
             if len(name) > 45:
                 return {'message': f'name is {len(name)} characters long. Please enter max 45 characters.'}, 400
             upload_directory = ManifestModel.upload_directory
             if 'platform' not in data:
-                print('No platform selected')
                 return {'message': 'No platform selected'}, 400
             if 'manifest' not in request.files:
-                print('No manifest file')
                 return {'message': 'No manifest file'}, 400
             file = request.files['manifest']
             if file.filename == '':
@@ -193,7 +179,7 @@ class Manifest(Resource):
             col_set = set()
             for i in df.columns:
                 col_set.add(i)
-            df, empty_cols = locals()[pf](
+            df, empty_cols = globals()[pf](
                 col_set, 
                 df,
                 orderno,
@@ -235,7 +221,6 @@ class Manifest(Resource):
         date_range = [df['shipdate'].min(), df['shipdate'].max()]
         pd.set_option('display.max_columns', None)
         df = df.rename(generated_columns, axis=1)
-        print(df.head(5))
         df.columns = df.columns.str.replace(' ', '_')
         df.columns = df.columns.str.replace('.', '')
         weight_thres_column = df['weight_threshold']
