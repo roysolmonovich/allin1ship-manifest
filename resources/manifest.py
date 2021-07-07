@@ -7,6 +7,7 @@ from math import ceil
 from app_lib import service as lib_service
 from numpy import nan, where
 from flask_jwt_extended import jwt_required
+import pdb
 
 from models.manifest import ManifestModel, ManifestDataModel, ManifestMissingModel, ManifestFormatModel, ManifestRaw
 from schemas.manifest import ManifestSchema
@@ -19,7 +20,6 @@ from resource_helpers import teapplix, \
                              shipstation, \
                              shopify
 
-import pdb
 
 # Redis is currently not used
 if os.environ.get('REDIS_URL') is not None:
@@ -158,7 +158,6 @@ class Manifest(Resource):
         existing = ManifestModel.find_by_name(name=name)
         if existing:
             return {'message': f'Name {name} already taken.'}, 400
-        
         if pf != 'manual':
             f_ext = filename.rsplit('.', 1)[1]
             if f_ext == 'xlsx':
