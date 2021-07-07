@@ -162,7 +162,7 @@ class Manifest(Resource):
         if pf != 'manual':
             f_ext = filename.rsplit('.', 1)[1]
             if f_ext == 'xlsx':
-                df = pd.read_excel(api_file_path, nrows=5)
+                df = pd.read_excel(api_file_path, nrows=5, engine='openpyxl')
             elif f_ext == 'csv':
                 df = pd.read_csv(api_file_path, nrows=5)
             orderno = ManifestFormatModel.format['order_no'][pf]  # not required
