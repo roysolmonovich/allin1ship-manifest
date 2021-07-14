@@ -7,7 +7,7 @@ from flask_jwt_extended import jwt_required
 manifest_service_update_schema = ManifestServiceUpdateSchema()
 
 class ManifestServiceUpdate(Resource):
-    @jwt_required()
+    # @jwt_required()
     def post(self):
         errors = manifest_service_update_schema.validate(request.form)
         if errors:
@@ -16,7 +16,7 @@ class ManifestServiceUpdate(Resource):
             return {'message': 'Service parameters already exist.'}, 400
         return {'message': 'Service successfully inserted.'}
 
-    @jwt_required()
+    # @jwt_required()
     def put(self):
         errors = manifest_service_update_schema.validate(request.form)
         if errors:

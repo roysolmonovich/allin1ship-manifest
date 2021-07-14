@@ -8,7 +8,7 @@ from numpy import nan
 from flask_jwt_extended import jwt_required
 
 class ManifestManual(Resource):
-    @jwt_required()
+    # @jwt_required()
     def post(self):
         data = request.form.to_dict()
         print(data.keys())

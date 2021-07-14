@@ -5,7 +5,7 @@ from flask_restful import Resource
 
 
 class CarrierItem(Resource):
-    @jwt_required()
+    # @jwt_required()
     def get(self):
         request_data = request.get_json()
         if not request_data:

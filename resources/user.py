@@ -26,7 +26,7 @@ class User(Resource):
         type=str,
     )
 
-    @jwt_required() # lechoureh, you shouldn't need a jwt to register, but I don't want anyone to register right now.
+    # @jwt_required() # lechoureh, you shouldn't need a jwt to register, but I don't want anyone to register right now.
     def post(self): # endpoint to register a new user
         data = User.parser.parse_args()
         existing = UserModel.find_by_username(username=data['username'])
@@ -47,7 +47,7 @@ class User(Resource):
         user.save_to_db()
         return {'message': f'User {data["username"]} added successfully.'}, 201
 
-    @jwt_required()
+    # @jwt_required()
     def put(self):
         data = User.parser.parse_args()
         print(data)
@@ -70,7 +70,7 @@ class User(Resource):
         existing.save_to_db()
         return {'message': 'Password changed successfully.'}, 201
 
-    @jwt_required()
+    # @jwt_required()
     def delete(self):
         data = User.parser.parse_args()
         existing = UserModel.find_by_username(username=data['username'])
@@ -115,7 +115,7 @@ class UserLogin(Resource):
 
 
 class TokenRefresh(Resource):
-    @jwt_required(refresh=True)
+    # @jwt_required(refresh=True)
     def post(self):
         current_user = get_jwt_identity()
         new_token = create_access_token(identity=current_user, fresh=False)
@@ -123,7 +123,7 @@ class TokenRefresh(Resource):
 
 
 class UserLogout(Resource):
-    @jwt_required()
+    # @jwt_required()
     def post(self):
         jti = get_jwt()['jti']  # jti is JWT ID - the unique JWT identifier
         BLOCKLIST.add(jti)

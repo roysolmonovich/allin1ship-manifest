@@ -5,7 +5,7 @@ from flask_restful import Resource
 
 # Not in use - could be used for celery app to make function calls async
 class ManifestTaskStatus(Resource):
-    @jwt_required()
+    # @jwt_required()
     def get(self):
         task_id = RequestContext.args.get('task_id')
         print(self)

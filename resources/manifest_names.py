@@ -8,12 +8,12 @@ manifest_update_schema = ManifestUpdateSchema()
 manifest_schema = ManifestSchema()
 
 class ManifestNames(Resource):
-    @jwt_required()
+    # @jwt_required()
     def get(self):
         all_manifests = ManifestModel.find_all()
         json_manifests = {manifest.name: str(manifest.init_time)[:10] for manifest in all_manifests}
         return json_manifests
-    @jwt_required()
+    # @jwt_required()
     def put(self):
         args = request.args
         print(args.keys())
@@ -34,7 +34,7 @@ class ManifestNames(Resource):
         existing.save_to_db()
         return {'message': 'Name successfully updated.'}
     
-    @jwt_required()
+    # @jwt_required()
     def delete(self):
         args = request.args
         print(args.keys())

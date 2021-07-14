@@ -7,7 +7,7 @@ from flask_jwt_extended import jwt_required
 manifest_format_schema = ManifestFormatSchema()
 
 class ManifestFormat(Resource):
-    @jwt_required()
+    # @jwt_required()
     def get(self):
         args = request.args
         platform = args.get('platform')

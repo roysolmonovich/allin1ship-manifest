@@ -4,7 +4,7 @@ from flask import request
 from flask_jwt_extended import jwt_required
 
 class ManifestFilter(Resource):
-    @jwt_required()
+    # @jwt_required()
     def post(self):
         request_data = request.get_json()
         print(request_data.keys())

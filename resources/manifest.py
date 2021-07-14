@@ -37,7 +37,7 @@ dom_intl = {'domestic services': dom_service_names, 'international services': in
 
 
 class Manifest(Resource):
-    @jwt_required()
+    # @jwt_required()
     def get(self):
         args = request.args
         if errors := manifest_schema.validate(request.args):
@@ -84,7 +84,7 @@ class Manifest(Resource):
             'Report': ManifestDataModel.shipment_report(filter_query=query)
         }
     
-    @jwt_required()
+    # @jwt_required()
     def post(self):
         data = request.form.to_dict()
         print(data.keys())
@@ -166,7 +166,7 @@ class Manifest(Resource):
             return {'message': f'Name {name} already taken.'}, 400
 
 
-        @jwt_required()
+        # @jwt_required()
         def create_df(columns, dtype, headers):
             if pf != 'manual':
                 f_ext = filename.rsplit('.', 1)[1]
@@ -216,7 +216,7 @@ class Manifest(Resource):
             # pd.set_option('display.max_columns', None)
             return df
         
-        @jwt_required()
+        # @jwt_required()
         def generate_defaults(df):
             generated_columns = {}
             if 'country' not in df.columns:
@@ -241,7 +241,7 @@ class Manifest(Resource):
                 generated_columns['service'] = 'service_gen'
             return df, generated_columns
 
-        @jwt_required()
+        # @jwt_required()
         def manual(df, headers):
             columns = list(headers.keys())
             dtype = {column: ManifestModel.default_types[headers[column]]
@@ -282,7 +282,7 @@ class Manifest(Resource):
                 df[col] = None
             return df, empty_cols
 
-        @jwt_required()
+        # @jwt_required()
         def shopify(col_set, df):
             columns = []
             dtype = {}
@@ -330,7 +330,7 @@ class Manifest(Resource):
                 df[col] = None
             return df, empty_cols
 
-        @jwt_required()
+        # @jwt_required()
         def shipstation(col_set, df):
             columns = []
             dtype = {}
@@ -414,7 +414,7 @@ class Manifest(Resource):
                 df[col] = None
             return df, empty_cols
 
-        @jwt_required()
+        # @jwt_required()
         def sellercloud_shipbridge(col_set, df):
             columns = []
             dtype = {}
@@ -704,7 +704,7 @@ class Manifest(Resource):
 
 
 class ManifestAuthTest(Resource):
-    @ jwt_required()
+    # @ jwt_required()
     def get(self):
         return 'ok'
 
